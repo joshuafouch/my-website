@@ -23,35 +23,18 @@
 		</ul>
 	</div>
 
-	<!-- Mobile Dropdown Menu: Visible only on small screens -->
-	<!-- The `lg:hidden` class hides this entire section on large screens. -->
-	<div class="navbar-end lg:hidden">
-		<div class="dropdown dropdown-end">
-			<!-- The hamburger button that triggers the dropdown -->
-			<div tabindex="0" role="button" class="btn btn-ghost">
-				<svg
-					xmlns="http://www.w3.org/2000/svg"
-					class="h-5 w-5"
-					fill="none"
-					viewBox="0 0 24 24"
-					stroke="currentColor"
-				>
-					<path
-						stroke-linecap="round"
-						stroke-linejoin="round"
-						stroke-width="2"
-						d="M4 6h16M4 12h16M4 18h7"
-					/>
-				</svg>
-			</div>
-			<!-- The dropdown menu content -->
-			<ul
-				tabindex="0"
-				class="menu menu-sm dropdown-content mt-3 z-[1] p-2 shadow bg-base-100 rounded-box w-52"
-			>
-				{#each navLinks as link (link.href)}
-					<li><a href={link.href}>{link.text}</a></li>
-				{/each}
+	<div class="drawer navbar-end lg:hidden">
+		<input id="my-drawer" type="checkbox" class="drawer-toggle" />
+		<div class="drawer-content">
+			<!-- Page content here -->
+			<label for="my-drawer" class="btn btn-dash drawer-button"> 💩 </label>
+		</div>
+		<div class="drawer-side">
+			<label for="my-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
+			<ul class="menu bg-base-200 text-base-content min-h-full w-80 p-4">
+				<!-- Sidebar content here -->
+				<li><a href="https://www.fortnite.com/?lang=en-US" target="_blank">link to fortnite</a></li>
+				<li><a href="https://omgsymbol.com/poop-emojis/" target="_blank">Sidebar Item 2</a></li>
 			</ul>
 		</div>
 	</div>
