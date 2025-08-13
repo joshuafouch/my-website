@@ -33,8 +33,8 @@
 			<label for="my-drawer" aria-label="close sidebar" class="drawer-overlay"></label>
 			<ul class="menu bg-base-200 text-base-content min-h-full w-80 p-4">
 				<!-- Sidebar content here -->
-				<li><a href="https://www.fortnite.com/?lang=en-US" target="_blank">link to fortnite</a></li>
-				<li><a href="https://omgsymbol.com/poop-emojis/" target="_blank">Sidebar Item 2</a></li>
+				<li><a href="https://www.fortnite.com/?lang=en-US" target="_blank">link to funny game!</a></li>
+				<li><a href="https://omgsymbol.com/poop-emojis/" target="_blank">Sidebar Item #2</a></li>
 			</ul>
 		</div>
 	</div>
