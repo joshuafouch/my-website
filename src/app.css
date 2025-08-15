@@ -1,39 +1,66 @@
 @import "tailwindcss";
-@plugin "daisyui";
-@plugin 'flowbite/plugin';
+@import "@fontsource/ibm-plex-mono";
+@import "@fontsource/ibm-plex-sans";
+@import "@fontsource/dm-serif-text";
 
-@custom-variant dark (&:where(.dark, .dark *));
+@plugin "daisyui" {
+  themes: nord;
+}
+@plugin "daisyui/theme" {
+  name: "nord-dark";
+  default: true;
+  prefersdark: true;
+  color-scheme: "dark";
+  /* Nord Dark Theme for DaisyUI */
+  --color-base-100: oklch(33.1% 0.027 259.62);   /* nord0 (#2E3440) - Main background */
+  --color-base-200: oklch(38.07% 0.032 258.12);  /* nord1 (#3B4252) - Lighter background */
+  --color-base-300: oklch(42.34% 0.035 257.21);  /* nord2 (#434C5E) - UI elements */
+  --color-base-content: oklch(95.27% 0.011 258.91); /* nord6 (#ECEFF4) - Base text */
 
-@theme {
-  --color-primary-50: #fff5f2;
-  --color-primary-100: #fff1ee;
-  --color-primary-200: #ffe4de;
-  --color-primary-300: #ffd5cc;
-  --color-primary-400: #ffbcad;
-  --color-primary-500: #fe795d;
-  --color-primary-600: #ef562f;
-  --color-primary-700: #eb4f27;
-  --color-primary-800: #cc4522;
-  --color-primary-900: #a5371b;
+  --color-primary: oklch(67.2% 0.057 257.73);     /* nord9 (#81A1C1) - Frost Blue */
+  --color-primary-content: oklch(33.1% 0.027 259.62); /* nord0 (#2E3440) - Text on primary */
 
-  --color-secondary-50: #f0f9ff;
-  --color-secondary-100: #e0f2fe;
-  --color-secondary-200: #bae6fd;
-  --color-secondary-300: #7dd3fc;
-  --color-secondary-400: #38bdf8;
-  --color-secondary-500: #0ea5e9;
-  --color-secondary-600: #0284c7;
-  --color-secondary-700: #0369a1;
-  --color-secondary-800: #075985;
-  --color-secondary-900: #0c4a6e;
+  --color-secondary: oklch(74.49% 0.046 195.06);  /* nord7 (#8FBCBB) - Frost Teal */
+  --color-secondary-content: oklch(33.1% 0.027 259.62); /* nord0 (#2E3440) - Text on secondary */
+
+  --color-accent: oklch(67.75% 0.07 313.52);     /* nord15 (#B48EAD) - Aurora Purple */
+  --color-accent-content: oklch(33.1% 0.027 259.62); /* nord0 (#2E3440) - Text on accent */
+
+  --color-neutral: oklch(46.3% 0.039 256.3);      /* nord3 (#4C566A) - UI elements, slight contrast */
+  --color-neutral-content: oklch(95.27% 0.011 258.91); /* nord6 (#ECEFF4) - Text on neutral */
+
+  --color-info: oklch(56.95% 0.076 257.25);      /* nord10 (#5E81AC) - Darker Frost Blue */
+  --color-info-content: oklch(95.27% 0.011 258.91); /* nord6 (#ECEFF4) - Text on info */
+
+  --color-success: oklch(73.57% 0.076 138.83);   /* nord14 (#A3BE8C) - Aurora Green */
+  --color-success-content: oklch(33.1% 0.027 259.62); /* nord0 (#2E3440) - Text on success */
+
+  --color-warning: oklch(85.34% 0.096 97.4);     /* nord13 (#EBCB8B) - Aurora Yellow */
+  --color-warning-content: oklch(33.1% 0.027 259.62); /* nord0 (#2E3440) - Text on warning */
+
+  --color-error: oklch(59.16% 0.128 13.9);       /* nord11 (#BF616A) - Aurora Red */
+  --color-error-content: oklch(95.27% 0.011 258.91); /* nord6 (#ECEFF4) - Text on error */
+
+  /* Unchanged variables from your example */
+  --radius-selector: 2rem;
+  --radius-field: 0.5rem;
+  --radius-box: 2rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 2px;
+  --depth: 1;
+  --noise: 1;
 }
 
-@source "../node_modules/flowbite-svelte/dist";
-@source "../node_modules/flowbite-svelte-icons/dist";
+/*custom font classes*/
+.font-main {
+  font-family: "IBM Plex Sans", sans-serif;
+}
 
-@layer base {
-  /* disable chrome cancel button */
-  input[type="search"]::-webkit-search-cancel-button {
-    display: none;
-  }
+.font-title {
+  font-family: "DM Serif Text", serif;
+}
+
+.font-mono {
+  font-family: "IBM Plex Mono", monospace;
 }

@@ -1,17 +1,50 @@
-<script>
-  import Hero from '$lib/components/Hero.svelte';
-  import { Alert } from 'flowbite-svelte';
+<script lang="ts">
 </script>
 
-<div class="min-h-screen flex flex-col bg-base-100">
-  <main class="flex-grow flex items-center justify-center">
-    <Hero />
-  </main>
+<div
+  class="hero min-h-screen bg-fixed bg-center bg-cover relative"
+  style="background-image: url('/assets/hero-bg.webp');"
+>
+  <div class="hero-overlay bg-[#4c566a]/80"></div>
+  <div class="hero-content text-neutral-content text-center">
+    <div class="max-w-md">
+      <img class="img pb-2" src="/assets/JF_logo_light.webp" alt="signature" />
+      <p class="mb-2 font-title text-xl">
+        Greetings, friends. My name is <span class="italic font-semibold text-accent">Joshua Fouch</span>.
+        Welcome to my digital garden — a place where I share my work, experiences, thoughts, and reflections.
+        Please take a look and enjoy!
+      </p>
+    </div>
+  </div>
 </div>
 
-<div class="p-8">
-  <Alert>
-    <span class="font-medium">Info alert!</span>
-    Change a few things up and try submitting again.
-  </Alert>
+<div class="text-neutral-content text-center">
+  <p class="text-error">
+    jsadflkasejflkasjeflkasjeflkasejf jsadflkasejflkasjeflkasjeflkasejf jsadflkasejflkasjeflkasjeflkasejf 
+    jsadflkasejflkasjeflkasjeflkasejf jsadflkasejflkasjeflkasjeflkasejf jsadflkasejflkasjeflkasjeflkasejf 
+    jsadflkasejflkasjeflkasjeflkasejf jsadflkasejflkasjeflkasjeflkasejf jsadflkasejflkasjeflkasjeflkasejf 
+    jsadflkasejflkasjeflkasjeflkasejf jsadflkasejflkasjeflkasjeflkasejf jsadflkasejflkasjeflkasjeflkasejf 
+  </p>
+  <p>jsadflkasejflkasjeflkasjeflkasejf</p>
+  <p>jsadflkasejflkasjeflkasjeflkasejf</p>
+  <p>jsadflkasejflkasjeflkasjeflkasejf</p>
+  <p>jsadflkasejflkasjeflkasjeflkasejf</p>
+  <p>jsadflkasejflkasjeflkasjeflkasejf</p>
+  <p>jsadflkasejflkasjeflkasjeflkasejf</p>
+  <p>jsadflkasejflkasjeflkasjeflkasejf</p>
+  <p>jsadflkasejflkasjeflkasjeflkasejf</p>
+  <p>jsadflkasejflkasjeflkasjeflkasejf</p>
+  <p>jsadflkasejflkasjeflkasjeflkasejf</p>
+  <p class="text-accent">
+    jsadflkasejflkasjeflkasjeflkasejf jsadflkasejflkasjeflkasjeflkasejf jsadflkasejflkasjeflkasjeflkasejf 
+    jsadflkasejflkasjeflkasjeflkasejf jsadflkasejflkasjeflkasjeflkasejf jsadflkasejflkasjeflkasjeflkasejf 
+    jsadflkasejflkasjeflkasjeflkasejf jsadflkasejflkasjeflkasjeflkasejf jsadflkasejflkasjeflkasjeflkasejf 
+    jsadflkasejflkasjeflkasjeflkasejf jsadflkasejflkasjeflkasjeflkasejf jsadflkasejflkasjeflkasjeflkasejf 
+  </p>
+  <p class="text-base-300">
+    jsadflkasejflkasjeflkasjeflkasejf jsadflkasejflkasjeflkasjeflkasejf jsadflkasejflkasjeflkasjeflkasejf 
+    jsadflkasejflkasjeflkasjeflkasejf jsadflkasejflkasjeflkasjeflkasejf jsadflkasejflkasjeflkasjeflkasejf 
+    jsadflkasejflkasjeflkasjeflkasejf jsadflkasejflkasjeflkasjeflkasejf jsadflkasejflkasjeflkasjeflkasejf 
+    jsadflkasejflkasjeflkasjeflkasejf jsadflkasejflkasjeflkasjeflkasejf jsadflkasejflkasjeflkasjeflkasejf 
+  </p>
 </div>
