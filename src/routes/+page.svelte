@@ -1,6 +1,7 @@
 <script lang="ts">
 </script>
 
+
 <div
   class="hero min-h-screen bg-fixed bg-center bg-cover relative"
   style="background-image: url('/assets/hero-bg.webp');"
@@ -24,6 +25,7 @@
     jsadflkasejflkasjeflkasjeflkasejf jsadflkasejflkasjeflkasjeflkasejf jsadflkasejflkasjeflkasjeflkasejf 
     jsadflkasejflkasjeflkasjeflkasejf jsadflkasejflkasjeflkasjeflkasejf jsadflkasejflkasjeflkasjeflkasejf 
     jsadflkasejflkasjeflkasjeflkasejf jsadflkasejflkasjeflkasjeflkasejf jsadflkasejflkasjeflkasjeflkasejf 
+    bruh
   </p>
   <p>jsadflkasejflkasjeflkasjeflkasejf</p>
   <p>jsadflkasejflkasjeflkasjeflkasejf</p>
