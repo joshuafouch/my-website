@@ -21,6 +21,7 @@
 >
   <div class="navbar-start">
     <a 
+      class="w-3xs"
       href="/"
       on:mouseenter={() => hovering = true}
       on:mouseleave={() => hovering = false}

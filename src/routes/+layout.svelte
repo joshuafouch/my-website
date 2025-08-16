@@ -28,7 +28,6 @@
       <Navbar />
     </div>
   </header>
-
 {/if}
 
 <div transition:fade>
