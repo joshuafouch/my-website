@@ -1,7 +1,7 @@
 <script>
   import { fly } from 'svelte/transition';
   import { links } from '$lib/config';
-  
+ 
   export let open = false;
 </script>
 
@@ -21,7 +21,8 @@
 		<ul class="flex flex-col justify-center gap-4 ">
 			{#each links as link (link.href)}
 				<li>
-					<a href={link.href} class="btn btn-ghost font-title text-xl w-full hover:text-success">{link.text}</a>
+					<a href={link.href} on:click={() => (open = false)}
+						class="btn btn-ghost font-title text-xl w-full hover:text-success">{link.text}</a>
 				</li>
 			{/each}
 		</ul>
