@@ -1,9 +1,5 @@
-<script lang="ts">
-</script>
-
-
 <div
-  class="hero min-h-screen bg-fixed bg-center bg-cover relative"
+  class="hero min-h-screen bg-fixed bg-top sm:bg-center bg-cover relative"
   style="background-image: url('/assets/hero-bg.webp');"
 >
   <div class="hero-overlay bg-[#4c566a]/80"></div>
