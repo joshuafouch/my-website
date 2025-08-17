@@ -1,25 +1,24 @@
 <script lang="ts">
-  import '../app.css';
-  import Navbar from '$lib/components/Navbar.svelte';
-  import Footer from '$lib/components/Footer.svelte';
-  import * as config from '$lib/config'
+	import '../app.css';
+	import Navbar from '$lib/components/Navbar.svelte';
+	import Footer from '$lib/components/Footer.svelte';
+	import * as config from '$lib/config';
 
-  let { children } = $props();
+	let { children } = $props();
 </script>
 
 <svelte:head>
-  <title>{config.title}</title>
-  <link rel="preload" href="/assets/JF_logo_light.webp" as="image" type="image/webp">
-  <link rel="preload" href="/assets/hero-bg.webp" as="image" type="image/webp">
+	<title>{config.title}</title>
+	<link rel="preload" href="/assets/JF_logo_light.webp" as="image" type="image/webp" />
+	<link rel="preload" href="/assets/hero-bg.webp" as="image" type="image/webp" />
 </svelte:head>
 
 <header class="fixed top-0 z-50 w-full lg:p-4">
-  <div class="max-w-6xl mx-auto">
-    <Navbar />
-  </div>
+	<div class="mx-auto max-w-6xl">
+		<Navbar />
+	</div>
 </header>
 
 {@render children()}
 
 <Footer />
-

@@ -1,19 +1,19 @@
 <script lang="ts">
-	import { fade } from "svelte/transition";
+	import { fade } from 'svelte/transition';
 
 	let response = false;
 
 	function toggleResponse() {
-		response = !response
+		response = !response;
 	}
-
 </script>
 
 {#if response}
-  <blockquote transition:fade={{delay: 300, duration: 350}} class="text-xl font-title pt-5"> 
+	<blockquote transition:fade={{ delay: 300, duration: 350 }} class="font-title pt-5 text-xl">
 		Glory to Him forever.
-  </blockquote>
+	</blockquote>
 {/if}
 
-<button class="btn btn-primary" on:click={toggleResponse}><span class="font-main">Respond</span></button>
-
+<button class="btn btn-primary" on:click={toggleResponse}
+	><span class="font-main">Respond</span></button
+>

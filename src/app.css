@@ -1,66 +1,66 @@
-@import "tailwindcss";
-@import "@fontsource/ibm-plex-mono";
-@import "@fontsource/ibm-plex-sans";
-@import "@fontsource/dm-serif-text";
+@import 'tailwindcss';
+@import '@fontsource/ibm-plex-mono';
+@import '@fontsource/ibm-plex-sans';
+@import '@fontsource/dm-serif-text';
 
 @plugin "daisyui" {
-  themes: nord;
+	themes: nord;
 }
 @plugin "daisyui/theme" {
-  name: "nord-dark";
-  default: true;
-  prefersdark: true;
-  color-scheme: "dark";
-  /* Nord Dark Theme for DaisyUI */
-  --color-base-100: oklch(33.1% 0.027 259.62);   /* nord0 (#2E3440) - Main background */
-  --color-base-200: oklch(38.07% 0.032 258.12);  /* nord1 (#3B4252) - Lighter background */
-  --color-base-300: oklch(42.34% 0.035 257.21);  /* nord2 (#434C5E) - UI elements */
-  --color-base-content: oklch(95.27% 0.011 258.91); /* nord6 (#ECEFF4) - Base text */
+	name: 'nord-dark';
+	default: true;
+	prefersdark: true;
+	color-scheme: 'dark';
+	/* Nord Dark Theme for DaisyUI */
+	--color-base-100: oklch(33.1% 0.027 259.62); /* nord0 (#2E3440) - Main background */
+	--color-base-200: oklch(38.07% 0.032 258.12); /* nord1 (#3B4252) - Lighter background */
+	--color-base-300: oklch(42.34% 0.035 257.21); /* nord2 (#434C5E) - UI elements */
+	--color-base-content: oklch(95.27% 0.011 258.91); /* nord6 (#ECEFF4) - Base text */
 
-  --color-primary: oklch(67.2% 0.057 257.73);     /* nord9 (#81A1C1) - Frost Blue */
-  --color-primary-content: oklch(33.1% 0.027 259.62); /* nord0 (#2E3440) - Text on primary */
+	--color-primary: oklch(67.2% 0.057 257.73); /* nord9 (#81A1C1) - Frost Blue */
+	--color-primary-content: oklch(33.1% 0.027 259.62); /* nord0 (#2E3440) - Text on primary */
 
-  --color-secondary: oklch(74.49% 0.046 195.06);  /* nord7 (#8FBCBB) - Frost Teal */
-  --color-secondary-content: oklch(33.1% 0.027 259.62); /* nord0 (#2E3440) - Text on secondary */
+	--color-secondary: oklch(74.49% 0.046 195.06); /* nord7 (#8FBCBB) - Frost Teal */
+	--color-secondary-content: oklch(33.1% 0.027 259.62); /* nord0 (#2E3440) - Text on secondary */
 
-  --color-accent: oklch(67.75% 0.07 313.52);     /* nord15 (#B48EAD) - Aurora Purple */
-  --color-accent-content: oklch(33.1% 0.027 259.62); /* nord0 (#2E3440) - Text on accent */
+	--color-accent: oklch(67.75% 0.07 313.52); /* nord15 (#B48EAD) - Aurora Purple */
+	--color-accent-content: oklch(33.1% 0.027 259.62); /* nord0 (#2E3440) - Text on accent */
 
-  --color-neutral: oklch(46.3% 0.039 256.3);      /* nord3 (#4C566A) - UI elements, slight contrast */
-  --color-neutral-content: oklch(95.27% 0.011 258.91); /* nord6 (#ECEFF4) - Text on neutral */
+	--color-neutral: oklch(46.3% 0.039 256.3); /* nord3 (#4C566A) - UI elements, slight contrast */
+	--color-neutral-content: oklch(95.27% 0.011 258.91); /* nord6 (#ECEFF4) - Text on neutral */
 
-  --color-info: oklch(56.95% 0.076 257.25);      /* nord10 (#5E81AC) - Darker Frost Blue */
-  --color-info-content: oklch(95.27% 0.011 258.91); /* nord6 (#ECEFF4) - Text on info */
+	--color-info: oklch(56.95% 0.076 257.25); /* nord10 (#5E81AC) - Darker Frost Blue */
+	--color-info-content: oklch(95.27% 0.011 258.91); /* nord6 (#ECEFF4) - Text on info */
 
-  --color-success: oklch(73.57% 0.076 138.83);   /* nord14 (#A3BE8C) - Aurora Green */
-  --color-success-content: oklch(33.1% 0.027 259.62); /* nord0 (#2E3440) - Text on success */
+	--color-success: oklch(73.57% 0.076 138.83); /* nord14 (#A3BE8C) - Aurora Green */
+	--color-success-content: oklch(33.1% 0.027 259.62); /* nord0 (#2E3440) - Text on success */
 
-  --color-warning: oklch(85.34% 0.096 97.4);     /* nord13 (#EBCB8B) - Aurora Yellow */
-  --color-warning-content: oklch(33.1% 0.027 259.62); /* nord0 (#2E3440) - Text on warning */
+	--color-warning: oklch(85.34% 0.096 97.4); /* nord13 (#EBCB8B) - Aurora Yellow */
+	--color-warning-content: oklch(33.1% 0.027 259.62); /* nord0 (#2E3440) - Text on warning */
 
-  --color-error: oklch(59.16% 0.128 13.9);       /* nord11 (#BF616A) - Aurora Red */
-  --color-error-content: oklch(95.27% 0.011 258.91); /* nord6 (#ECEFF4) - Text on error */
+	--color-error: oklch(59.16% 0.128 13.9); /* nord11 (#BF616A) - Aurora Red */
+	--color-error-content: oklch(95.27% 0.011 258.91); /* nord6 (#ECEFF4) - Text on error */
 
-  /* Unchanged variables from your example */
-  --radius-selector: 2rem;
-  --radius-field: 0.5rem;
-  --radius-box: 2rem;
-  --size-selector: 0.25rem;
-  --size-field: 0.25rem;
-  --border: 2px;
-  --depth: 1;
-  --noise: 1;
+	/* Unchanged variables from your example */
+	--radius-selector: 2rem;
+	--radius-field: 0.5rem;
+	--radius-box: 2rem;
+	--size-selector: 0.25rem;
+	--size-field: 0.25rem;
+	--border: 2px;
+	--depth: 1;
+	--noise: 1;
 }
 
 /*custom font classes*/
 .font-main {
-  font-family: "IBM Plex Sans", sans-serif;
+	font-family: 'IBM Plex Sans', sans-serif;
 }
 
 .font-title {
-  font-family: "DM Serif Text", serif;
+	font-family: 'DM Serif Text', serif;
 }
 
 .font-mono {
-  font-family: "IBM Plex Mono", monospace;
+	font-family: 'IBM Plex Mono', monospace;
 }
