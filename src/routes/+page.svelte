@@ -15,7 +15,10 @@
   </div>
 </div>
 
-<div class="text-neutral-content text-center">
+<!-- NOTE: the classes in this div are essential for all other routes!!!!!!!!! -->
+<div class="max-w-4xl mx-auto px-4 pb-16 text-center
+  pt-24 text-content"
+>
   <p class="text-error">
     jsadflkasejflkasjeflkasjeflkasejf jsadflkasejflkasjeflkasjeflkasejf jsadflkasejflkasjeflkasjeflkasejf 
     jsadflkasejflkasjeflkasjeflkasejf jsadflkasejflkasjeflkasjeflkasejf jsadflkasejflkasjeflkasjeflkasejf 
@@ -23,8 +26,32 @@
     jsadflkasejflkasjeflkasjeflkasejf jsadflkasejflkasjeflkasjeflkasejf jsadflkasejflkasjeflkasjeflkasejf 
     bruh
   </p>
+  <p>jsadflkasejflkas jeflkasjeflkasejf</p>
   <p>jsadflkasejflkasjeflkasjeflkasejf</p>
-  <p>jsadflkasejflkasjeflkasjeflkasejf</p>
+  <p>a a a a a a a a a a a a a a a a a a a a a a a a a ss d s s a asf  w q qw qw f qwf sa fq f qsf qs c qsf qwsfqs f qs  f sfq qsf q</p>
+  <p>a a a a a a a a a a a a a a a a a a a a a a a a a ss d s s a asf  w q qw qw f qwf sa fq f qsf qs c qsf qwsfqs f qs  f sfq qsf q</p>
+  <p>a a a a a a a a a a a a a a a a a a a a a a a a a ss d s s a asf  w q qw qw f qwf sa fq f qsf qs c qsf qwsfqs f qs  f sfq qsf q</p>
+  <p>a a a a a a a a a a a a a a a a a a a a a a a a a ss d s s a asf  w q qw qw f qwf sa fq f qsf qs c qsf qwsfqs f qs  f sfq qsf q</p>
+  <p>a a a a a a a a a a a a a a a a a a a a a a a a a ss d s s a asf  w q qw qw f qwf sa fq f qsf qs c qsf qwsfqs f qs  f sfq qsf q</p>
+  <p>a a a a a a a a a a a a a a a a a a a a a a a a a ss d s s a asf  w q qw qw f qwf sa fq f qsf qs c qsf qwsfqs f qs  f sfq qsf q</p>
+  <p>a a a a a a a a a a a a a a a a a a a a a a a a a ss d s s a asf  w q qw qw f qwf sa fq f qsf qs c qsf qwsfqs f qs  f sfq qsf q</p>
+  <p>a a a a a a a a a a a a a a a a a a a a a a a a a ss d s s a asf  w q qw qw f qwf sa fq f qsf qs c qsf qwsfqs f qs  f sfq qsf q</p>
+  <p>a a a a a a a a a a a a a a a a a a a a a a a a a ss d s s a asf  w q qw qw f qwf sa fq f qsf qs c qsf qwsfqs f qs  f sfq qsf q</p>
+  <p>a a a a a a a a a a a a a a a a a a a a a a a a a ss d s s a asf  w q qw qw f qwf sa fq f qsf qs c qsf qwsfqs f qs  f sfq qsf q</p>
+  <p>a a a a a a a a a a a a a a a a a a a a a a a a a ss d s s a asf  w q qw qw f qwf sa fq f qsf qs c qsf qwsfqs f qs  f sfq qsf q</p>
+  <p>a a a a a a a a a a a a a a a a a a a a a a a a a ss d s s a asf  w q qw qw f qwf sa fq f qsf qs c qsf qwsfqs f qs  f sfq qsf q</p>
+  <p>a a a a a a a a a a a a a a a a a a a a a a a a a ss d s s a asf  w q qw qw f qwf sa fq f qsf qs c qsf qwsfqs f qs  f sfq qsf q</p>
+  <p>a a a a a a a a a a a a a a a a a a a a a a a a a ss d s s a asf  w q qw qw f qwf sa fq f qsf qs c qsf qwsfqs f qs  f sfq qsf q</p>
+  <p>a a a a a a a a a a a a a a a a a a a a a a a a a ss d s s a asf  w q qw qw f qwf sa fq f qsf qs c qsf qwsfqs f qs  f sfq qsf q</p>
+  <p>a a a a a a a a a a a a a a a a a a a a a a a a a ss d s s a asf  w q qw qw f qwf sa fq f qsf qs c qsf qwsfqs f qs  f sfq qsf q</p>
+  <p>a a a a a a a a a a a a a a a a a a a a a a a a a ss d s s a asf  w q qw qw f qwf sa fq f qsf qs c qsf qwsfqs f qs  f sfq qsf q</p>
+  <p>a a a a a a a a a a a a a a a a a a a a a a a a a ss d s s a asf  w q qw qw f qwf sa fq f qsf qs c qsf qwsfqs f qs  f sfq qsf q</p>
+  <p>a a a a a a a a a a a a a a a a a a a a a a a a a ss d s s a asf  w q qw qw f qwf sa fq f qsf qs c qsf qwsfqs f qs  f sfq qsf q</p>
+  <p>a a a a a a a a a a a a a a a a a a a a a a a a a ss d s s a asf  w q qw qw f qwf sa fq f qsf qs c qsf qwsfqs f qs  f sfq qsf q</p>
+  <p>a a a a a a a a a a a a a a a a a a a a a a a a a ss d s s a asf  w q qw qw f qwf sa fq f qsf qs c qsf qwsfqs f qs  f sfq qsf q</p>
+  <p>a a a a a a a a a a a a a a a a a a a a a a a a a ss d s s a asf  w q qw qw f qwf sa fq f qsf qs c qsf qwsfqs f qs  f sfq qsf q</p>
+  <p>a a a a a a a a a a a a a a a a a a a a a a a a a ss d s s a asf  w q qw qw f qwf sa fq f qsf qs c qsf qwsfqs f qs  f sfq qsf q</p>
+  <p>a a a a a a a a a a a a a a a a a a a a a a a a a ss d s s a asf  w q qw qw f qwf sa fq f qsf qs c qsf qwsfqs f qs  f sfq qsf q</p>
   <p>jsadflkasejflkasjeflkasjeflkasejf</p>
   <p>jsadflkasejflkasjeflkasjeflkasejf</p>
   <p>jsadflkasejflkasjeflkasjeflkasejf</p>
