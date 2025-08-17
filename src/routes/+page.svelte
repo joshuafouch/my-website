@@ -9,7 +9,7 @@
       <p class="mb-2 font-title text-xl">
         Greetings, friends. My name is <span class="italic font-semibold text-accent">Joshua Fouch</span>.
         Welcome to my digital garden — a place where I share my work, experiences, thoughts, and reflections.
-        Please take a look and enjoy!
+        Please take a look and enjoy :)
       </p>
     </div>
   </div>
