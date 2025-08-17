@@ -13,7 +13,7 @@
 </svelte:head>
 
 <div class="navbar bg-base-100/80 shadow-lg shadow-info font-title 
-  rounded-xl backdrop-blur-md"
+ lg:rounded-xl rounded-b-xl backdrop-blur-md"
 >
   <div class="navbar-start">
     <a 
@@ -38,6 +38,7 @@
     </a>
   </div>
 
+  <!-- on desktop it will show -->
   <div class="navbar-end hidden lg:flex">
     <ul class="menu menu-horizontal px-1 text-xl">
       {#each links as link (link.href)}
@@ -46,6 +47,7 @@
     </ul>
   </div>
 
+  <!-- shown in mobile-->
   <div class="navbar-end lg:hidden">
     <button aria-label="open menu" class="btn btn-square btn-ghost" on:click={() => (isOpen = true)}>
       <svg
