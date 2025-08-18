@@ -18,22 +18,16 @@
     tabindex="0"
     on:click={() => (open = false)}
     on:keydown={(e) => e.key === 'Enter' && (open = false)}
-    class="fixed inset-0 z-40 bg-black/60"
-    transition:fly={{ duration: 300, x: '100%' }}
+    class="fixed inset-0 z-40 bg-black/20"
+    transition:fly={{ duration: 300, x: '-100%' }}
   ></div>
   <aside
-    class="bg-base-200/80 shadow-info fixed top-0 right-0 z-[60] h-min w-64 rounded-l-xl p-1 shadow-lg backdrop-blur-md"
+    class="bg-base-300/80 shadow-info fixed top-1/4 -translate-y-1/2 right-0 
+    z-[60] h-min w-64 rounded-l-xl p-1 shadow-lg backdrop-blur-md"
     transition:fly={{ duration: 300, x: '100%' }}
   >
     <ul class="flex flex-col justify-center gap-2">
       <li>
-        <button
-          on:click={scrollToTop}
-          on:click={() => (open = false)}
-          class="btn btn-ghost font-title text-accent hover:text-success w-full text-xl"
-        >
-          Go to Top
-        </button>
       </li>
       {#each links as link (link.href)}
         <li>
@@ -44,6 +38,13 @@
           >
         </li>
       {/each}
+      <button
+        on:click={scrollToTop}
+        on:click={() => (open = false)}
+        class="btn btn-ghost font-title text-accent hover:text-success w-full text-xl"
+      >
+        Go to Top
+      </button>
     </ul>
   </aside>
 {/if}
