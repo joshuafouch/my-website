@@ -41,7 +41,9 @@
 	<div class="navbar-end hidden lg:flex">
 		<ul class="menu menu-horizontal px-1 text-xl">
 			{#each links as link (link.href)}
-				<li class="hover:text-success"><a href={link.href}>{link.text}</a></li>
+				<li class="hover:text-success">
+					<a href={link.href}>{link.text}</a>
+				</li>
 			{/each}
 		</ul>
 	</div>
