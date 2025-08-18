@@ -18,7 +18,7 @@
 
 <!-- NOTE: the classes in this div are essential for all other routes!!!!!!!!! -->
 <div
-  class="text-content mx-auto max-w-4xl px-4 pt-24
+  class="text-content mx-auto max-w-3xl px-4 pt-24
   pb-16 text-center"
 >
   <p class="text-error">

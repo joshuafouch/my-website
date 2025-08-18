@@ -13,7 +13,7 @@
   <link rel="preload" href="/assets/hero-bg.webp" as="image" type="image/webp" />
 </svelte:head>
 
-<header class="fixed top-0 z-50 w-full lg:p-4">
+<header class="fixed top-0 z-50 w-full">
   <div class="mx-auto max-w-6xl">
     <Navbar />
   </div>
