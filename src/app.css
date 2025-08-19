@@ -64,3 +64,7 @@
 .font-mono {
   font-family: 'IBM Plex Mono', monospace;
 }
+
+html {
+  scroll-behavior: smooth;
+}

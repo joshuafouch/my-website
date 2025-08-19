@@ -19,7 +19,7 @@
     on:click={() => (open = false)}
     on:keydown={(e) => e.key === 'Enter' && (open = false)}
     class="fixed inset-0 z-40 bg-black/20"
-    transition:fly={{ duration: 300, x: '-100%' }}
+    transition:fly={{ duration: 300, x: '100%' }}
   ></div>
   <aside
     class="bg-base-300/80 shadow-info fixed top-1/4 -translate-y-1/2 right-0 
