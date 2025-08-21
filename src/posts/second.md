@@ -11,3 +11,5 @@ published: true
 ## Svelte
 
 Media inside the **static** folder is served from `/`.
+
+![Hello](/previews/spencer-glacier.webp)

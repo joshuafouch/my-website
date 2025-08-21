@@ -3,6 +3,15 @@
 @import '@fontsource/ibm-plex-sans';
 @import '@fontsource/dm-serif-text';
 
+@plugin "@tailwindcss/typography";
+@layer base {
+  .prose {
+    --tw-prose-body: 'IBM Plex Sans', sans-serif;
+    --tw-prose-headings: 'DM Serif Text', serif;
+    --tw-prose-code: 'IBM Plex Mono', monospace;
+  }
+}
+
 @plugin "daisyui" {
   themes: nord;
 }
