@@ -2,9 +2,10 @@
   import '../app.css';
   import Navbar from '$lib/components/Navbar.svelte';
   import Footer from '$lib/components/Footer.svelte';
+  import Transition from '$lib/components/Transition.svelte';
   import * as config from '$lib/config';
 
-  let { children } = $props();
+  let { children, data } = $props();
 </script>
 
 <svelte:head>
@@ -31,6 +32,10 @@
   </div>
 </header>
 
-{@render children()}
+<main>
+  <Transition url={data.url}>
+    {@render children()}
+  </Transition>
+</main>
 
 <Footer />
