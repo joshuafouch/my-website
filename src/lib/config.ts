@@ -1,8 +1,7 @@
-import { dev } from '$app/environment';
-
 export const title = 'Joshua Fouch';
 export const description = "Joshua's Digital Garden";
-export const url = dev ? 'http://localhost:5173/' : 'https://joshuafouch.vercel.app/';
+export const url = 'https://joshuafouch.vercel.app';
+export const local_url = 'http://localhost:5173'
 
 export const links = [
   { href: '/', text: 'Home' },

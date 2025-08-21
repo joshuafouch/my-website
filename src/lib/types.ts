@@ -6,5 +6,6 @@ export type Post = {
 	description: string
 	date: string
 	categories: Categories[]
+	image: string
 	published: boolean
 }

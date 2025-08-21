@@ -14,7 +14,7 @@
         <div class="card bg-base-neutral text-left shadow-xl">
           <figure>
             <img
-              class="h-56 w-full object-cover"
+              class="h-56 w-full object-cover opacity-75"
               src={post.image || '/previews/spencer-glacier.webp'}
               alt={post.title}
             />
