@@ -14,9 +14,9 @@
   <meta property="og:logo" content="{config.url}/favicon.png" />
 </svelte:head>
 
-<div class="px-4 pt-24 pb-16">
+<div class="px-4 pt-9 pb-16">
 
-  <article class="prose lg:prose-xl prose-headings:font-title mx-auto">
+  <article class="prose lg:prose-xl prose-headings:font-title mx-auto break-words overflow-x-hidden">
 
     <header class="text-xl text-center font-title">
       <h1 class="pt-15">{data.meta.title}</h1>
@@ -24,7 +24,7 @@
 
       <div class="not-prose mt-8 mb-12 flex flex-wrap justify-center gap-4">
         {#each data.meta.categories as category (category)}
-          <button on:click={() => (console.log(`${config.url}${data.meta.image}`))} class="btn btn-accent">&num;{category}</button>
+          <button class="btn btn-accent">&num;{category}</button>
         {/each}
       </div>
 
