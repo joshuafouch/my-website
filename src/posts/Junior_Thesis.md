@@ -101,7 +101,7 @@ Benedict XVI. “Sacramentum Caritatis- Apostolic Exhortation, Benedict XVI.” 
 
 Benedict XVI and Romano Guardini. _The Spirit of the Liturgy_. 2000. San Francisco, Ca, Ignatius Press, 2008.
 
-Paul VI. “Sacrosanctum Concilium.” Vatican, 4 Dec. 1963, www.vatican.va/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19631204_ sacrosanctum-concilium_en.html.
+Paul VI. “Sacrosanctum Concilium.” Vatican, 4 Dec. 1963, www.vatican.va/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19631204_sacrosanctum-concilium_en.html.
 
 Aquinas, Thomas. “Summa Theologica”. Aquinas.cc, aquinas.cc/la/en/~ST. Accessed 8 Apr. 2022.
 

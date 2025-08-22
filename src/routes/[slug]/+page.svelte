@@ -36,3 +36,9 @@
 
   </article>
 </div>
+
+<style>
+  .p {
+    overflow-wrap: break-word;
+  }
+</style>
