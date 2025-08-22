@@ -81,30 +81,28 @@ As humans, we ought to achieve the highest form of worship by means of Sacred Ar
 
 ## Works Cited
 
-Aquinas, Thomas. “Summa Theologica.” Aquinas.cc, aquinas.cc/la/en/~ST. Accessed 8 Apr. 2022.
+Aquinas, Thomas. “Summa Theologica.” [Aquinas.cc](https://aquinas.cc/la/en/~ST), Accessed 8 Apr. 2022.
 
-Benedict XVI. “Sacramentum Caritatis- Apostolic Exhortation, Benedict XVI.” Vatican, 2007, www.vatican.va/content/benedict-xvi/en/apost_exhortations/documents/hf_ben-xvi_exh_20070222_sacramentum-caritatis.html#PART_TWO.
+Benedict XVI. “Sacramentum Caritatis- Apostolic Exhortation, Benedict XVI.” _Vatican_, 2007, [www.vatican.va](https://www.vatican.va/content/benedict-xvi/en/apost_exhortations/documents/hf_ben-xvi_exh_20070222_sacramentum-caritatis.html).
 
-Catechism of the Catholic Church. 2nd ed., First Image Books, 1995. Print.
+_Catechism of the Catholic Church_. 2nd ed., First Image Books, 1995. Print.
 
 ---
 
 ## Bibliography
 
-“Code of Canon Law.” www.vatican.va/archive/cod-iuris-canonici/cic_index_en.html.
+“Code of Canon Law.” [Vatican](https://www.vatican.va/archive/cod-iuris-canonici/cic_index_en.html).
 
-FGM Architects. “Catholic Liturgy 101: Introduction to Liturgical Catechesis.” FGM Architects, 15 Dec. 2015, www.fgmarchitects.com/post/catholic-liturgy-101-introduction-to-liturgical-catechesis.
+FGM Architects. “Catholic Liturgy 101: Introduction to Liturgical Catechesis.” _FGM Architects_, 15 Dec. 2015, [www.fgmarchitects.com](https://www.fgmarchitects.com/post/catholic-liturgy-101-introduction-to-liturgical-catechesis).
 
-Francis, Mannion. “The Church and the City.” First Things, 2000, www.firstthings.com/article/2000/02/the-church-and-the-city.
-
-Benedict XVI. “Sacramentum Caritatis- Apostolic Exhortation, Benedict XVI.” Vatican, Libreria Editrice Vaticana, 2007, www.vatican.va/content/benedict-xvi/en/apost_exhortations/documents/hf_ben-xvi_exh_200 70222_sacramentum-caritatis.html#PART_TWO.
+Francis, Mannion. “The Church and the City.” _First Things_, 2000, [www.firstthings.com](https://www.firstthings.com/article/2000/02/the-church-and-the-city).
 
 Benedict XVI and Romano Guardini. _The Spirit of the Liturgy_. 2000. San Francisco, Ca, Ignatius Press, 2008.
 
-Paul VI. “Sacrosanctum Concilium.” Vatican, 4 Dec. 1963, www.vatican.va/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19631204_sacrosanctum-concilium_en.html.
+Paul VI. “Sacrosanctum Concilium.” _Vatican_, 4 Dec. 1963, [www.vatican.va](https://www.vatican.va/archive/hist_councils/ii_vatican_council/documents/vat-ii_const_19631204_sacrosanctum-concilium_en.html).
 
-Aquinas, Thomas. “Summa Theologica”. Aquinas.cc, aquinas.cc/la/en/~ST. Accessed 8 Apr. 2022.
+Aquinas, Thomas. “Summa Theologica”. [Aquinas.cc](https://aquinas.cc/la/en/~ST), Accessed 8 Apr. 2022.
 
-“Beauty in Every Aspect of the Liturgical Rite.” Vatican, www.vatican.va/news_services/liturgy/details/ns_lit_doc_20091117_bellezza_en.html.
+“Beauty in Every Aspect of the Liturgical Rite.” [Vatican](https://www.vatican.va/news_services/liturgy/details/ns_lit_doc_20091117_bellezza_en.html).
 
-Catechism of the Catholic Church. 2nd ed., First Image Books, 1995. Print.
+_Catechism of the Catholic Church_. 2nd ed., First Image Books, 1995. Print.
