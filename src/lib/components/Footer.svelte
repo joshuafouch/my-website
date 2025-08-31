@@ -2,7 +2,7 @@
   <aside>
     <img src="/assets/JF_logo_light.webp" alt="Logo" class="mb-2 w-28" />
     <p>
-      &copy; {new Date().getFullYear()} Joshua Couch
+      &copy; {new Date().getFullYear()} Joshua Fouch
       <br />
       Omnia ad Jesum per Mariam!
     </p>
