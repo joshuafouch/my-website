@@ -9,9 +9,9 @@
 
 <div class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
   <section>
-    <div class="pt-24 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
+    <div class="lg:pt-10 pt-8 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
       {#each data.posts as post (post.slug)}
-        <div class="card bg-base-neutral text-left shadow-xl">
+        <div class="card bg-neutral text-left shadow-xl">
           <figure>
             <img
               class="h-56 w-full object-cover opacity-75"

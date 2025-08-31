@@ -19,12 +19,12 @@
   <article class="prose lg:prose-xl prose-headings:font-title mx-auto break-words overflow-x-hidden">
 
     <header class="text-xl text-center font-title">
-      <h1 class="pt-15">{data.meta.title}</h1>
+      <h1 class="lg:pt-24 pt-15">{data.meta.title}</h1>
       <p>{formatDate(data.meta.date)}</p>
 
       <div class="not-prose mt-8 mb-12 flex flex-wrap justify-center gap-4">
         {#each data.meta.categories as category (category)}
-          <button class="btn btn-accent">&num;{category}</button>
+          <div class="badge badge-xl badge-soft badge-secondary">&num;{category}</div>
         {/each}
       </div>
 
