@@ -58,7 +58,7 @@ _by Joshua Fouch_
 ## Links
 
 - [How to Become Catholic](https://www.catholic.com/tract/how-to-become-a-catholic)
-- [Relative Link](/joshpfp.jpg)
+- [Relative Link](assets/joshpfp.jpg)
 
 ---
 
