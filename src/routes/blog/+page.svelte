@@ -11,7 +11,10 @@
   <section>
     <div class="lg:pt-10 pt-8 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
       {#each data.posts as post (post.slug)}
-        <div class="card bg-neutral text-left shadow-xl">
+        <a 
+          href={post.slug} 
+          class="card bg-neutral border-secondary border-2 text-left shadow-xl transition-transform duration-300 hover:-translate-y-1 hover:shadow-2xl"
+        >
           <figure>
             <img
               class="h-56 w-full object-cover opacity-75"
@@ -21,15 +24,11 @@
           </figure>
           <div class="card-body">
             <h2 class="card-title font-title">{post.title}</h2>
-
             <p class="text-sm opacity-70">{formatDate(post.date)}</p>
-
             <p class="mt-2 text-base-content/80">{post.description}</p>
-            <div class="card-actions mt-4 justify-end">
-              <a href={post.slug} class="btn btn-success">Read Post</a>
+            
             </div>
-          </div>
-        </div>
+        </a>
       {/each}
     </div>
   </section>
