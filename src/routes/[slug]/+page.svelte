@@ -2,7 +2,6 @@
   import { formatDate } from '$lib/utils';
   let { data } = $props();
   import * as config from '$lib/config';
-
 </script>
 
 <svelte:head>
@@ -14,31 +13,30 @@
   <meta property="og:logo" content="{config.url}/favicon.png" />
 </svelte:head>
 
-<div class="px-4 pt-9 pb-16">
-
-  <article class="prose lg:prose-xl prose-headings:font-title mx-auto break-words overflow-x-hidden">
-
-    <header class="text-xl text-center font-title">
-      <h1 class="lg:pt-24 pt-15">{data.meta.title}</h1>
-      <p>{formatDate(data.meta.date)}</p>
-
-      <div class="not-prose mt-8 mb-12 flex flex-wrap justify-center gap-4">
+<div
+  class="hero min-h-[60vh] bg-cover bg-bottom sm:bg-fixed sm:bg-center rounded-b-4xl"
+  style="background-image: url({data.meta.image || '/previews/spencer-glacier.webp'});"
+>
+  <div class="hero-overlay bg-black/60 rounded-b-4xl"></div>
+  <div class="hero-content pt-24 text-center text-neutral-content">
+    <div class="max-w-2xl">
+      <h1 class="font-title mb-4 text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl">
+        {data.meta.title}
+      </h1>
+      <p class="mb-6 opacity-80">{formatDate(data.meta.date)}</p>
+      <div class="flex flex-wrap justify-center gap-2">
         {#each data.meta.categories as category (category)}
-          <div class="badge badge-xl badge-soft badge-secondary">&num;{category}</div>
+          <div class="badge badge-secondary badge-outline">&num;{category}</div>
         {/each}
       </div>
+    </div>
+  </div>
+</div>
 
-    </header>
-    
+<main class="bg-base-100 px-4 py-8">
+  <article class="prose lg:prose-xl prose-headings:font-title mx-auto">
     <div class="font-main">
       <data.content />
     </div>
-
   </article>
-</div>
-
-<style>
-  .p {
-    overflow-wrap: break-word;
-  }
-</style>
+</main>
