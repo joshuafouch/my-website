@@ -1,11 +1,27 @@
 <script lang="ts">
   import { formatDate } from '$lib/utils';
   let { data } = $props();
+  import * as config from '$lib/config';
 </script>
 
 <svelte:head>
   <title>My Blog</title>
+  
+  <meta name="description" content="Welcome to my devblog where I post about my projects and ideas." />
+
+  <meta property="og:title" content="My Blog" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="{config.url}/blog" />
+  <meta property="og:description" content="Welcome to my devblog where I post about my projects and ideas." />
+  <meta property="og:image" content="{config.url}/previews/spencer-glacier.webp" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="My Blog" />
+  <meta name="twitter:description" content="Welcome to my devblog where I post about my projects and ideas." />
+  <meta name="twitter:image" content="{config.url}/previews/spencer-glacier.webp" />
+
 </svelte:head>
+  
 
 <div class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
   <section>

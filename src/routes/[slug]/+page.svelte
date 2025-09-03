@@ -6,11 +6,21 @@
 
 <svelte:head>
   <title>{data.meta.title}</title>
+  <meta name="description" content={data.meta.description} />
+
   <meta property="og:title" content={data.meta.title} />
   <meta property="og:type" content="article" />
+  <meta property="og:url" content="{config.url}/{data.meta.slug}" />
   <meta property="og:description" content={data.meta.description} />
   <meta property="og:image" content="{config.url}{data.meta.image}" />
   <meta property="og:logo" content="{config.url}/favicon.png" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta property="twitter:domain" content="joshuafouch.vercel.app" />
+  <meta property="twitter:url" content="{config.url}/{data.meta.slug}" />
+  <meta name="twitter:title" content={data.meta.title} />
+  <meta name="twitter:description" content={data.meta.description} />
+  <meta name="twitter:image" content="{config.url}{data.meta.image}" />
 </svelte:head>
 
 <div

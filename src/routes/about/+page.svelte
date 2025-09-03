@@ -1,9 +1,25 @@
+<script lang="ts">
+  import * as config from '$lib/config';
+</script>
+
 <svelte:head>
   <title>About Me</title>
   <meta
     name="description"
     content="hi"
   />
+
+  <meta property="og:title" content="About Me" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="{config.url}/about" />
+  <meta property="og:description" content="Learn more about me if you want to." />
+  <meta property="og:image" content="https://images.pexels.com/photos/3408744/pexels-photo-3408744.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="About Me" />
+  <meta name="twitter:description" content="Learn more about me if you want to." />
+  <meta name="twitter:image" content="https://images.pexels.com/photos/3408744/pexels-photo-3408744.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" />
+
 </svelte:head>
 
 <div
