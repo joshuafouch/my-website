@@ -4,14 +4,9 @@
   import Footer from '$lib/components/Footer.svelte';
   import Transition from '$lib/components/Transition.svelte';
   import * as config from '$lib/config';
-  import { afterNavigate } from '$app/navigation';
+  // import { afterNavigate } from '$app/navigation';
 
   let { children, data } = $props();
-
-  // This function runs after every navigation
-  afterNavigate(() => {
-    window.scrollTo(0, 0);
-  });
 
 </script>
 
