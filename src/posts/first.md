@@ -1,6 +1,6 @@
 ---
 title: First Post
-description: This is my first post EVER! WOW THIS IS COOL, YEAH!
+description: Testing mdsvex
 date: '2025-08-03'
 categories:
   - sveltekit
