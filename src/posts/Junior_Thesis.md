@@ -11,7 +11,7 @@ published: true
 
 **by Joshua Fouch**
 
-_This was written in **2022** as my 11th grade Thesis paper, based off of the scholastic way of writing in the Summa Theologica of Saint Thomas Aquinas. Please don't just my 11th grade mind, hah..._
+_This was written in **2022** as my 11th grade Thesis paper, based off of the scholastic way of writing in the Summa Theologica of Saint Thomas Aquinas. Please don't judge my 11th grade mind, hah..._
 
 ---
 
