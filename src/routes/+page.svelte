@@ -7,7 +7,7 @@
     <div class="max-w-md">
       <img class="img pb-2" src="/assets/JF_logo_light.webp" alt="signature" />
       <p class="font-title mb-2 text-xl">
-        Greetings, friends. My name is <span class="font-semibold italic">Joshua Fouch</span>. 
+        Greetings! My name is <span class="font-semibold italic">Joshua Fouch</span>. 
         A third-year <span class="text-accent">Computer Science</span> undergrad minoring in 
         <span class="text-accent">Cybersecurity</span>.
         Welcome to my digital portfolio and have a pleasant stay!
