@@ -27,7 +27,7 @@
       </div>
       <p class="font-main flex-grow text-lg sm:text-left">
         I am a student at Franciscan University of Steubenville studying Computer Science. 
-        I love coding, Linux, guitar, piano, and the Catholic Faith. I aspire to be a cybersecurity engineer, 
+        I love coding, Linux, guitar, piano, and my Catholic Faith. I aspire to be a cybersecurity engineer, 
         penetration tester, or a web developer. However, above all, I aspire to be a saint, putting holiness above worldly ambition
         for the sake of Christ.
       </p>
