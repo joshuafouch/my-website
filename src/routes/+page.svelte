@@ -50,7 +50,9 @@
         <ul class="list-disc pl-5 font-main text-left">
           <li>C++</li>
           <li>Python</li>
-          <li>Perl & Bash scripting</li>
+          <li>Perl</li>
+          <li>Bash scripting</li>
+          <li>JavaScript</li>
           <li>Elixir</li>
         </ul>
       </div>
@@ -58,7 +60,6 @@
         <h3 class="font-title mb-2 text-xl font-medium">Web Development</h3>
         <ul class="list-disc pl-5 font-main text-left">
           <li>Svelte / SvelteKit</li>
-          <li>JavaScript</li>
           <li>TailwindCSS</li>
         </ul>
       </div>
@@ -71,9 +72,10 @@
       <div class="card bg-base-100 p-6 shadow-md transition-shadow hover:shadow-lg">
         <h3 class="font-title mb-2 text-xl font-medium">Tools & Practices</h3>
         <ul class="list-disc pl-5 font-main text-left">
-          <li>Git & GitHub</li>
-          <li>Linux & command line</li>
+          <li>Git</li>
+          <li>Linux & CLI</li>
           <li>Agile & Scrum</li>
+          <li>AWS Cloud Infrastructure</li>
         </ul>
       </div>
     </div>
@@ -85,45 +87,48 @@
     <h2 class="font-title mb-6 text-3xl font-semibold">Quick Links</h2>
     <div class="flex flex-col space-y-6">
 
-      <div class="flex flex-col sm:flex-row items-center sm:space-x-4">
+      <div class="flex flex-col sm:flex-row items-center sm:space-x-4 w-full justify-between">
         <p class="font-main text-lg text-left mb-2 sm:mb-0">
           If you want to see my projects and what I've been working on, click here:
         </p>
-        <a href="/projects" class="btn btn-primary font-main w-full sm:w-auto">
+        <a href="/projects" class="btn btn-primary font-main w-full sm:w-auto whitespace-nowrap">
           View My Projects
         </a>
       </div>
+      
       <div class="divider"></div>
 
-      <div class="flex flex-col sm:flex-row items-center sm:space-x-4">
+      <div class="flex flex-col sm:flex-row items-center sm:space-x-4 w-full justify-between">
         <p class="font-main text-lg text-left mb-2 sm:mb-0">
           If you would like to contact me or check out my socials, click here:
         </p>
-        <a href="/contact" class="btn btn-success font-main w-full sm:w-auto">
+        <a href="/contact" class="btn btn-success font-main w-full sm:w-auto whitespace-nowrap">
           Contact Me
         </a>
       </div>
+      
       <div class="divider"></div>
 
-      <div class="flex flex-col sm:flex-row items-center sm:space-x-4">
+      <div class="flex flex-col sm:flex-row items-center sm:space-x-4 w-full justify-between">
         <p class="font-main text-lg text-left mb-2 sm:mb-0">
           For a full overview of my work and experience, you can download my resume:
         </p>
-        <a href="/" class="btn btn-accent font-main w-full sm:w-auto">
+        <a href="/assets/jf_resume25-26.pdf" class="btn btn-accent font-main w-full sm:w-auto whitespace-nowrap">
           Download CV
         </a>
       </div>
+      
       <div class="divider"></div>
 
-      <div class="flex flex-col sm:flex-row items-center sm:space-x-4">
+      <div class="flex flex-col sm:flex-row items-center sm:space-x-4 w-full justify-between">
         <p class="font-main text-lg text-left mb-2 sm:mb-0">
           If you are interested in reading my blog and hearing my ideas, click here:
         </p>
-        <a href="/blog" class="btn btn-secondary font-main w-full sm:w-auto">
+        <a href="/blog" class="btn btn-secondary font-main w-full sm:w-auto whitespace-nowrap">
           Visit My Blog
         </a>
       </div>
-      
+       
     </div>
   </div>
 </div>
