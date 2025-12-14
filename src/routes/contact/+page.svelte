@@ -33,8 +33,23 @@
   };
 </script>
 
+<div
+  class="rounded-b-4xl hero h-[60vh] bg-cover bg-bottom sm:bg-fixed sm:bg-center"
+  style="background-image: url(/assets/valleybutte.webp);"
+>
+  <div class="hero-overlay bg-black/60 rounded-b-4xl"></div>
+  <div class="hero-content pt-24 text-center text-neutral-content">
+    <div class="max-w-md">
+      <h1 class="font-title mb-5 text-5xl font-bold">Contact Me</h1>
+      <p class="font-main mb-5 text-xl text-accent">
+        If you want to let me know anything or send something random, please do so below, okay?
+      </p>
+    </div>
+  </div>
+</div>
+
 <div class="container mx-auto max-w-5xl p-8 text-neutral-content">
-  <div id="contact" class="container mx-auto max-w-4xl pt-32 pb-16 text-neutral-content">
+  <div id="contact" class="container mx-auto max-w-4xl pt-20 pb-16 text-neutral-content">
     <div class="card bg-base-300 p-8 shadow-xl text-center">
       <h2 class="font-title mb-4 text-3xl font-semibold">Contact Me</h2>
       
@@ -44,7 +59,8 @@
         </p>
       {:else}
          <p class="font-main mb-6 text-lg text-gray-400">
-          Send me a message below!
+          Send me a message below,
+          Please enter your correct email so I can send back a reply!
         </p>
       {/if}
 

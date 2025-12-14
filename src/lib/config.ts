@@ -5,7 +5,7 @@ export const local_url = 'http://localhost:7777'
 
 export const links = [
   { href: '/', text: 'Home' },
-  { href: '/about', text: 'About' },
+  //{ href: '/about', text: 'About' },
   { href: '/projects', text: 'Projects' },
   { href: '/blog', text: 'Devblog' },
   { href: '/contact', text: 'Contact' }

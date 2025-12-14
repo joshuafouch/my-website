@@ -22,6 +22,20 @@
 
 </svelte:head>
   
+<div
+  class="rounded-b-4xl hero h-[60vh] bg-cover bg-bottom sm:bg-fixed sm:bg-center"
+  style="background-image: url(/assets/thunderbirdfalls.webp);"
+>
+  <div class="hero-overlay bg-black/60 rounded-b-4xl"></div>
+  <div class="hero-content pt-24 text-center text-neutral-content">
+    <div class="max-w-md">
+      <h1 class="font-title mb-5 text-5xl font-bold">My Blog Posts</h1>
+      <p class="font-main mb-5 text-xl text-accent">
+        Check out some of my ideas, rants, and other cool things if you want to.
+      </p>
+    </div>
+  </div>
+</div>
 
 <div class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
   <section>
