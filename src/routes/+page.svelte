@@ -1,7 +1,16 @@
 <script lang="ts">
   import { formatDate } from '$lib/utils';
+  import Metadata from '$lib/components/Metadata.svelte';
   let { data } = $props();
 </script>
+
+<Metadata
+  title="Joshua Fouch - Computer Science Student & Developer"
+  description="Third-year Computer Science undergraduate at Franciscan University, focusing on networking, scripting, and web development. Explore my portfolio, projects, and blog."
+  url="/"
+  image="/assets/hero-bg.webp"
+  imageAlt="Joshua Fouch's Portfolio"
+/>
 
 <div
   class="hero relative min-h-screen rounded-b-4xl bg-cover bg-bottom sm:bg-fixed sm:bg-center"
@@ -96,7 +105,7 @@
       <div class="flex justify-center">
         <a
           href="/{data.featuredPost.slug}"
-          class="card bg-neutral w-full max-w-md border-2 border-secondary text-left shadow-xl transition-transform duration-300 hover:-translate-y-1 hover:shadow-2xl"
+          class="card bg-neutral border-secondary w-full max-w-md border-2 text-left shadow-xl transition-transform duration-300 hover:-translate-y-1 hover:shadow-2xl"
         >
           <figure>
             <img
