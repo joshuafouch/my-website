@@ -1,30 +1,17 @@
 <script lang="ts">
   import * as config from '$lib/config';
+  import Metadata from '$lib/components/Metadata.svelte';
   import { formatDate } from '$lib/utils';
   let { data } = $props();
 </script>
 
-<svelte:head>
-  <title>My Projects</title>
-  <meta name="description" content="hi" />
-
-  <meta property="og:title" content="About Me" />
-  <meta property="og:type" content="website" />
-  <meta property="og:url" content="{config.url}/about" />
-  <meta property="og:description" content="My Projects" />
-  <meta
-    property="og:image"
-    content="https://images.pexels.com/photos/3408744/pexels-photo-3408744.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
-  />
-
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:title" content="About Me" />
-  <meta name="twitter:description" content="My Projects" />
-  <meta
-    name="twitter:image"
-    content="https://images.pexels.com/photos/3408744/pexels-photo-3408744.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2"
-  />
-</svelte:head>
+<Metadata
+  title="My Projects"
+  description="A collection of my professional, personal, and academic projects"
+  url="/projects"
+  image="/assets/happy_snow.webp"
+  imageAlt="My Projects"
+/>
 
 <div
   class="hero h-[60vh] rounded-b-4xl bg-cover bg-bottom sm:bg-fixed sm:bg-center"
