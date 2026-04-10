@@ -34,8 +34,8 @@
   }: Props = $props();
 
   // Construct full URLs
-  const fullUrl = url.startsWith('http') ? url : `${config.url}${url}`;
-  const fullImage = image.startsWith('http') ? image : `${config.url}${image}`;
+  const fullUrl = $derived(url.startsWith('http') ? url : `${config.url}${url}`);
+  const fullImage = $derived(image.startsWith('http') ? image : `${config.url}${image}`);
 
   // Schema.org structured data
   const getSchemaData = () => {

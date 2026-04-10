@@ -21,7 +21,7 @@
   <div class="hero-content text-neutral-content pt-24 text-center">
     <div class="max-w-md">
       <h1 class="font-title mb-5 text-5xl font-bold">My Projects</h1>
-      <p class="font-main text-accent mb-5 text-lg">
+      <p class="font-main text-accent mb-5 text-xl">
         Here are some of my professional, personal, and academic projects I have produced over the
         years. Most of these are GitHub links to the source code.
       </p>
