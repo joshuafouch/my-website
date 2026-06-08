@@ -41,7 +41,7 @@
       <p class="font-main grow text-lg sm:text-left">
         I am a fourth-year at Franciscan University of Steubenville studying Computer Science
         focusing on networking, cybersecurity, and web development. I am currently working at the
-        <a href="https://www.alaskarailroad.com/" class="link text-accent">Alaska Railroad</a> as a
+        <span class="text-accent">Alaska Railroad</span> as a
         <span class="text-accent">Automation Programming Intern</span>.
       </p>
     </div>
@@ -51,10 +51,100 @@
   </div>
 </div>
 
+<div id="experience" class="text-neutral-content container mx-auto max-w-5xl p-8">
+  <div class="card bg-base-300 p-8 shadow-xl">
+    <div class="mb-8 text-center">
+      <h2 class="font-title mb-2 text-3xl font-semibold">Technical Work Experience</h2>
+      <p class="font-main text-lg">
+        Here is some of my professional work I am doing and have done.
+      </p>
+    </div>
+
+    <div class="space-y-6">
+      <!-- Automation Programming Intern -->
+      <div
+        class="card bg-base-100 border-accent border-l-4 shadow-md transition-all duration-300 hover:shadow-lg"
+      >
+        <div class="card-body p-6">
+          <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <h3 class="font-title text-xl font-semibold">Automation Programming Intern</h3>
+            <span class="badge badge-outline text-sm">May 2026 - Present</span>
+          </div>
+          <p class="font-main text-accent mt-1 font-medium">
+            <a href="https://www.alaskarailroad.com/" class="link" target="_blank">
+              Alaska Railroad
+            </a>
+          </p>
+          <p class="font-main text-base-content/80 mt-3">Details coming soon...</p>
+          <div class="card-actions mt-4 flex-wrap justify-start gap-2">
+            <span class="badge badge-accent">Python</span>
+            <span class="badge badge-accent">System Automation</span>
+            <span class="badge badge-accent">Scripting</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Computer Science Tutor -->
+      <div
+        class="card bg-base-100 border-info border-l-4 shadow-md transition-all duration-300 hover:shadow-lg"
+      >
+        <div class="card-body p-6">
+          <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <h3 class="font-title text-xl font-semibold">ITS Helpdesk Technician</h3>
+            <span class="badge badge-outline text-sm">Aug 2025 - May 2026</span>
+          </div>
+          <p class="font-main text-info mt-1 font-medium">
+            <a href="https://dynamiccampus.com/" target="_blank" class="link"> Dynamic Campus </a>
+          </p>
+          <p class="font-main text-base-content/80 mt-3">
+            Worked as an IT helpdesk technician, providing technical support and troubleshooting for
+            campus computers and networks.
+          </p>
+          <div class="card-actions mt-4 flex-wrap justify-start gap-2">
+            <span class="badge badge-info">Ticketing</span>
+            <span class="badge badge-info">Troubleshooting</span>
+            <span class="badge badge-info">Customer Support</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Computer Science Tutor -->
+      <div
+        class="card bg-base-100 border-success border-l-4 shadow-md transition-all duration-300 hover:shadow-lg"
+      >
+        <div class="card-body p-6">
+          <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <h3 class="font-title text-xl font-semibold">Computer Science Tutor</h3>
+            <span class="badge badge-outline text-sm">Fall 2024 - Spring 2025</span>
+          </div>
+          <p class="font-main text-success mt-1 font-medium">
+            <a
+              href="https://snas.franciscan.edu/department-of-engineering-and-computing/"
+              target="_blank"
+              class="link"
+            >
+              Franciscan University
+            </a>
+          </p>
+          <p class="font-main text-base-content/80 mt-3">
+            Mentored and graded students in computer science fundamentals, data structures, and
+            programming concepts. Helped develop problem-solving skills and debugging techniques.
+          </p>
+          <div class="card-actions mt-4 flex-wrap justify-start gap-2">
+            <span class="badge badge-success">C++</span>
+            <span class="badge badge-success">Grading</span>
+            <span class="badge badge-success">Mentoring</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="text-neutral-content container mx-auto max-w-5xl p-8">
   <div class="card bg-base-300 p-8 text-center shadow-xl">
-    <h2 class="font-title mb-4 text-3xl font-semibold">Experience & Skills</h2>
-    <p class="font-main mb-6 text-lg">Here's an overview of my technical experience and skills.</p>
+    <h2 class="font-title mb-4 text-3xl font-semibold">Tech Stack</h2>
+    <p class="font-main mb-6 text-lg">Here's an overview of the technologies I have used.</p>
     <div class="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
       <div class="card bg-base-100 p-6 shadow-md transition-shadow hover:shadow-lg">
         <h3 class="font-title mb-2 text-xl font-medium">Programming & Scripting</h3>
@@ -84,6 +174,7 @@
           <li>
             <a
               href="https://www.credly.com/badges/7a3f3d96-94d2-4ea5-bc5a-9a0b0aac1ade/public_url"
+              target="_blank"
               class="link text-accent">AWS Cloud Practitioner</a
             >
           </li>
@@ -139,19 +230,13 @@
           <li>Client Server Architecture</li>
         </ul>
       </div>
-      <div class="card bg-base-100 p-6 shadow-md transition-shadow hover:shadow-lg">
-        <h3 class="font-title mb-2 text-xl font-medium">Certifications</h3>
+      <!-- <div class="card bg-base-100 p-6 shadow-md transition-shadow hover:shadow-lg">
+        <h3 class="font-title mb-2 text-xl font-medium">Artificial Intelligence</h3>
         <ul class="font-main list-disc pl-5 text-left">
-          <li>
-            <a
-              class="link text-accent"
-              href="https://www.credly.com/badges/7a3f3d96-94d2-4ea5-bc5a-9a0b0aac1ade/public_url"
-              >AWS Cloud Practitioner</a
-            >
-          </li>
-          <li class="italic">Working on Comptia Network+</li>
+          <li>OpenCode</li>
+          <li>OpenRouter</li>
         </ul>
-      </div>
+      </div> -->
     </div>
   </div>
 </div>
@@ -271,6 +356,7 @@
         </p>
         <a
           href={resolve('/assets/jf_resume25-26.pdf')}
+          target="_blank"
           class="btn btn-accent font-main w-full whitespace-nowrap sm:w-auto"
         >
           Resume
