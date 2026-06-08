@@ -60,8 +60,6 @@
 <div class="text-neutral-content container mx-auto max-w-5xl p-8">
   <div id="contact" class="text-neutral-content container mx-auto max-w-4xl pt-20 pb-16">
     <div class="card bg-base-300 p-8 text-center shadow-xl">
-      <h2 class="font-title mb-4 text-3xl font-semibold">Contact Me</h2>
-
       {#if status}
         <p
           class="font-main mb-6 text-lg {status.includes('Failed')

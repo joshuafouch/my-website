@@ -1,7 +1,8 @@
 <script lang="ts">
-  import * as config from '$lib/config';
+  // import * as config from '$lib/config';
   import Metadata from '$lib/components/Metadata.svelte';
   import { formatDate } from '$lib/utils';
+  import { resolve } from '$app/paths';
   let { data } = $props();
 </script>
 
@@ -21,10 +22,10 @@
   <div class="hero-content text-neutral-content pt-24 text-center">
     <div class="max-w-md">
       <h1 class="font-title mb-5 text-5xl font-bold">My Projects</h1>
-      <p class="font-main text-accent mb-5 text-xl">
+      <!-- <p class="font-main text-accent mb-5 text-xl">
         Here are some of my professional, personal, and academic projects I have produced over the
         years. Most of these are GitHub links to the source code.
-      </p>
+      </p> -->
     </div>
   </div>
 </div>
@@ -34,7 +35,7 @@
     <div class="grid grid-cols-1 gap-8 pt-8 md:grid-cols-2 lg:grid-cols-3 lg:pt-10">
       {#each data.projects as project (project.slug)}
         <a
-          href="/{project.slug}"
+          href={resolve(`/${project.slug}`)}
           class="card bg-neutral border-secondary border-2 text-left shadow-xl transition-transform duration-300 hover:-translate-y-1 hover:shadow-2xl"
         >
           <figure>
