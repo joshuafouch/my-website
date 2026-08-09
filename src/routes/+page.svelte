@@ -61,6 +61,42 @@
     </div>
 
     <div class="space-y-6">
+        <!-- AFRL researcher -->
+        <div
+          class="card bg-base-100 border-success border-l-4 shadow-md transition-all duration-300 hover:shadow-lg"
+        >
+          <div class="card-body p-6">
+            <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+              <h3 class="font-title text-xl font-semibold">Student Researcher</h3>
+              <span class="badge badge-outline text-sm">Fall 2026 - Present</span>
+            </div>
+            <p class="font-main text-success mt-1 font-medium">
+              <a
+                href="https://snas.franciscan.edu/department-of-engineering-and-computing/"
+                target="_blank"
+                class="link"
+              >
+                Franciscan University
+              </a>
+            </p>
+            <p class="font-main text-success mt-1 font-medium">
+              <a
+                href="https://www.afrl.af.mil/"
+                target="_blank"
+                class="link"
+              >
+                  Air Force Research Laboratory (AFRL)
+              </a>
+            </p>
+            <p class="font-main text-base-content/80 mt-3">Details coming soon...</p>
+            <!-- <div class="card-actions mt-4 flex-wrap justify-start gap-2">
+              <span class="badge badge-success">C++</span>
+              <span class="badge badge-success">Grading</span>
+              <span class="badge badge-success">Mentoring</span>
+            </div> -->
+          </div>
+        </div>
+
       <!-- Automation Programming Intern -->
       <div
         class="card bg-base-100 border-accent border-l-4 shadow-md transition-all duration-300 hover:shadow-lg"
@@ -75,16 +111,18 @@
               Alaska Railroad
             </a>
           </p>
-          <p class="font-main text-base-content/80 mt-3">Details coming soon...</p>
+          <p class="font-main text-base-content/80 mt-3">
+              Architected a full-stack observability platform to continuously monitor 115+ remote industrial radios. Managed on-premise Linux VMs and built custom REST APIs for real-time network telemetry.
+          </p>
           <div class="card-actions mt-4 flex-wrap justify-start gap-2">
-            <span class="badge badge-accent">Python</span>
-            <span class="badge badge-accent">System Automation</span>
+            <span class="badge badge-accent">Django REST Framework</span>
+            <span class="badge badge-accent">Linux System Automation</span>
             <span class="badge badge-accent">Scripting</span>
           </div>
         </div>
       </div>
 
-      <!-- Computer Science Tutor -->
+      <!-- IT -->
       <div
         class="card bg-base-100 border-info border-l-4 shadow-md transition-all duration-300 hover:shadow-lg"
       >
@@ -97,8 +135,7 @@
             <a href="https://dynamiccampus.com/" target="_blank" class="link"> Dynamic Campus </a>
           </p>
           <p class="font-main text-base-content/80 mt-3">
-            Worked as an IT helpdesk technician, providing technical support and troubleshooting for
-            campus computers and networks.
+              Provided Tier-1 IT support, diagnosing and resolving complex hardware, network connectivity, and OS-level software faults for a large university user base.
           </p>
           <div class="card-actions mt-4 flex-wrap justify-start gap-2">
             <span class="badge badge-info">Ticketing</span>
@@ -128,7 +165,7 @@
           </p>
           <p class="font-main text-base-content/80 mt-3">
             Mentored and graded students in computer science fundamentals, data structures, and
-            programming concepts. Helped develop problem-solving skills and debugging techniques.
+            programming concepts.
           </p>
           <div class="card-actions mt-4 flex-wrap justify-start gap-2">
             <span class="badge badge-success">C++</span>
