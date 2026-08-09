@@ -113,7 +113,7 @@
             LinkedIn
           </a>
           <a
-            href="/assets/jf_resume25-26.pdf"
+            href="/assets/jf_resume26-27.pdf"
             target="_blank"
             class="btn btn-accent font-main flex items-center gap-2"
           >

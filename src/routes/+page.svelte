@@ -355,11 +355,10 @@
           For a full overview of my work and experience, you can download my resume:
         </p>
         <a
-          href={resolve('/assets/jf_resume25-26.pdf')}
-          target="_blank"
+          href="/assets/jf_resume26-27.pdf"
           class="btn btn-accent font-main w-full whitespace-nowrap sm:w-auto"
         >
-          Resume
+          Download Resume
         </a>
       </div>
 
