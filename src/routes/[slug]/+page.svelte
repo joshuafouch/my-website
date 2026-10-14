@@ -1,8 +1,7 @@
 <script lang="ts">
-  import { formatDate } from '$lib/utils';
-  import Metadata from '$lib/components/Metadata.svelte';
+  import { formatDate } from '#lib/utils.ts';
+  import Metadata from '#lib/components/Metadata.svelte';
   let { data } = $props();
-  import * as config from '$lib/config';
 </script>
 
 <Metadata

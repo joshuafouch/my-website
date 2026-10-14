@@ -1,6 +1,7 @@
 <script lang="ts">
   import emailjs from '@emailjs/browser';
-  import Metadata from '$lib/components/Metadata.svelte';
+  import { asset } from '$app/paths';
+  import Metadata from '#lib/components/Metadata.svelte';
 
   const SERVICE_ID = 'service_fasfba7';
   const TEMPLATE_ID = 'template_sm4vbpc';
@@ -113,7 +114,7 @@
             LinkedIn
           </a>
           <a
-            href="/assets/jf_resume26-27.pdf"
+            href={asset('assets/jf_resume26-27.pdf')}
             target="_blank"
             class="btn btn-accent font-main flex items-center gap-2"
           >

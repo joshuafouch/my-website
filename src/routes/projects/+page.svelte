@@ -1,7 +1,7 @@
 <script lang="ts">
-  // import * as config from '$lib/config';
-  import Metadata from '$lib/components/Metadata.svelte';
-  import { formatDate } from '$lib/utils';
+  // import * as config from '#lib/config.ts';
+  import Metadata from '#lib/components/Metadata.svelte';
+  import { formatDate } from '#lib/utils.ts';
   import { resolve } from '$app/paths';
   let { data } = $props();
 </script>
@@ -35,7 +35,7 @@
     <div class="grid grid-cols-1 gap-8 pt-8 md:grid-cols-2 lg:grid-cols-3 lg:pt-10">
       {#each data.projects as project (project.slug)}
         <a
-          href={resolve(`/${project.slug}`)}
+          href={resolve('/[slug]', { slug: project.slug })}
           class="card bg-neutral border-secondary border-2 text-left shadow-xl transition-transform duration-300 hover:-translate-y-1 hover:shadow-2xl"
         >
           <figure>

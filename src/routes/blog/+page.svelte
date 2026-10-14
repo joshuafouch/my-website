@@ -1,9 +1,9 @@
 <script lang="ts">
-  import { formatDate } from '$lib/utils';
-  import Metadata from '$lib/components/Metadata.svelte';
+  import { formatDate } from '#lib/utils.ts';
+  import Metadata from '#lib/components/Metadata.svelte';
   import { resolve } from '$app/paths';
   let { data } = $props();
-  // import * as config from '$lib/config';
+  // import * as config from '#lib/config.ts';
 </script>
 
 <Metadata
@@ -34,7 +34,7 @@
     <div class="grid grid-cols-1 gap-8 pt-8 md:grid-cols-2 lg:grid-cols-3 lg:pt-10">
       {#each data.posts as post (post.slug)}
         <a
-          href={resolve(`/${post.slug}`)}
+          href={resolve('/[slug]', { slug: post.slug })}
           class="card bg-neutral border-secondary border-2 text-left shadow-xl transition-transform duration-300 hover:-translate-y-1 hover:shadow-2xl"
         >
           <figure>

@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { formatDate } from '$lib/utils';
-  import Metadata from '$lib/components/Metadata.svelte';
-  import { resolve } from '$app/paths';
+  import { formatDate } from '#lib/utils.ts';
+  import Metadata from '#lib/components/Metadata.svelte';
+  import { asset, resolve } from '$app/paths';
   let { data } = $props();
 </script>
 
@@ -61,41 +61,37 @@
     </div>
 
     <div class="space-y-6">
-        <!-- AFRL researcher -->
-        <div
-          class="card bg-base-100 border-success border-l-4 shadow-md transition-all duration-300 hover:shadow-lg"
-        >
-          <div class="card-body p-6">
-            <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-              <h3 class="font-title text-xl font-semibold">Student Researcher</h3>
-              <span class="badge badge-outline text-sm">Fall 2026 - Present</span>
-            </div>
-            <p class="font-main text-success mt-1 font-medium">
-              <a
-                href="https://snas.franciscan.edu/department-of-engineering-and-computing/"
-                target="_blank"
-                class="link"
-              >
-                Franciscan University
-              </a>
-            </p>
-            <p class="font-main text-success mt-1 font-medium">
-              <a
-                href="https://www.afrl.af.mil/"
-                target="_blank"
-                class="link"
-              >
-                  Air Force Research Laboratory (AFRL)
-              </a>
-            </p>
-            <p class="font-main text-base-content/80 mt-3">Details coming soon...</p>
-            <!-- <div class="card-actions mt-4 flex-wrap justify-start gap-2">
+      <!-- AFRL researcher -->
+      <div
+        class="card bg-base-100 border-success border-l-4 shadow-md transition-all duration-300 hover:shadow-lg"
+      >
+        <div class="card-body p-6">
+          <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <h3 class="font-title text-xl font-semibold">Student Researcher</h3>
+            <span class="badge badge-outline text-sm">Fall 2026 - Present</span>
+          </div>
+          <p class="font-main text-success mt-1 font-medium">
+            <a
+              href="https://snas.franciscan.edu/department-of-engineering-and-computing/"
+              target="_blank"
+              class="link"
+            >
+              Franciscan University
+            </a>
+          </p>
+          <p class="font-main text-success mt-1 font-medium">
+            <a href="https://www.afrl.af.mil/" target="_blank" class="link">
+              Air Force Research Laboratory (AFRL)
+            </a>
+          </p>
+          <p class="font-main text-base-content/80 mt-3">Details coming soon...</p>
+          <!-- <div class="card-actions mt-4 flex-wrap justify-start gap-2">
               <span class="badge badge-success">C++</span>
               <span class="badge badge-success">Grading</span>
               <span class="badge badge-success">Mentoring</span>
             </div> -->
-          </div>
         </div>
+      </div>
 
       <!-- Automation Programming Intern -->
       <div
@@ -112,7 +108,9 @@
             </a>
           </p>
           <p class="font-main text-base-content/80 mt-3">
-              Architected a full-stack observability platform to continuously monitor 115+ remote industrial radios. Managed on-premise Linux VMs and built custom REST APIs for real-time network telemetry.
+            Architected a full-stack observability platform to continuously monitor 115+ remote
+            industrial radios. Managed on-premise Linux VMs and built custom REST APIs for real-time
+            network telemetry.
           </p>
           <div class="card-actions mt-4 flex-wrap justify-start gap-2">
             <span class="badge badge-accent">Django REST Framework</span>
@@ -135,7 +133,8 @@
             <a href="https://dynamiccampus.com/" target="_blank" class="link"> Dynamic Campus </a>
           </p>
           <p class="font-main text-base-content/80 mt-3">
-              Provided Tier-1 IT support, diagnosing and resolving complex hardware, network connectivity, and OS-level software faults for a large university user base.
+            Provided Tier-1 IT support, diagnosing and resolving complex hardware, network
+            connectivity, and OS-level software faults for a large university user base.
           </p>
           <div class="card-actions mt-4 flex-wrap justify-start gap-2">
             <span class="badge badge-info">Ticketing</span>
@@ -286,7 +285,7 @@
     {#if data.featuredPost}
       <div class="flex justify-center">
         <a
-          href={resolve(`/${data.featuredPost.slug}`)}
+          href={resolve('/[slug]', { slug: data.featuredPost.slug })}
           class="card bg-neutral border-secondary w-full max-w-md border-2 text-left shadow-xl transition-transform duration-300 hover:-translate-y-1 hover:shadow-2xl"
         >
           <figure>
@@ -392,7 +391,7 @@
           For a full overview of my work and experience, you can download my resume:
         </p>
         <a
-          href="/assets/jf_resume26-27.pdf"
+          href={asset('assets/jf_resume26-27.pdf')}
           class="btn btn-accent font-main w-full whitespace-nowrap sm:w-auto"
         >
           Download Resume

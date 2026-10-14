@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { links } from '$lib/config';
+  import { links } from '#lib/config.ts';
+  import { resolve } from '$app/paths';
   import Sidebar from './Sidebar.svelte';
 
   let isHidden = false;
@@ -9,15 +10,14 @@
 
   function handleScroll() {
     const currentScrollY = window.scrollY;
-      // will remove nav at threshold and will show if scrolling up
-      if (currentScrollY > lastScrollY && currentScrollY > 200) {
-        isHidden = true; // scrolling down
-      } else {
-        isHidden = false; // scrolling up
-      }
+    // will remove nav at threshold and will show if scrolling up
+    if (currentScrollY > lastScrollY && currentScrollY > 200) {
+      isHidden = true; // scrolling down
+    } else {
+      isHidden = false; // scrolling up
+    }
     lastScrollY = currentScrollY;
   }
-
 </script>
 
 <svelte:window on:scroll={handleScroll} bind:innerWidth={windowWidth} />
@@ -28,24 +28,20 @@
 </svelte:head>
 
 <div
-  class="navbar bg-base-300/80 shadow-info font-title shadow-lg
-  backdrop-blur-md rounded-b-xl
-  transition-transform duration duration-400"
+  class="navbar bg-base-300/80 shadow-info font-title duration
+  rounded-b-xl shadow-lg
+  backdrop-blur-md transition-transform duration-400"
   class:-translate-y-full={isHidden}
 >
   <div class="navbar-start">
-    <a class="group relative w-3xs" href="/">
-      <img
-        src="/assets/JF_navlogo_light.webp"
-        alt="Logo white"
-        class="w-3/4"
-      />
+    <a class="group relative w-3xs" href={resolve('/')}>
+      <img src="/assets/JF_navlogo_light.webp" alt="Logo white" class="w-3/4" />
       <img
         src="/assets/JF_navlogo_green.webp"
         alt="Logo green"
-        class="w-3/4 absolute top-0 left-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+        class="absolute top-0 left-0 w-3/4 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
       />
-    </a>  
+    </a>
   </div>
 
   <!-- on desktop it will show -->
@@ -53,7 +49,7 @@
     <ul class="menu menu-horizontal px-1 text-xl">
       {#each links as link (link.href)}
         <li class="hover:text-success">
-          <a href={link.href}>{link.text}</a>
+          <a href={resolve(link.href)}>{link.text}</a>
         </li>
       {/each}
     </ul>

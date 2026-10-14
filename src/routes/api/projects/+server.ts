@@ -1,5 +1,5 @@
 import { json } from '@sveltejs/kit';
-import type { Project } from '$lib/types';
+import type { Project } from '#lib/types.ts';
 
 async function getProjects() {
   let projects: Project[] = [];
@@ -13,7 +13,7 @@ async function getProjects() {
     if (file && typeof file === 'object' && 'metadata' in file && slug) {
       const metadata = file.metadata as Omit<Project, 'slug'>;
       const project = { ...metadata, slug } satisfies Project;
-      project.published && projects.push(project);
+      if (project.published) projects.push(project);
     }
   }
 

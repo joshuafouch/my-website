@@ -1,4 +1,4 @@
-import type { Post } from '$lib/types';
+import type { Post } from '#lib/types.ts';
 
 export async function load({ fetch }) {
   // Fetch all posts from the API

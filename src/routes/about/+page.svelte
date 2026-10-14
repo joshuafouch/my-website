@@ -1,6 +1,5 @@
 <script lang="ts">
-  import * as config from '$lib/config';
-  import Metadata from '$lib/components/Metadata.svelte';
+  import Metadata from '#lib/components/Metadata.svelte';
 </script>
 
 <Metadata

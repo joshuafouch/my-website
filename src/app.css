@@ -3,7 +3,7 @@
 @import '@fontsource/ibm-plex-sans';
 @import '@fontsource/dm-serif-text';
 
-@plugin "@tailwindcss/typography";
+@plugin '@tailwindcss/typography';
 @layer base {
   .prose {
     --tw-prose-body: 'IBM Plex Sans', sans-serif;
@@ -12,10 +12,10 @@
   }
 }
 
-@plugin "daisyui" {
+@plugin 'daisyui' {
   themes: nord;
 }
-@plugin "daisyui/theme" {
+@plugin 'daisyui/theme' {
   name: 'nord-dark';
   default: true;
   prefersdark: true;

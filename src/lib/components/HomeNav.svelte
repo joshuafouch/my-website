@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { links } from '$lib/config';
+  import { links } from '#lib/config.ts';
+  import { resolve } from '$app/paths';
   import Sidebar from './Sidebar.svelte';
 
   let isOpen = false;
@@ -18,7 +19,7 @@
   <div class="navbar-start">
     <a
       class="w-3xs"
-      href="/"
+      href={resolve('/')}
       on:mouseenter={() => (hovering = true)}
       on:mouseleave={() => (hovering = false)}
     >
@@ -42,7 +43,7 @@
     <ul class="menu menu-horizontal px-1 text-xl">
       {#each links as link (link.href)}
         <li class="hover:text-success">
-          <a href={link.href}>{link.text}</a>
+          <a href={resolve(link.href)}>{link.text}</a>
         </li>
       {/each}
     </ul>

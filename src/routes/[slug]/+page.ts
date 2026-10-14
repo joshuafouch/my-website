@@ -8,7 +8,7 @@ export async function load({ params }) {
       content: post.default,
       meta: { ...post.metadata, slug: params.slug, type: 'post' }
     };
-  } catch (e) {
+  } catch {
     try {
       const project = await import(`../../projects/${params.slug}.md`);
 
@@ -16,7 +16,7 @@ export async function load({ params }) {
         content: project.default,
         meta: { ...project.metadata, slug: params.slug, type: 'project' }
       };
-    } catch (e) {
+    } catch {
       error(404, `Could not find ${params.slug}`);
     }
   }

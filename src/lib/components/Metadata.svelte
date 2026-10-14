@@ -1,5 +1,5 @@
 <script lang="ts">
-  import * as config from '$lib/config';
+  import * as config from '#lib/config.ts';
 
   interface Props {
     title?: string;
@@ -78,6 +78,11 @@
       }
     };
   };
+
+  const schemaHtml =
+    `<script type="application/ld+json">${JSON.stringify(getSchemaData(), null, 2)}` +
+    '</' +
+    'script>';
 </script>
 
 <svelte:head>
@@ -99,7 +104,7 @@
   {#if type === 'article' && date}
     <meta property="article:published_time" content={date} />
     <meta property="article:author" content={author} />
-    {#each tags as tag}
+    {#each tags as tag (tag)}
       <meta property="article:tag" content={tag} />
     {/each}
   {/if}
@@ -116,5 +121,6 @@
   <link rel="canonical" href={fullUrl} />
 
   <!-- Schema.org JSON-LD -->
-  {@html `<script type="application/ld+json">${JSON.stringify(getSchemaData(), null, 2)}</script>`}
+  <!-- eslint-disable-next-line svelte/no-at-html-tags -->
+  {@html schemaHtml}
 </svelte:head>

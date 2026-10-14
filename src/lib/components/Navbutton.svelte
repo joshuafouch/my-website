@@ -6,8 +6,8 @@
 
 <button
   class="btn btn-circle bg-secondary text-base-100
-         shadow-base-300 fixed bottom-4 right-4
-         p-1 border-2 shadow-lg lg:hidden z-50"
+         shadow-base-300 fixed right-4 bottom-4
+         z-50 border-2 p-1 shadow-lg lg:hidden"
   aria-label="open menu"
   on:click={() => (isOpen = true)}
 >
