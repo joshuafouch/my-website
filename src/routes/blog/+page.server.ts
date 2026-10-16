@@ -1,7 +1,7 @@
-import type { Post } from '#lib/types.ts';
+import { getPublishedPosts } from '#lib/posts.ts';
+import type { PageServerLoad } from './$types';
 
-export async function load({ fetch }) {
-  const response = await fetch('/api/posts');
-  const posts: Post[] = await response.json();
-  return { posts };
-}
+export const load: PageServerLoad = async ({ locals }) => {
+	const posts = await getPublishedPosts(locals.supabase);
+	return { posts };
+};
