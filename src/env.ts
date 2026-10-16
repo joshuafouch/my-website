@@ -14,5 +14,12 @@ export const variables = defineEnvVars({
 			if (!value) throw new Error('PUBLIC_SUPABASE_ANON_KEY is required');
 			return value;
 		}
+	},
+	// Private: only used on the server to gate /admin
+	ADMIN_EMAIL: {
+		schema: (value) => {
+			if (!value) throw new Error('ADMIN_EMAIL is required');
+			return value;
+		}
 	}
 });
