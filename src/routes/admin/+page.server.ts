@@ -13,7 +13,7 @@ export const load: PageServerLoad = async ({ locals }) => {
 };
 
 export const actions: Actions = {
-  default: async ({ request, locals }) => {
+  save: async ({ request, locals }) => {
     await requireAdmin(locals.supabase);
     const form = await request.formData();
     const result = await savePostFromForm(locals.supabase, form);

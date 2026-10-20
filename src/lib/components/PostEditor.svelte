@@ -54,7 +54,12 @@
   }
 </script>
 
-<form method="POST" enctype="multipart/form-data" class="card bg-base-300 space-y-4 p-6 shadow-xl">
+<form
+  method="POST"
+  action="?/save"
+  enctype="multipart/form-data"
+  class="card bg-base-300 space-y-4 p-6 shadow-xl"
+>
   {#if form?.error}
     <p class="text-error font-main">{form.error}</p>
   {/if}

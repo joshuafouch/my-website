@@ -15,7 +15,7 @@ export const load: PageServerLoad = async ({ locals, params, url }) => {
 };
 
 export const actions: Actions = {
-  default: async ({ request, locals, params }) => {
+  save: async ({ request, locals, params }) => {
     await requireAdmin(locals.supabase);
     const existing = await getAdminPostBySlug(locals.supabase, params.slug);
     if (!existing) error(404, `Could not find ${params.slug}`);
