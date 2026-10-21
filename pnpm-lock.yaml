@@ -172,6 +172,9 @@ importers:
       '@fontsource/dm-serif-text':
         specifier: ^5.2.8
         version: 5.2.8
+      '@fontsource/eb-garamond':
+        specifier: ^5.3.0
+        version: 5.3.0
       '@fontsource/ibm-plex-mono':
         specifier: ^5.2.7
         version: 5.2.7
@@ -326,6 +329,9 @@ packages:
 
   '@fontsource/dm-serif-text@5.2.8':
     resolution: {integrity: sha512-Zbo9UKc/9cWWTTGleFk/oL9TQWHcEA8IXLqGaVvWC90Q5GqOe7DdPmU38hIF7KQqDmxuk2sT2gJV5raYBeu1VA==}
+
+  '@fontsource/eb-garamond@5.3.0':
+    resolution: {integrity: sha512-VplwHpB8FLuzl+4G5LDci1b3Z4SghiuXH8XEgaxjnOb5aue5mEt1njmDKeO6iyLeGa73LffU7PC7hzncLRx0ZA==}
 
   '@fontsource/ibm-plex-mono@5.2.7':
     resolution: {integrity: sha512-MKAb8qV+CaiMQn2B0dIi1OV3565NYzp3WN5b4oT6LTkk+F0jR6j0ZN+5BKJiIhffDC3rtBULsYZE65+0018z9w==}
@@ -2019,6 +2025,8 @@ snapshots:
       levn: 0.4.1
 
   '@fontsource/dm-serif-text@5.2.8': {}
+
+  '@fontsource/eb-garamond@5.3.0': {}
 
   '@fontsource/ibm-plex-mono@5.2.7': {}
 
