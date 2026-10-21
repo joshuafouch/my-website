@@ -1,0 +1,22 @@
+name: Branch flow
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  branch-flow:
+    name: Branch flow
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check merge direction
+        run: |
+          base="${{ github.base_ref }}"
+          head="${{ github.head_ref }}"
+          if [ "$base" = "main" ] && [ "$head" = "staging" ]; then
+            exit 0
+          fi
+          if [ "$base" = "staging" ] && [ "$head" != "main" ]; then
+            exit 0
+          fi
+          echo "Feature branches merge into staging. Only staging merges into main."
+          exit 1

@@ -6,7 +6,7 @@ categories:
   - theology
   - philosophy
   - astronomy
-image: '/previews/pillars_of_creation.jpg'
+image: 'https://hmobqymwzttfzjnbmmzw.supabase.co/storage/v1/object/public/blog-images/covers/pillars_of_creation.jpg'
 published: true
 ---
 

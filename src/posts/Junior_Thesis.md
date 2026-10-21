@@ -5,7 +5,7 @@ date: '2025-08-21'
 categories:
   - theology
   - philosophy
-image: '/previews/beautiful_church.jpg'
+image: 'https://hmobqymwzttfzjnbmmzw.supabase.co/storage/v1/object/public/blog-images/covers/beautiful_church.jpg'
 published: true
 ---
 

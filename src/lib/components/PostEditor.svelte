@@ -121,7 +121,7 @@
       class="input input-bordered w-full"
       name="image"
       value={imageValue}
-      placeholder="/previews/..."
+      placeholder="https://.../blog-images/covers/..."
     />
     {#if imageValue}
       <img class="mt-2 h-32 w-full rounded-lg object-cover" src={imageValue} alt="" />
