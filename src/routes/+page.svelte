@@ -1,6 +1,7 @@
 <script lang="ts">
   import { formatDate } from '#lib/utils.ts';
   import Metadata from '#lib/components/Metadata.svelte';
+  import SignatureLogo from '#lib/components/SignatureLogo.svelte';
   import { asset, resolve } from '$app/paths';
   let { data } = $props();
 </script>
@@ -20,7 +21,7 @@
   <div class="hero-overlay bg-neutral/80 rounded-b-4xl"></div>
   <div class="hero-content text-neutral-content text-center">
     <div class="max-w-md">
-      <img class="img pb-2" src="/assets/JF_logo_light.webp" alt="signature" />
+      <SignatureLogo />
       <p class="font-title mb-2 text-xl">
         Hello! My name is <span class="text-accent font-semibold italic">Joshua Fouch</span>.
         Welcome to my corner of the web.
