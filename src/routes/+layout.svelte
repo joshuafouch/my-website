@@ -3,21 +3,36 @@
   import Navbar from '#lib/components/Navbar.svelte';
   import Footer from '#lib/components/Footer.svelte';
   import Transition from '#lib/components/Transition.svelte';
-  // import { afterNavigate } from '$app/navigation';
+  import { onNavigate } from '$app/navigation';
 
   let { children, data } = $props();
+
+  const isLanding = $derived(data.url === '/');
+
+  onNavigate((navigation) => {
+    if (!document.startViewTransition) return;
+    if (navigation.from?.url.pathname === navigation.to?.url.pathname) return;
+
+    return new Promise((resolve) => {
+      document.startViewTransition(async () => {
+        resolve();
+        await navigation.complete;
+      });
+    });
+  });
 </script>
 
 <svelte:head>
-  <link rel="preload" href="/assets/JF_logo_light.webp" as="image" type="image/webp" />
   <link rel="preload" href="/assets/hero-bg.webp" as="image" type="image/webp" />
 </svelte:head>
 
-<header class="fixed top-0 z-50 w-full">
-  <div class="mx-auto max-w-6xl">
-    <Navbar />
-  </div>
-</header>
+{#if !isLanding}
+  <header class="site-nav fixed top-0 z-50 w-full">
+    <div class="mx-auto max-w-6xl">
+      <Navbar />
+    </div>
+  </header>
+{/if}
 
 <main>
   <Transition url={data.url}>
@@ -25,4 +40,12 @@
   </Transition>
 </main>
 
-<Footer />
+{#if !isLanding}
+  <Footer />
+{/if}
+
+<style>
+  .site-nav {
+    view-transition-name: site-nav;
+  }
+</style>

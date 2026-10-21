@@ -172,6 +172,9 @@ importers:
       '@fontsource/dm-serif-text':
         specifier: ^5.2.8
         version: 5.2.8
+      '@fontsource/eb-garamond':
+        specifier: ^5.3.0
+        version: 5.3.0
       '@fontsource/ibm-plex-mono':
         specifier: ^5.2.7
         version: 5.2.7
@@ -187,6 +190,9 @@ importers:
       daisyui:
         specifier: ^5.5.19
         version: 5.5.19
+      gsap:
+        specifier: ^3.15.0
+        version: 3.15.0
       marked:
         specifier: ^18.1.1
         version: 18.1.1
@@ -323,6 +329,9 @@ packages:
 
   '@fontsource/dm-serif-text@5.2.8':
     resolution: {integrity: sha512-Zbo9UKc/9cWWTTGleFk/oL9TQWHcEA8IXLqGaVvWC90Q5GqOe7DdPmU38hIF7KQqDmxuk2sT2gJV5raYBeu1VA==}
+
+  '@fontsource/eb-garamond@5.3.0':
+    resolution: {integrity: sha512-VplwHpB8FLuzl+4G5LDci1b3Z4SghiuXH8XEgaxjnOb5aue5mEt1njmDKeO6iyLeGa73LffU7PC7hzncLRx0ZA==}
 
   '@fontsource/ibm-plex-mono@5.2.7':
     resolution: {integrity: sha512-MKAb8qV+CaiMQn2B0dIi1OV3565NYzp3WN5b4oT6LTkk+F0jR6j0ZN+5BKJiIhffDC3rtBULsYZE65+0018z9w==}
@@ -1193,6 +1202,9 @@ packages:
   graceful-fs@4.2.11:
     resolution: {integrity: sha512-RbJ5/jmFcNNCcDV5o9eTnBLJ/HszWV0P73bc+Ff4nS/rJj+YaS6IGyiOL0VoBYX+l1Wrl3k63h/KrH+nhJ0XvQ==}
 
+  gsap@3.15.0:
+    resolution: {integrity: sha512-dMW4CWBTUK1AEEDeZc1g4xpPGIrSf9fJF960qbTZmN/QwZIWY5wgliS6JWl9/25fpTGJrMRtSjGtOmPnfjZB+A==}
+
   hast-util-heading-rank@3.0.0:
     resolution: {integrity: sha512-EJKb8oMUXVHcWZTDepnr+WNbfnXKFNf9duMesmr4S8SXTJBJ9M4Yok08pu9vxdJwdlGRhVumk9mEhkEvKGifwA==}
 
@@ -2014,6 +2026,8 @@ snapshots:
 
   '@fontsource/dm-serif-text@5.2.8': {}
 
+  '@fontsource/eb-garamond@5.3.0': {}
+
   '@fontsource/ibm-plex-mono@5.2.7': {}
 
   '@fontsource/ibm-plex-sans@5.2.8': {}
@@ -2775,6 +2789,8 @@ snapshots:
   globals@17.4.0: {}
 
   graceful-fs@4.2.11: {}
+
+  gsap@3.15.0: {}
 
   hast-util-heading-rank@3.0.0:
     dependencies:

@@ -2,6 +2,10 @@
 @import '@fontsource/ibm-plex-mono';
 @import '@fontsource/ibm-plex-sans';
 @import '@fontsource/dm-serif-text';
+@import '@fontsource/eb-garamond/400.css';
+@import '@fontsource/eb-garamond/400-italic.css';
+@import '@fontsource/eb-garamond/500.css';
+@import '@fontsource/eb-garamond/500-italic.css';
 
 @plugin '@tailwindcss/typography';
 @layer base {
@@ -74,6 +78,44 @@
   font-family: 'IBM Plex Mono', monospace;
 }
 
+.font-serif {
+  font-family: 'EB Garamond', Garamond, 'Times New Roman', serif;
+}
+
+:root {
+  --nord0: #2e3440;
+  --nord1: #3b4252;
+  --nord3: #4c566a;
+  --nord4: #d8dee9;
+  --nord6: #eceff4;
+  --nord8: #88c0d0;
+  --nord13: #ebcb8b;
+  --nord14: #a3be8c;
+
+  --ink: var(--nord6);
+  --ink-muted: color-mix(in oklab, var(--nord4) 70%, transparent);
+  --ink-accent: var(--nord14);
+  --ground: #1b1f27;
+}
+
 html {
   scroll-behavior: smooth;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 250ms;
+  animation-timing-function: ease;
+}
+
+::view-transition-group(site-nav) {
+  animation-duration: 250ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
 }
