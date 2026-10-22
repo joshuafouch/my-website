@@ -5,17 +5,18 @@
 
 <script lang="ts">
   import { onMount } from 'svelte';
+  import { goto } from '$app/navigation';
   import Metadata from '#lib/components/Metadata.svelte';
   import SignatureLogo from '#lib/components/SignatureLogo.svelte';
-  import { asset, resolve } from '$app/paths';
+  import BackgroundSwitch from '#lib/components/BackgroundSwitch.svelte';
+  import { resolve } from '$app/paths';
 
   const heroImage = '/assets/hero-bg.webp';
 
   const pages = [
     { text: 'About', href: resolve('/about') },
-    { text: 'Blog', href: resolve('/blog') },
     { text: 'Projects', href: resolve('/projects') },
-    { text: 'Resume', href: asset('assets/jf_resume26-27.pdf') }
+    { text: 'Blog', href: resolve('/blog') }
   ];
 
   const socials = [
@@ -27,6 +28,28 @@
   const returning = landingSeen;
   let ready = $state(landingSeen);
   let replay = $state(0);
+  let leaving = $state(false);
+
+  function depart(event: MouseEvent) {
+    if (leaving) {
+      event.preventDefault();
+      return;
+    }
+    const anchor = event.currentTarget;
+    if (!(anchor instanceof HTMLAnchorElement) || anchor.target === '_blank') return;
+    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0)
+      return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+    const url = new URL(anchor.href);
+    if (url.origin !== window.location.origin) return;
+
+    event.preventDefault();
+    leaving = true;
+    window.setTimeout(() => {
+      goto(url.pathname + url.search + url.hash);
+    }, 100);
+  }
 
   onMount(() => {
     if (landingSeen) return;
@@ -61,8 +84,7 @@
 <svelte:head>
   <noscript>
     <style>
-      .landing .reveal,
-      .landing .backdrop {
+      .landing .reveal {
         opacity: 1 !important;
       }
       .landing .loader {
@@ -76,13 +98,8 @@
   class="landing relative flex min-h-svh flex-col font-serif"
   class:is-ready={ready}
   class:is-return={returning}
+  class:is-leaving={leaving}
 >
-  <div
-    class="backdrop absolute inset-0 bg-cover bg-bottom sm:bg-center"
-    style="background-image: url('{heroImage}');"
-  ></div>
-  <div class="veil absolute inset-0"></div>
-
   {#if !returning}
     <div class="loader absolute inset-0 flex items-center justify-center" aria-hidden="true">
       <div class="flex flex-col items-center gap-6">
@@ -97,6 +114,7 @@
   {/if}
 
   <div class="corner reveal" style="--step: 0">
+    <BackgroundSwitch />
     <button type="button" class="icon-btn" aria-label="Color mode">
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <path
@@ -119,29 +137,40 @@
         onclick={() => replay++}
       >
         {#key replay}
-          <SignatureLogo play={ready} instant={returning && replay === 0} />
+          <SignatureLogo play={ready} instant={returning && replay === 0} erase={leaving} />
         {/key}
       </button>
     </div>
 
-    <p class="hello reveal mt-4 max-w-md text-xl leading-relaxed sm:text-2xl" style="--step: 0">
+    <p
+      class="hello reveal mt-4 max-w-md text-xl leading-relaxed sm:text-2xl"
+      style="--step: 0; --leave-y: -1.4rem"
+    >
       Hello! My name is <em class="name">Joshua Fouch</em>. Welcome to my corner of the web.
     </p>
 
-    <nav aria-label="Pages" class="reveal mt-10" style="--step: 1">
+    <nav aria-label="Pages" class="reveal mt-10" style="--step: 1; --leave-x: 1.75rem">
       <ul class="pages flex flex-wrap items-center justify-center gap-y-1 text-base sm:text-xl">
         {#each pages as page, index (page.text)}
           {#if index > 0}
             <li aria-hidden="true" class="dot">·</li>
           {/if}
-          <li><a class="link-line" href={page.href}>{page.text}</a></li>
+          <li><a class="link-line" href={page.href} onclick={depart}>{page.text}</a></li>
         {/each}
       </ul>
     </nav>
   </div>
 
-  <footer class="foot reveal text-center" style="--step: 2">
-    <ul class="socials flex flex-wrap justify-center gap-x-8 text-sm">
+  <footer class="foot reveal text-center" style="--step: 2; --leave-y: 1.6rem">
+    <ul class="socials flex flex-wrap justify-center">
+      <li>
+        <a class="social-link link-line" href={resolve('/resume')} onclick={depart}>
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M6 2h8.2L20 7.8V22H6V2z" />
+          </svg>
+          Resume
+        </a>
+      </li>
       {#each socials as social (social.text)}
         <li>
           <a
@@ -168,7 +197,12 @@
         </li>
       {/each}
     </ul>
-    <a class="icon-btn admin" href={resolve('/admin/login')} aria-label="Admin login">
+    <a
+      class="icon-btn admin"
+      href={resolve('/admin/login')}
+      aria-label="Admin login"
+      onclick={depart}
+    >
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <circle cx="7" cy="12" r="3.25" fill="none" stroke="currentColor" stroke-width="1.6" />
         <path
@@ -186,28 +220,6 @@
 <style>
   .landing {
     color: var(--ink);
-    background-color: var(--ground);
-  }
-
-  .backdrop {
-    opacity: 0;
-    transition: opacity 600ms ease;
-  }
-
-  .is-ready .backdrop {
-    opacity: 1;
-  }
-
-  .is-return .backdrop {
-    transition: none;
-  }
-
-  .veil {
-    background: radial-gradient(
-      ellipse at center,
-      color-mix(in oklab, var(--ground) 72%, transparent) 0%,
-      color-mix(in oklab, var(--ground) 90%, transparent) 70%
-    );
   }
 
   .corner {
@@ -308,7 +320,7 @@
   }
 
   .is-ready .logo.quick {
-    animation: rise 350ms ease both;
+    animation: rise 200ms ease both;
   }
 
   .reveal {
@@ -321,8 +333,19 @@
   }
 
   .is-return .reveal {
-    animation-duration: 350ms;
+    animation-duration: 200ms;
     animation-delay: 0ms;
+  }
+
+  .is-leaving .reveal:not(.corner) {
+    animation: depart 100ms ease forwards;
+  }
+
+  @keyframes depart {
+    to {
+      opacity: 0;
+      transform: translate(var(--leave-x, 0), var(--leave-y, -1rem));
+    }
   }
 
   @keyframes rise {
@@ -375,9 +398,14 @@
 
   .socials {
     grid-column: 2;
-    column-gap: 1rem;
-    letter-spacing: 0.1em;
+    align-items: center;
+    gap: 1.25rem 1.75rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    letter-spacing: 0.12em;
     text-transform: uppercase;
+    font-size: 0.8rem;
     color: var(--ink-muted);
   }
 
@@ -386,6 +414,7 @@
     align-items: center;
     gap: 0.4rem;
     min-height: 2.75rem;
+    color: var(--ink-muted);
   }
 
   .social-link svg {
@@ -409,10 +438,14 @@
     outline: none;
   }
 
-  @media (max-width: 359px) {
+  @media (max-width: 520px) {
     .socials {
-      column-gap: 0.75rem;
-      letter-spacing: 0.04em;
+      grid-column: 1 / -1;
+      justify-content: center;
+      gap: 0.45rem 0.9rem;
+      padding-inline: 3.25rem;
+      letter-spacing: 0.08em;
+      font-size: 0.72rem;
     }
   }
 
@@ -440,15 +473,9 @@
     .dot {
       padding-inline: 1.1rem;
     }
-
-    .socials {
-      column-gap: 2rem;
-      letter-spacing: 0.18em;
-    }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .backdrop,
     .loader {
       transition: none;
     }
@@ -459,7 +486,8 @@
     }
 
     .is-ready .reveal,
-    .is-ready .logo.quick {
+    .is-ready .logo.quick,
+    .is-leaving .reveal {
       animation: none;
       opacity: 1;
     }

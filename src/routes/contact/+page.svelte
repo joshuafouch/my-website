@@ -46,20 +46,12 @@
   imageAlt="Contact Joshua Fouch"
 />
 
-<div
-  class="hero h-[60vh] rounded-b-4xl bg-cover bg-bottom sm:bg-fixed sm:bg-center"
-  style="background-image: url(/assets/valleybutte.webp);"
->
-  <div class="hero-overlay rounded-b-4xl bg-black/60"></div>
-  <div class="hero-content text-neutral-content pt-24 text-center">
-    <div class="max-w-md">
-      <h1 class="font-title mb-5 text-5xl font-bold">Contact Me</h1>
-    </div>
-  </div>
-</div>
+<header class="px-4 pt-32 text-center">
+  <h1 class="font-title text-5xl font-bold">Contact Me</h1>
+</header>
 
 <div class="text-neutral-content container mx-auto max-w-5xl p-8">
-  <div id="contact" class="text-neutral-content container mx-auto max-w-4xl pt-20 pb-16">
+  <div id="contact" class="text-neutral-content container mx-auto max-w-4xl pt-8 pb-16">
     <div class="card bg-base-300 p-8 text-center shadow-xl">
       {#if status}
         <p
