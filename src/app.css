@@ -102,14 +102,206 @@ html {
   scroll-behavior: smooth;
 }
 
+body {
+  background: var(--ground);
+}
+
+.site-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background: var(--ground);
+  pointer-events: none;
+  view-transition-name: site-backdrop;
+}
+
+.site-backdrop .photo,
+.site-backdrop .veil {
+  position: absolute;
+  inset: 0;
+}
+
+.site-backdrop .photo {
+  background-color: var(--ground);
+  background-size: cover;
+  background-position: center bottom;
+  opacity: 0;
+}
+
+.site-backdrop .under {
+  z-index: 0;
+}
+
+.site-backdrop.ready .under.held {
+  opacity: 1;
+}
+
+.site-backdrop .over {
+  z-index: 1;
+}
+
+.site-backdrop .over.shown {
+  animation: backdrop-in 700ms ease forwards;
+}
+
+.site-backdrop .veil {
+  z-index: 2;
+  background: radial-gradient(
+    ellipse at center,
+    color-mix(in oklab, var(--ground) 72%, transparent) 0%,
+    color-mix(in oklab, var(--ground) 90%, transparent) 70%
+  );
+}
+
+@keyframes backdrop-in {
+  to {
+    opacity: 1;
+  }
+}
+
+@media (min-width: 640px) {
+  .site-backdrop .photo {
+    background-position: center;
+  }
+}
+
+html[data-vt] .site-nav {
+  view-transition-name: site-nav;
+}
+
+html[data-vt] .page-stack {
+  view-transition-name: page;
+}
+
+::view-transition-group(root),
 ::view-transition-old(root),
 ::view-transition-new(root) {
-  animation-duration: 250ms;
-  animation-timing-function: ease;
+  animation: none;
+}
+
+::view-transition-group(page),
+::view-transition-group(about-tabs),
+::view-transition-old(about-tabs),
+::view-transition-new(about-tabs),
+::view-transition-group(site-backdrop),
+::view-transition-old(site-backdrop),
+::view-transition-new(site-backdrop),
+::view-transition-group(backdrop-switch),
+::view-transition-old(backdrop-switch),
+::view-transition-new(backdrop-switch) {
+  animation: none;
+}
+
+::view-transition-group(page) {
+  z-index: 1;
+}
+
+::view-transition-group(about-tabs) {
+  z-index: 2;
 }
 
 ::view-transition-group(site-nav) {
-  animation-duration: 250ms;
+  z-index: 3;
+}
+
+::view-transition-group(backdrop-switch) {
+  z-index: 5;
+}
+
+::view-transition-image-pair(page) {
+  overflow: clip;
+}
+
+::view-transition-old(page),
+::view-transition-new(page),
+::view-transition-old(site-nav),
+::view-transition-new(site-nav) {
+  mix-blend-mode: normal;
+  object-fit: none;
+  object-position: top left;
+}
+
+html[data-vt='nav-persist']::view-transition-group(site-nav),
+html[data-vt='nav-persist']::view-transition-old(site-nav),
+html[data-vt='nav-persist']::view-transition-new(site-nav),
+html[data-vt='nav-leave']::view-transition-group(site-nav),
+html[data-vt='nav-enter']::view-transition-group(site-nav) {
+  animation: none;
+}
+
+html[data-vt='nav-persist']::view-transition-old(page),
+html[data-vt='nav-enter']::view-transition-old(page) {
+  animation: page-leave 280ms ease both;
+}
+
+html[data-vt='nav-persist']::view-transition-new(page),
+html[data-vt='nav-enter']::view-transition-new(page) {
+  animation: page-enter 320ms ease both;
+}
+
+html[data-vt='nav-leave']::view-transition-old(page) {
+  animation: page-leave 260ms ease both;
+}
+
+html[data-vt='nav-leave']::view-transition-new(page) {
+  animation: none;
+  opacity: 0;
+}
+
+html[data-vt='nav-leave']::view-transition-old(site-nav) {
+  animation: nav-slide-up 280ms ease forwards;
+}
+
+html[data-vt='nav-enter']::view-transition-new(site-nav) {
+  animation: nav-slide-down 420ms ease both;
+}
+
+html[data-vt='nav-leave'] .landing.is-return .reveal,
+html[data-vt='nav-leave'] .landing .logo.quick {
+  animation: none !important;
+  opacity: 0 !important;
+}
+
+@keyframes page-leave {
+  to {
+    opacity: 0;
+    translate: 0 -0.75rem;
+  }
+}
+
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    translate: 0 0.8rem;
+  }
+}
+
+@keyframes nav-slide-up {
+  to {
+    translate: 0 -120%;
+  }
+}
+
+@keyframes nav-slide-down {
+  from {
+    translate: 0 -120%;
+  }
+}
+
+.quiet-link {
+  color: var(--ink-muted);
+  background: linear-gradient(currentColor, currentColor) no-repeat left bottom / 0 1px;
+  padding-bottom: 2px;
+  transition:
+    background-size 300ms ease,
+    color 300ms ease;
+}
+
+.quiet-link:hover,
+.quiet-link:focus-visible {
+  color: var(--ink-accent);
+  background-size: 100% 1px;
+  outline: none;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -117,5 +309,10 @@ html {
   ::view-transition-old(*),
   ::view-transition-new(*) {
     animation: none !important;
+  }
+
+  .site-backdrop .over.shown {
+    animation: none;
+    opacity: 1;
   }
 }

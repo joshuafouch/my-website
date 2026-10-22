@@ -14,21 +14,9 @@
   imageAlt="My Projects"
 />
 
-<div
-  class="hero h-[60vh] rounded-b-4xl bg-cover bg-bottom sm:bg-fixed sm:bg-center"
-  style="background-image: url(/assets/happy_snow.webp);"
->
-  <div class="hero-overlay rounded-b-4xl bg-black/60"></div>
-  <div class="hero-content text-neutral-content pt-24 text-center">
-    <div class="max-w-md">
-      <h1 class="font-title mb-5 text-5xl font-bold">My Projects</h1>
-      <!-- <p class="font-main text-accent mb-5 text-xl">
-        Here are some of my professional, personal, and academic projects I have produced over the
-        years. Most of these are GitHub links to the source code.
-      </p> -->
-    </div>
-  </div>
-</div>
+<header class="px-4 pt-32 text-center">
+  <h1 class="font-title text-5xl font-bold">My Projects</h1>
+</header>
 
 <div class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
   <section>
