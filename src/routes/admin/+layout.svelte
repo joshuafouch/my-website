@@ -1,24 +1,68 @@
 <script lang="ts">
   import { resolve } from '$app/paths';
+  import { page } from '$app/state';
 
   let { data, children } = $props();
+
+  const section = $derived.by(() => {
+    const path = page.url.pathname;
+    if (path.startsWith('/admin/projects')) return 'projects';
+    if (path.startsWith('/admin/about/personal')) return 'personal';
+    if (path.startsWith('/admin/about')) return 'professional';
+    if (path.startsWith('/admin/mfa') || path.startsWith('/admin/login')) return '';
+    return 'posts';
+  });
 </script>
 
-<div class="text-neutral-content container mx-auto max-w-4xl px-4 py-24">
+<div class="studio font-serif">
   {#if data.isAdmin}
-    <div class="mb-8 flex items-center justify-between gap-4">
-      {#if data.needsMfa}
-        <span></span>
-      {:else}
-        <div class="flex items-center gap-4">
-          <a href={resolve('/admin')} class="font-title text-lg">Posts</a>
-          <a href={resolve('/admin/mfa')} class="font-main text-sm opacity-70">Authenticator</a>
-        </div>
-      {/if}
-      <form method="POST" action="/admin/logout">
-        <button class="btn btn-ghost btn-sm font-main" type="submit">Log out</button>
-      </form>
-    </div>
+    <nav aria-label="Admin">
+      <ul>
+        {#if !data.needsMfa}
+          <li>
+            <a
+              class="quiet-link"
+              href={resolve('/admin')}
+              aria-current={section === 'posts' ? 'page' : undefined}>Blog</a
+            >
+          </li>
+          <li>
+            <a
+              class="quiet-link"
+              href={resolve('/admin/projects')}
+              aria-current={section === 'projects' ? 'page' : undefined}>Projects</a
+            >
+          </li>
+          <li>
+            <a
+              class="quiet-link"
+              href={resolve('/admin/about/professional')}
+              aria-current={section === 'professional' ? 'page' : undefined}>Professional</a
+            >
+          </li>
+          <li>
+            <a
+              class="quiet-link"
+              href={resolve('/admin/about/personal')}
+              aria-current={section === 'personal' ? 'page' : undefined}>Personal</a
+            >
+          </li>
+          <li class="side">
+            <a
+              class="quiet-link"
+              href={resolve('/admin/mfa')}
+              aria-current={page.url.pathname.startsWith('/admin/mfa') ? 'page' : undefined}
+              >Authenticator</a
+            >
+          </li>
+        {/if}
+        <li>
+          <form method="POST" action="/admin/logout">
+            <button class="text" type="submit">Log out</button>
+          </form>
+        </li>
+      </ul>
+    </nav>
   {/if}
 
   {@render children()}
