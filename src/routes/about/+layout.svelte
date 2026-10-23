@@ -34,7 +34,7 @@
   .about-shell {
     max-width: 46rem;
     margin-inline: auto;
-    padding: 7.5rem 1.5rem 4rem;
+    padding: 2.25rem 1.5rem 3rem;
     color: var(--ink);
   }
 

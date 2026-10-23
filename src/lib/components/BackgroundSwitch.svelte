@@ -1,8 +1,16 @@
 <script lang="ts">
   import { cycleBackdrop } from '#lib/backdrop.svelte.ts';
+
+  let { compact = false }: { compact?: boolean } = $props();
 </script>
 
-<button type="button" class="switch" aria-label="Change background" onclick={cycleBackdrop}>
+<button
+  type="button"
+  class="switch"
+  class:compact
+  aria-label="Change background"
+  onclick={cycleBackdrop}
+>
   <svg viewBox="0 0 24 24" aria-hidden="true">
     <path
       d="M2.5 18.5 8.5 8l4 6 2.5-3.5L21.5 18.5"
@@ -39,5 +47,16 @@
     color: var(--ink);
     border-color: var(--nord4);
     outline: none;
+  }
+
+  .compact {
+    width: 2rem;
+    height: 2rem;
+    background: transparent;
+  }
+
+  .compact svg {
+    width: 0.95rem;
+    height: 0.95rem;
   }
 </style>
