@@ -1,23 +1,16 @@
 <script lang="ts">
   import Metadata from '#lib/components/Metadata.svelte';
+  import PersonalAbout from '#lib/components/PersonalAbout.svelte';
+
+  let { data } = $props();
 </script>
 
 <Metadata
   title="Personal - Joshua Fouch"
-  description="A few personal notes from Joshua Fouch. Favorite music is on the way."
+  description={data.intro.trim() || 'A few personal notes from Joshua Fouch.'}
   url="/about/personal"
   image="/assets/hero-bg.webp"
   imageAlt="Joshua Fouch"
 />
 
-<section>
-  <h2>Favorite music</h2>
-</section>
-
-<style>
-  h2 {
-    margin: 0;
-    font-size: 2.4rem;
-    font-weight: 500;
-  }
-</style>
+<PersonalAbout introHtml={data.introHtml} youtubeUrl={data.youtubeUrl} music={data.music} />

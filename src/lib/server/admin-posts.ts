@@ -24,7 +24,7 @@ export async function requireAdmin(supabase: Client) {
 export async function getAdminPosts(supabase: Client) {
   const { data, error: dbError } = await supabase
     .from('posts')
-    .select('id, title, slug, date, published')
+    .select('id, title, slug, date, published, image')
     .order('date', { ascending: false });
 
   if (dbError) {
@@ -53,7 +53,7 @@ export async function getAdminPostBySlug(supabase: Client, slug: string) {
 export async function uploadBlogImage(
   supabase: Client,
   file: File,
-  folder: 'covers' | 'inline'
+  folder: 'covers' | 'inline' | 'portraits'
 ): Promise<{ url: string } | { error: string }> {
   if (!IMAGE_TYPES.has(file.type)) {
     return { error: 'Use a JPEG, PNG, WebP, or GIF.' };
