@@ -99,10 +99,10 @@
   --ink-accent: var(--nord14);
   --ground: #1b1f27;
   --sidebar-width: 15rem;
-}
-
-html {
-  scroll-behavior: smooth;
+  --rail-mini: 3.5rem;
+  --rail-speed: 460ms;
+  --ease-slide: cubic-bezier(0.7, 0, 0.2, 1);
+  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
 body {
@@ -115,7 +115,6 @@ body {
   z-index: 0;
   background: var(--ground);
   pointer-events: none;
-  view-transition-name: site-backdrop;
 }
 
 .site-backdrop .photo,
@@ -147,6 +146,11 @@ body {
   animation: backdrop-in 700ms ease forwards;
 }
 
+.site-backdrop .over.shown.settled {
+  animation: none;
+  opacity: 1;
+}
+
 .site-backdrop .veil {
   z-index: 2;
   background: radial-gradient(
@@ -168,19 +172,20 @@ body {
   }
 }
 
-html[data-vt] .site-nav {
-  view-transition-name: site-nav;
+html[data-vt-phase='new'] .inner-shell .transition {
+  view-transition-name: page;
 }
 
-html[data-vt] .page-stack {
-  view-transition-name: page;
+html[data-vt='enter'][data-vt-phase='new'] .rail,
+html[data-vt='leave']:not([data-vt-phase]) .rail {
+  view-transition-name: site-rail;
 }
 
 .to-top {
   position: fixed;
   z-index: 30;
   right: max(1.25rem, env(safe-area-inset-right));
-  bottom: max(6.75rem, calc(env(safe-area-inset-bottom) + 6rem));
+  bottom: max(1.25rem, env(safe-area-inset-bottom));
   display: grid;
   place-items: center;
   width: 2.75rem;
@@ -218,118 +223,88 @@ html[data-vt] .page-stack {
   }
 }
 
+/* Page changes: the outgoing screen (exactly as it was, scroll and all) fades
+   out on top of the incoming one, then only the new page content rises in.
+   Everything shared, like the sidebar and ridge, never visibly moves. */
+::view-transition-group(*) {
+  animation-duration: 380ms;
+  animation-timing-function: var(--ease-out);
+}
+
 ::view-transition-group(root),
-::view-transition-old(root),
 ::view-transition-new(root) {
   animation: none;
 }
 
+::view-transition-old(root),
+::view-transition-new(root) {
+  mix-blend-mode: normal;
+}
+
+::view-transition-old(root) {
+  z-index: 1;
+  animation: vt-fade-out 200ms cubic-bezier(0.4, 0, 1, 1) both;
+}
+
+html[data-vt='enter']::view-transition-old(root),
+html[data-vt='leave']::view-transition-old(root) {
+  animation-duration: 280ms;
+}
+
 ::view-transition-group(page),
 ::view-transition-group(about-tabs),
+::view-transition-group(site-rail) {
+  animation: none;
+}
+
+::view-transition-new(page) {
+  animation: vt-rise 420ms var(--ease-out) 110ms both;
+}
+
 ::view-transition-old(about-tabs),
-::view-transition-new(about-tabs),
-::view-transition-group(site-backdrop),
-::view-transition-old(site-backdrop),
-::view-transition-new(site-backdrop),
-::view-transition-group(backdrop-switch),
-::view-transition-old(backdrop-switch),
-::view-transition-new(backdrop-switch) {
-  animation: none;
-}
-
-::view-transition-group(page) {
-  z-index: 1;
-}
-
-::view-transition-group(about-tabs) {
-  z-index: 2;
-}
-
-::view-transition-group(site-nav) {
-  z-index: 3;
-}
-
-::view-transition-group(backdrop-switch) {
-  z-index: 5;
-}
-
-::view-transition-image-pair(page) {
-  overflow: clip;
-}
-
-::view-transition-old(page),
-::view-transition-new(page),
-::view-transition-old(site-nav),
-::view-transition-new(site-nav) {
+::view-transition-new(about-tabs) {
   mix-blend-mode: normal;
-  object-fit: none;
-  object-position: top left;
-}
-
-html[data-vt='nav-persist']::view-transition-group(site-nav),
-html[data-vt='nav-persist']::view-transition-old(site-nav),
-html[data-vt='nav-persist']::view-transition-new(site-nav),
-html[data-vt='nav-leave']::view-transition-group(site-nav),
-html[data-vt='nav-enter']::view-transition-group(site-nav) {
   animation: none;
 }
 
-html[data-vt='nav-persist']::view-transition-old(page),
-html[data-vt='nav-enter']::view-transition-old(page) {
-  animation: page-leave 280ms ease both;
+::view-transition-old(about-tabs):only-child {
+  animation: vt-fade-out 200ms ease both;
 }
 
-html[data-vt='nav-persist']::view-transition-new(page),
-html[data-vt='nav-enter']::view-transition-new(page) {
-  animation: page-enter 320ms ease both;
+::view-transition-new(about-tabs):only-child {
+  animation: vt-rise 420ms var(--ease-out) 110ms both;
 }
 
-html[data-vt='nav-leave']::view-transition-old(page) {
-  animation: page-leave 260ms ease both;
+::view-transition-new(site-rail) {
+  animation: vt-rail-in 560ms var(--ease-slide) both;
 }
 
-html[data-vt='nav-leave']::view-transition-new(page) {
-  animation: none;
-  opacity: 0;
+::view-transition-old(site-rail) {
+  animation: vt-rail-out 360ms var(--ease-slide) both;
 }
 
-html[data-vt='nav-leave']::view-transition-old(site-nav) {
-  animation: nav-slide-up 280ms ease forwards;
-}
-
-html[data-vt='nav-enter']::view-transition-new(site-nav) {
-  animation: nav-slide-down 420ms ease both;
-}
-
-html[data-vt='nav-leave'] .landing.is-return .reveal,
-html[data-vt='nav-leave'] .landing .logo.quick {
-  animation: none !important;
-  opacity: 0 !important;
-}
-
-@keyframes page-leave {
+@keyframes vt-fade-out {
   to {
     opacity: 0;
-    translate: 0 -0.75rem;
   }
 }
 
-@keyframes page-enter {
+@keyframes vt-rise {
   from {
     opacity: 0;
-    translate: 0 0.8rem;
+    translate: 0 0.75rem;
   }
 }
 
-@keyframes nav-slide-up {
-  to {
-    translate: 0 -120%;
-  }
-}
-
-@keyframes nav-slide-down {
+@keyframes vt-rail-in {
   from {
-    translate: 0 -120%;
+    translate: -100% 0;
+  }
+}
+
+@keyframes vt-rail-out {
+  to {
+    translate: -100% 0;
   }
 }
 

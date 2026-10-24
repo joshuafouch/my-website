@@ -25,7 +25,6 @@
 
 <style>
   .switch {
-    view-transition-name: backdrop-switch;
     display: grid;
     place-items: center;
     width: 2.75rem;
@@ -35,6 +34,9 @@
     background: color-mix(in oklab, var(--ground) 55%, transparent);
     color: var(--ink-muted);
     cursor: pointer;
+    transition:
+      color 200ms ease,
+      border-color 200ms ease;
   }
 
   .switch svg {
