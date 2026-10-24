@@ -5,11 +5,13 @@
   import { links } from '#lib/config.ts';
   import { sidebar, toggleSidebar } from '#lib/sidebar.svelte.ts';
   import BackgroundSwitch from '#lib/components/BackgroundSwitch.svelte';
+  import JafCrest from '#lib/components/JafCrest.svelte';
 
   let menu = $state(false);
   let narrow = $state(false);
 
   const pathname = $derived(page.url.pathname);
+  const folded = $derived(!narrow && !sidebar.open);
   const linksHidden = $derived(narrow ? !menu : !sidebar.open);
 
   $effect(() => {
@@ -30,21 +32,17 @@
   }
 </script>
 
-<aside
-  class="rail font-serif"
-  class:closed={!sidebar.open}
-  class:expanded={menu}
-  inert={!narrow && !sidebar.open}
->
+<aside class="rail font-serif" class:closed={!sidebar.open} class:expanded={menu}>
   <div class="bar">
-    <a class="mark" href={resolve('/')} aria-label="Home">
+    <a class="mark" href={resolve('/')} aria-label="Home" inert={folded}>
       <img src="/assets/jaf.svg" alt="" />
     </a>
     <button
       type="button"
       class="fold"
-      aria-label="Hide sidebar"
-      inert={!sidebar.open}
+      aria-label={sidebar.open ? 'Hide sidebar' : 'Show sidebar'}
+      aria-expanded={sidebar.open}
+      aria-controls="site-links"
       onclick={toggleSidebar}
     >
       <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -63,15 +61,51 @@
       class="menu-btn"
       aria-expanded={menu}
       aria-controls="site-links"
+      aria-label={menu ? 'Close' : 'Menu'}
       onclick={() => (menu = !menu)}
     >
-      {menu ? 'Close' : 'Menu'}
+      {#if menu}
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            d="M6 6l12 12M18 6 6 18"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+          />
+        </svg>
+      {:else}
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <path
+            d="M4 7h16M4 12h16M4 17h16"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+          />
+        </svg>
+      {/if}
     </button>
   </div>
 
-  <nav id="site-links" aria-label="Pages" inert={linksHidden}>
+  <div class="tools" role="group" aria-label="Appearance" inert={folded}>
+    <BackgroundSwitch compact />
+    <button type="button" class="tool" aria-label="Color mode">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path
+          d="M21 14.5A8.5 8.5 0 1 1 9.5 3a7 7 0 0 0 11.5 11.5z"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linejoin="round"
+        />
+      </svg>
+    </button>
+  </div>
+
+  <nav id="site-links" aria-label="Pages">
     <div class="sheet">
-      <ul class="pages">
+      <ul class="pages" inert={linksHidden}>
         {#each links as link (link.href)}
           <li>
             <a href={resolve(link.href)} aria-current={current(link.href) ? 'page' : undefined}>
@@ -81,22 +115,11 @@
         {/each}
       </ul>
 
-      <div class="dock">
-        <div class="tools" role="group" aria-label="Appearance">
-          <BackgroundSwitch compact />
-          <button type="button" class="tool" aria-label="Color mode">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path
-                d="M21 14.5A8.5 8.5 0 1 1 9.5 3a7 7 0 0 0 11.5 11.5z"
-                fill="none"
-                stroke="currentColor"
-                stroke-width="1.5"
-                stroke-linejoin="round"
-              />
-            </svg>
-          </button>
+      <div class="rail-foot">
+        <div class="crest">
+          <JafCrest />
         </div>
-        <ul class="socials">
+        <ul class="socials" inert={linksHidden}>
           <li>
             <a class="quiet-link" href={resolve('/resume')}>
               <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -141,26 +164,6 @@
   </nav>
 </aside>
 
-<button
-  type="button"
-  class="edge"
-  class:shut={!sidebar.open}
-  aria-label="Show sidebar"
-  inert={sidebar.open}
-  onclick={toggleSidebar}
->
-  <svg viewBox="0 0 24 24" aria-hidden="true">
-    <path
-      d="M9.5 6 15.5 12l-6 6"
-      fill="none"
-      stroke="currentColor"
-      stroke-width="1.5"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-    />
-  </svg>
-</button>
-
 <style>
   .rail {
     position: fixed;
@@ -171,31 +174,46 @@
     display: flex;
     flex-direction: column;
     width: var(--sidebar-width);
+    overflow: hidden;
     background: var(--nord1);
     border-right: 1px solid color-mix(in oklab, var(--nord4) 22%, transparent);
-    transform: translateX(0);
-    transition: transform 280ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    translate: 0 0;
+    transition: translate var(--rail-speed) var(--ease-slide);
+    will-change: translate;
   }
 
   .rail.closed {
-    transform: translateX(-100%);
+    translate: calc(var(--rail-mini) - 100%) 0;
+  }
+
+  .mark,
+  .tools,
+  nav {
+    transition: opacity 260ms ease 160ms;
+  }
+
+  .closed .mark,
+  .closed .tools,
+  .closed nav {
+    opacity: 0;
+    transition-delay: 0ms;
+    transition-duration: 160ms;
   }
 
   .bar {
+    position: relative;
+    z-index: 2;
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
   }
 
   .mark {
-    position: relative;
     display: grid;
     place-items: center;
     width: 3.4rem;
     height: 3.4rem;
     margin: 1.35rem;
-    overflow: hidden;
-    background: var(--nord6);
   }
 
   .mark img {
@@ -203,31 +221,6 @@
     height: 2.5rem;
     max-width: none;
     object-fit: contain;
-    transition: transform 280ms cubic-bezier(0.2, 0.8, 0.2, 1);
-  }
-
-  .mark::after {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: linear-gradient(
-      105deg,
-      transparent 32%,
-      color-mix(in oklab, white 72%, transparent) 50%,
-      transparent 68%
-    );
-    transform: translateX(-130%);
-    pointer-events: none;
-  }
-
-  .mark:hover img,
-  .mark:focus-visible img {
-    transform: scale(1.06);
-  }
-
-  .mark:hover::after,
-  .mark:focus-visible::after {
-    animation: mark-shine 700ms ease;
   }
 
   .mark:focus-visible {
@@ -236,31 +229,51 @@
   }
 
   .fold,
-  .tool {
+  .tool,
+  .menu-btn {
     display: grid;
     place-items: center;
     border: 0;
     background: transparent;
     color: var(--ink-muted);
     cursor: pointer;
+    transition: color 200ms ease;
   }
 
   .fold {
+    position: absolute;
+    top: 1.9rem;
+    right: calc((var(--rail-mini) - 2.25rem) / 2);
     width: 2.25rem;
     height: 2.25rem;
-    margin: 1.9rem 0.7rem 0 0;
+  }
+
+  .fold svg {
+    transition: rotate var(--rail-speed) var(--ease-slide);
+  }
+
+  .closed .fold svg {
+    rotate: 180deg;
   }
 
   .fold svg,
-  .tool svg {
+  .tool svg,
+  .menu-btn svg {
     width: 1rem;
     height: 1rem;
+  }
+
+  .menu-btn svg {
+    width: 1.15rem;
+    height: 1.15rem;
   }
 
   .fold:hover,
   .fold:focus-visible,
   .tool:hover,
-  .tool:focus-visible {
+  .tool:focus-visible,
+  .menu-btn:hover,
+  .menu-btn:focus-visible {
     color: var(--ink);
     outline: none;
   }
@@ -297,6 +310,14 @@
     font-variant: small-caps;
     letter-spacing: 0.14em;
     text-decoration: none;
+    transition:
+      color 220ms ease,
+      translate 320ms var(--ease-out);
+  }
+
+  .pages a:hover,
+  .pages a:focus-visible {
+    translate: 0.3rem 0;
   }
 
   .pages a[aria-current='page'],
@@ -306,16 +327,32 @@
     outline: none;
   }
 
-  .dock {
+  .rail-foot {
+    position: relative;
+    z-index: 1;
     margin-top: auto;
-    padding: 0.85rem 0 1.15rem;
+    padding: 3.15rem 0 1.2rem;
     border-top: 1px solid color-mix(in oklab, var(--nord4) 18%, transparent);
   }
 
+  .crest {
+    position: absolute;
+    z-index: 0;
+    left: 50%;
+    bottom: 0;
+    width: 14rem;
+    pointer-events: none;
+    opacity: 0.3;
+    transform: translate(-50%, 50%);
+  }
+
   .tools {
+    position: absolute;
+    z-index: 3;
+    bottom: 8.15rem;
+    left: 1rem;
     display: flex;
     gap: 0.35rem;
-    padding: 0 1rem 0.35rem;
   }
 
   .tool {
@@ -325,61 +362,30 @@
     border-radius: 9999px;
   }
 
+  .socials {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
   .socials a {
-    display: inline-flex;
+    display: flex;
     align-items: center;
-    gap: 0.4rem;
-    min-height: 1.85rem;
-    padding: 0.1rem 1.15rem;
-    font-size: 0.95rem;
+    gap: 0.7rem;
+    min-height: 2.25rem;
+    padding: 0.1rem 1.35rem;
+    font-size: 1.05rem;
     font-variant: small-caps;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.14em;
     text-decoration: none;
   }
 
   .socials svg {
-    width: 0.75rem;
-    height: 0.75rem;
-    fill: currentColor;
-  }
-
-  .edge {
-    position: fixed;
-    z-index: 45;
-    top: 0;
-    left: 0;
-    display: none;
-    place-items: center;
-    width: 2.75rem;
-    height: 2.75rem;
-    padding: 0;
-    border: 0;
-    border-right: 1px solid color-mix(in oklab, var(--nord4) 28%, transparent);
-    border-bottom: 1px solid color-mix(in oklab, var(--nord4) 28%, transparent);
-    background: var(--nord1);
-    color: var(--ink-muted);
-    cursor: pointer;
-  }
-
-  .edge.shut {
-    display: grid;
-  }
-
-  .edge svg {
     width: 1rem;
     height: 1rem;
-  }
-
-  .edge:hover,
-  .edge:focus-visible {
-    color: var(--ink);
-    outline: none;
-  }
-
-  @keyframes mark-shine {
-    to {
-      transform: translateX(130%);
-    }
+    flex: none;
+    fill: currentColor;
   }
 
   @media (max-width: 767px) {
@@ -387,20 +393,32 @@
     .rail.closed {
       right: 0;
       bottom: auto;
+      display: grid;
+      grid-template-columns: auto 1fr auto auto;
+      grid-template-rows: 3.5rem auto;
+      align-items: center;
       width: 100%;
       height: auto;
+      overflow: visible;
       border-right: 0;
       border-bottom: 1px solid color-mix(in oklab, var(--nord4) 22%, transparent);
-      transform: none;
+      translate: none;
+      will-change: auto;
+    }
+
+    .closed .mark,
+    .closed .tools,
+    .closed nav {
+      opacity: 1;
     }
 
     .bar {
-      align-items: center;
-      height: 3.5rem;
-      padding-right: 0.35rem;
+      display: contents;
     }
 
     .mark {
+      grid-column: 1;
+      grid-row: 1;
       width: 2.5rem;
       height: 2.5rem;
       margin: 0 0.85rem;
@@ -416,27 +434,28 @@
     }
 
     .menu-btn {
-      display: inline-flex;
-      align-items: center;
-      min-height: 2.75rem;
-      padding: 0 0.85rem;
-      border: 0;
-      background: none;
-      color: var(--ink-muted);
-      font: inherit;
-      font-variant: small-caps;
-      letter-spacing: 0.12em;
-      cursor: pointer;
+      display: grid;
+      grid-column: 4;
+      grid-row: 1;
+      width: 2.75rem;
+      height: 2.75rem;
+      padding: 0;
     }
 
-    .menu-btn:hover,
-    .menu-btn:focus-visible {
-      color: var(--ink-accent);
-      outline: none;
+    .tools {
+      position: static;
+      grid-column: 3;
+      grid-row: 1;
+      align-items: center;
+      height: auto;
+      margin: 0;
+      padding-right: 0.15rem;
     }
 
     nav {
       display: grid;
+      grid-column: 1 / -1;
+      grid-row: 2;
       flex: none;
       grid-template-rows: 0fr;
       transition: grid-template-rows 280ms cubic-bezier(0.2, 0.8, 0.2, 1);
@@ -449,6 +468,7 @@
 
     .sheet {
       display: block;
+      min-height: 0;
       overflow: hidden;
     }
 
@@ -456,25 +476,29 @@
       padding-bottom: 0.85rem;
     }
 
-    .dock {
+    .rail-foot {
       margin-top: 0.35rem;
+      padding: 0.35rem 0 0;
     }
 
-    .edge,
-    .edge.shut {
+    .crest {
       display: none;
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
     .rail,
+    .mark,
+    .tools,
     nav,
-    .mark img {
+    .fold svg,
+    .pages a {
       transition: none;
     }
 
-    .mark::after {
-      animation: none;
+    .pages a:hover,
+    .pages a:focus-visible {
+      translate: none;
     }
   }
 </style>
