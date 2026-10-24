@@ -144,6 +144,8 @@
 
 <style>
   .projects {
+    max-width: 46rem;
+    margin-inline: auto;
     padding: 2.25rem 1.5rem 2.5rem;
     color: var(--ink);
   }
