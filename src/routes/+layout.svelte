@@ -7,6 +7,7 @@
   import SiteBackdrop from '#lib/components/SiteBackdrop.svelte';
   import SiteSidebar from '#lib/components/SiteSidebar.svelte';
   import SignatureLogo from '#lib/components/SignatureLogo.svelte';
+  import JafCrest from '#lib/components/JafCrest.svelte';
   import { backdrop, photos, restoreBackdrop } from '#lib/backdrop.svelte.ts';
   import { restoreSidebar, sidebar } from '#lib/sidebar.svelte.ts';
 
@@ -15,7 +16,9 @@
   const isLanding = $derived(data.url === '/');
   let scrollY = $state(0);
   let signatureRun = $state(0);
+  let ridgePx = $state(176);
   const showTop = $derived(scrollY > 280);
+  const sigReveal = $derived(Math.min(1, Math.max(0, scrollY / (ridgePx || 1))));
 
   function scrollUp() {
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -24,7 +27,17 @@
 
   onMount(() => {
     restoreSidebar();
-    return restoreBackdrop();
+    const measure = () => {
+      const ridge = document.querySelector('.ridge');
+      if (ridge) ridgePx = ridge.getBoundingClientRect().height;
+    };
+    measure();
+    window.addEventListener('resize', measure);
+    const stopBackdrop = restoreBackdrop();
+    return () => {
+      window.removeEventListener('resize', measure);
+      stopBackdrop?.();
+    };
   });
 
   onNavigate((navigation) => {
@@ -34,17 +47,24 @@
     if (!from || !to || from === to) return;
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-    const kind = from === '/' ? 'nav-enter' : to === '/' ? 'nav-leave' : 'nav-persist';
     const root = document.documentElement;
-    root.dataset.vt = kind;
+    const token = String(Date.now());
+    root.dataset.vt = from === '/' ? 'enter' : to === '/' ? 'leave' : 'swap';
+    root.dataset.vtId = token;
+    delete root.dataset.vtPhase;
 
     return new Promise((resolve) => {
       const transition = document.startViewTransition(async () => {
         resolve();
         await navigation.complete;
+        // Only the incoming page gets its own layer; the outgoing one fades as part of the root.
+        root.dataset.vtPhase = 'new';
       });
       const clear = () => {
-        if (root.dataset.vt === kind) delete root.dataset.vt;
+        if (root.dataset.vtId !== token) return;
+        delete root.dataset.vt;
+        delete root.dataset.vtId;
+        delete root.dataset.vtPhase;
       };
       transition.finished.then(clear, clear);
     });
@@ -62,21 +82,35 @@
 {:else}
   <div class="inner-shell" class:sidebar-open={sidebar.open}>
     <SiteSidebar />
+    <div class="seam" aria-hidden="true"></div>
     <button
       type="button"
       class="watermark"
       aria-label="Replay signature"
+      style:--sig-reveal={sigReveal}
       onclick={() => signatureRun++}
     >
       <div class="turn">
         {#key signatureRun}
-          <SignatureLogo play instant={signatureRun === 0} />
+          <SignatureLogo play instant={signatureRun === 0} compact />
         {/key}
       </div>
     </button>
+    <div class="floor-crest">
+      <JafCrest />
+    </div>
     <div class="page-stack">
       <main>
-        <div class="ridge" style:background-image="url('{photos[backdrop.index]}')"></div>
+        <div class="ridge" aria-hidden="true">
+          <div class="photo" style:background-image="url('{photos[backdrop.previous]}')"></div>
+          {#key backdrop.index}
+            <div
+              class="photo"
+              class:fade={backdrop.previous !== backdrop.index}
+              style:background-image="url('{photos[backdrop.index]}')"
+            ></div>
+          {/key}
+        </div>
         <Transition url={data.url}>
           {@render children()}
         </Transition>
@@ -119,7 +153,13 @@
 
 <style>
   .inner-shell {
+    --ridge-height: 11rem;
+    --sig-length: 100svh;
+    --sig-thickness: calc(var(--sig-length) * 850.3 / 2857.14);
+    --bar-height: 0px;
+    position: relative;
     min-height: 100svh;
+    overflow-x: clip;
     background: var(--nord0);
   }
 
@@ -128,56 +168,100 @@
     z-index: 1;
   }
 
+  /* Same width open or closed, so the sidebar only ever slides it (no reflow). */
   .inner-shell .page-stack {
-    margin-left: 0;
-    transition: margin-left 280ms cubic-bezier(0.2, 0.8, 0.2, 1);
+    width: calc(100% - var(--sidebar-width));
+    translate: var(--rail-mini) 0;
+    transition: translate var(--rail-speed) var(--ease-slide);
   }
 
   .sidebar-open .page-stack {
-    margin-left: var(--sidebar-width);
+    translate: var(--sidebar-width) 0;
   }
 
   .ridge {
-    height: 11rem;
+    position: relative;
+    height: var(--ridge-height);
+    margin-right: calc(var(--sidebar-width) * -1);
+    overflow: hidden;
     background-color: var(--nord1);
+  }
+
+  .ridge .photo {
+    position: absolute;
+    inset: 0;
     background-position: center 42%;
     background-size: cover;
   }
 
+  .ridge .photo.fade {
+    opacity: 0;
+    animation: ridge-in 700ms ease forwards;
+  }
+
   .ridge::after {
     content: '';
-    display: block;
-    height: 100%;
+    position: absolute;
+    z-index: 1;
+    inset: 0;
     background: linear-gradient(transparent 35%, var(--nord0));
+  }
+
+  @keyframes ridge-in {
+    to {
+      opacity: 1;
+    }
+  }
+
+  .floor-crest,
+  .seam {
+    display: none;
   }
 
   .watermark {
     position: fixed;
-    z-index: 2;
+    z-index: 0;
     top: 0;
     right: 0;
     bottom: 0;
     display: block;
-    width: 7.5rem;
+    width: var(--sig-thickness);
     padding: 0;
-    overflow: hidden;
+    overflow: visible;
     border: 0;
     background: none;
     color: inherit;
     font: inherit;
     cursor: pointer;
+    pointer-events: none;
+    opacity: var(--sig-reveal, 0);
+    transition:
+      opacity 240ms ease,
+      visibility 0s;
   }
 
+  /* The signature is thousands of paths. Its drift animates filter and opacity
+     only, which the compositor can run without repainting the SVG. */
   .turn {
-    --sig-length: 22rem;
     position: absolute;
-    top: calc(var(--sig-length) / 2 + 0.35rem);
+    top: 50%;
     left: 50%;
     width: var(--sig-length);
-    color: var(--nord4);
+    color: var(--nord8);
     opacity: 0.16;
-    transform: translate(-50%, -50%) rotate(90deg);
+    transform: translate(-50%, -50%) rotate(-90deg);
     animation: signature-drift 24s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  @media (min-width: 768px) {
+    .sidebar-open .watermark {
+      visibility: hidden;
+      opacity: 0;
+      transition:
+        opacity 200ms ease,
+        visibility 0s linear 200ms;
+    }
   }
 
   .turn :global(svg) {
@@ -194,65 +278,129 @@
     opacity: 0.34;
   }
 
+  /* From nord8: desaturated reads as nord4, 118deg as nord15, 259deg as nord14. */
   @keyframes signature-drift {
-    0%,
-    100% {
-      color: var(--nord4);
+    0% {
+      filter: hue-rotate(0deg) saturate(0.25) brightness(1.15);
       opacity: 0.14;
     }
 
     28% {
-      color: var(--nord8);
+      filter: hue-rotate(0deg) saturate(1) brightness(1);
       opacity: 0.22;
     }
 
     52% {
-      color: var(--nord15);
+      filter: hue-rotate(118deg) saturate(1) brightness(1);
       opacity: 0.16;
     }
 
     76% {
-      color: var(--nord14);
+      filter: hue-rotate(259deg) saturate(1) brightness(1);
       opacity: 0.2;
     }
-  }
 
-  @media (min-width: 768px) {
-    .inner-shell .page-stack {
-      padding-right: 7.5rem;
-    }
-
-    .ridge {
-      margin-right: -7.5rem;
+    100% {
+      filter: hue-rotate(360deg) saturate(0.25) brightness(1.15);
+      opacity: 0.14;
     }
   }
 
   @media (max-width: 767px) {
+    .inner-shell {
+      --ridge-height: 7rem;
+      --bar-height: 3.5rem;
+    }
+
     .inner-shell .page-stack,
     .sidebar-open .page-stack {
-      margin-left: 0;
-      padding-top: 3.5rem;
+      width: auto;
+      translate: none;
+      padding-top: var(--bar-height);
     }
 
     .ridge {
-      height: 7rem;
       margin-right: 0;
     }
 
     .watermark {
-      display: none;
+      position: absolute;
+      top: calc(var(--bar-height) + var(--ridge-height));
+      right: auto;
+      bottom: auto;
+      left: 50%;
+      z-index: 2;
+      width: 5.5rem;
+      height: auto;
+      transform: translate(-50%, -50%);
+      pointer-events: auto;
+      opacity: 1;
+    }
+
+    .seam {
+      position: absolute;
+      z-index: 2;
+      top: calc(var(--bar-height) + var(--ridge-height));
+      right: 0;
+      left: 0;
+      display: block;
+      height: 1px;
+      pointer-events: none;
+      background:
+        linear-gradient(currentColor, currentColor) left center / calc(50% - 3.6rem) 1px no-repeat,
+        linear-gradient(currentColor, currentColor) right center / calc(50% - 3.6rem) 1px no-repeat;
+      color: color-mix(in oklab, var(--nord4) 70%, transparent);
+    }
+
+    .turn {
+      position: relative;
+      top: auto;
+      left: auto;
+      width: 100%;
+      color: var(--nord4);
+      opacity: 0.82;
+      transform: none;
+      animation: none;
+    }
+
+    .watermark:focus-visible .turn {
+      opacity: 1;
+    }
+
+    .floor-crest {
+      position: fixed;
+      z-index: 0;
+      bottom: 0;
+      left: 50%;
+      display: block;
+      width: 18rem;
+      opacity: 0.22;
+      pointer-events: none;
+      transform: translate(-50%, 50%);
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .inner-shell .page-stack {
+    .inner-shell .page-stack,
+    .watermark {
       transition: none;
+    }
+
+    .ridge .photo.fade {
+      opacity: 1;
+      animation: none;
     }
 
     .turn {
       animation: none;
       color: var(--nord4);
       opacity: 0.16;
+    }
+  }
+
+  @media (max-width: 767px) and (prefers-reduced-motion: reduce) {
+    .turn {
+      opacity: 0.82;
     }
   }
 </style>
