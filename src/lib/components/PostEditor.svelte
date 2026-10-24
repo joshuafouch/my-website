@@ -1,6 +1,9 @@
 <script lang="ts">
   import { enhance } from '$app/forms';
+  import { marked } from 'marked';
   import { untrack } from 'svelte';
+  import PostPreview from '#lib/components/PostPreview.svelte';
+  import { openLinks } from '#lib/links.ts';
   import { slugify } from '#lib/slug.ts';
 
   type Fields = {
@@ -32,18 +35,35 @@
   let title = $state(untrack(() => form?.title ?? post?.title ?? ''));
   let slug = $state(untrack(() => form?.slug ?? post?.slug ?? ''));
   let slugTouched = $state(untrack(() => Boolean(post?.slug || form?.slug)));
+  let description = $state(untrack(() => form?.description ?? post?.description ?? ''));
+  let date = $state(untrack(() => (form?.date ?? post?.date ?? today).slice(0, 10)));
+  let categories = $state(untrack(() => form?.categories ?? post?.categories?.join(', ') ?? ''));
+  let image = $state(untrack(() => form?.image ?? post?.image ?? ''));
   let body = $state(untrack(() => form?.body ?? post?.body ?? ''));
+  let published = $state(untrack(() => form?.published ?? post?.published ?? false));
+  let coverPreview = $state('');
   let inlineError = $state('');
   let inlineStatus = $state('');
+  let dialog = $state<HTMLDialogElement>();
+  let previewHtml = $state('');
 
-  const imageValue = $derived(form?.image ?? post?.image ?? '');
-  const categoriesValue = $derived(form?.categories ?? post?.categories?.join(', ') ?? '');
-  const dateValue = $derived((form?.date ?? post?.date ?? today).slice(0, 10));
-  const publishedValue = $derived(form?.published ?? post?.published ?? false);
+  const shownImage = $derived(coverPreview || image);
+  const previewTags = $derived(
+    categories
+      .split(',')
+      .map((category) => category.trim())
+      .filter(Boolean)
+  );
 
   function onTitleInput(event: Event) {
     title = (event.currentTarget as HTMLInputElement).value;
     if (!slugTouched) slug = slugify(title);
+  }
+
+  function onCover(event: Event) {
+    const file = (event.currentTarget as HTMLInputElement).files?.[0];
+    if (coverPreview) URL.revokeObjectURL(coverPreview);
+    coverPreview = file ? URL.createObjectURL(file) : '';
   }
 
   function insertMarkdown(markdown: string) {
@@ -52,33 +72,32 @@
     const end = area?.selectionEnd ?? body.length;
     body = `${body.slice(0, start)}${markdown}${body.slice(end)}`;
   }
+
+  async function openPreview() {
+    const rendered = body.trim() ? await marked.parse(body) : '';
+    previewHtml = openLinks(String(rendered));
+    if (dialog && !dialog.open) dialog.showModal();
+  }
+
+  function closePreview() {
+    dialog?.close();
+  }
 </script>
 
-<form
-  method="POST"
-  action="?/save"
-  enctype="multipart/form-data"
-  class="card bg-base-300 space-y-4 p-6 shadow-xl"
->
+<form method="POST" action="?/save" enctype="multipart/form-data">
   {#if form?.error}
-    <p class="text-error font-main">{form.error}</p>
+    <p class="error">{form.error}</p>
   {/if}
+  <p class="note">Preview checks the article. It stays private until you publish and save.</p>
 
-  <label class="font-main block space-y-1">
+  <label class="field">
     <span>Title</span>
-    <input
-      class="input input-bordered w-full"
-      name="title"
-      required
-      value={title}
-      oninput={onTitleInput}
-    />
+    <input name="title" required value={title} oninput={onTitleInput} />
   </label>
 
-  <label class="font-main block space-y-1">
+  <label class="field">
     <span>Slug</span>
     <input
-      class="input input-bordered w-full"
       name="slug"
       required
       value={slug}
@@ -89,81 +108,55 @@
     />
   </label>
 
-  <label class="font-main block space-y-1">
+  <label class="field">
     <span>Description</span>
-    <textarea
-      class="textarea textarea-bordered w-full"
-      name="description"
-      rows="3"
-      required
-      value={form?.description ?? post?.description ?? ''}
-    ></textarea>
+    <textarea name="description" rows="3" required bind:value={description}></textarea>
   </label>
 
-  <label class="font-main block space-y-1">
+  <label class="field">
     <span>Date</span>
-    <input class="input input-bordered w-full" type="date" name="date" required value={dateValue} />
+    <input type="date" name="date" required bind:value={date} />
   </label>
 
-  <label class="font-main block space-y-1">
+  <label class="field">
     <span>Categories</span>
-    <input
-      class="input input-bordered w-full"
-      name="categories"
-      placeholder="theology, philosophy"
-      value={categoriesValue}
-    />
+    <input name="categories" placeholder="theology, philosophy" bind:value={categories} />
   </label>
 
-  <label class="font-main block space-y-1">
+  <label class="field">
     <span>Cover image URL</span>
-    <input
-      class="input input-bordered w-full"
-      name="image"
-      value={imageValue}
-      placeholder="https://.../blog-images/covers/..."
-    />
-    {#if imageValue}
-      <img class="mt-2 h-32 w-full rounded-lg object-cover" src={imageValue} alt="" />
-    {/if}
+    <input name="image" bind:value={image} placeholder="https://.../blog-images/covers/..." />
   </label>
+  {#if shownImage}
+    <img class="thumb" src={shownImage} alt="" />
+  {/if}
 
-  <label class="font-main block space-y-1">
+  <label class="field">
     <span>Replace cover</span>
-    <input
-      class="file-input file-input-bordered w-full"
-      type="file"
-      name="cover"
-      accept="image/*"
-    />
+    <input type="file" name="cover" accept="image/*" onchange={onCover} />
   </label>
 
-  <label class="font-main block space-y-1">
+  <label class="field body-field">
     <span>Body</span>
-    <textarea
-      id="post-body"
-      class="textarea textarea-bordered min-h-80 w-full font-mono"
-      name="body"
-      required
-      bind:value={body}
-    ></textarea>
+    <textarea id="post-body" name="body" required bind:value={body}></textarea>
   </label>
 
-  <label class="font-main flex items-center gap-2">
-    <input class="checkbox" type="checkbox" name="published" checked={publishedValue} />
+  <label class="check">
+    <input type="checkbox" name="published" bind:checked={published} />
     Published
   </label>
 
-  <button class="btn btn-primary font-main" type="submit"
-    >{post ? 'Update post' : 'Create post'}</button
-  >
+  <div class="bar">
+    <button class="solid" type="submit">{post ? 'Save post' : 'Save post'}</button>
+    <button class="solid" type="button" onclick={openPreview}>Preview</button>
+  </div>
 </form>
 
 <form
   method="POST"
   action="?/inline"
   enctype="multipart/form-data"
-  class="card bg-base-300 mt-6 space-y-3 p-6 shadow-xl"
+  class="editor"
   use:enhance={() => {
     inlineError = '';
     inlineStatus = 'Uploading...';
@@ -180,24 +173,52 @@
     };
   }}
 >
-  <h2 class="font-title text-xl">Insert an image</h2>
-  <p class="font-main text-sm opacity-70">
-    Uploads to Storage and places a Markdown image at the cursor in the body. Save the post
-    afterward.
-  </p>
+  <h2>Insert an image</h2>
+  <p class="note">Uploads the image and places it in the body. Save the post afterward.</p>
   {#if inlineError}
-    <p class="text-error font-main">{inlineError}</p>
+    <p class="error">{inlineError}</p>
   {/if}
   {#if inlineStatus}
-    <p class="font-main text-sm opacity-80">{inlineStatus}</p>
+    <p class="note">{inlineStatus}</p>
   {/if}
-  <input
-    class="file-input file-input-bordered w-full"
-    type="file"
-    name="inline"
-    accept="image/*"
-    required
-  />
-  <input class="input input-bordered w-full" name="alt" placeholder="Alt text" />
-  <button class="btn btn-secondary font-main" type="submit">Upload and insert</button>
+  <label class="field">
+    <span>Image</span>
+    <input type="file" name="inline" accept="image/*" required />
+  </label>
+  <label class="field">
+    <span>Alt text</span>
+    <input name="alt" placeholder="Describe the image" />
+  </label>
+  <div class="bar">
+    <button class="solid" type="submit">Upload and insert</button>
+  </div>
 </form>
+
+<dialog
+  class="preview-dialog"
+  bind:this={dialog}
+  onclick={(event) => event.target === dialog && closePreview()}
+>
+  <div class="preview-bar">
+    <button class="preview-close" type="button" onclick={closePreview}>Close</button>
+  </div>
+  <PostPreview
+    compact
+    {title}
+    {description}
+    {date}
+    categories={previewTags}
+    image={shownImage}
+    html={previewHtml}
+  />
+</dialog>
+
+<style>
+  .thumb {
+    display: block;
+    width: 100%;
+    max-height: 14rem;
+    margin-top: 0.8rem;
+    object-fit: cover;
+  }
+</style>

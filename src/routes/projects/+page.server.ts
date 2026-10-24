@@ -1,7 +1,7 @@
-import type { Project } from '#lib/types.ts';
+import { getPublishedProjects } from '#lib/projects.ts';
+import type { PageServerLoad } from './$types';
 
-export async function load({ fetch }) {
-  const response = await fetch('/api/projects');
-  const projects: Project[] = await response.json();
+export const load: PageServerLoad = async ({ locals }) => {
+  const projects = await getPublishedProjects(locals.supabase);
   return { projects };
-}
+};

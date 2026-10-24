@@ -1,8 +1,16 @@
 <script lang="ts">
   import { cycleBackdrop } from '#lib/backdrop.svelte.ts';
+
+  let { compact = false }: { compact?: boolean } = $props();
 </script>
 
-<button type="button" class="switch" aria-label="Change background" onclick={cycleBackdrop}>
+<button
+  type="button"
+  class="switch"
+  class:compact
+  aria-label="Change background"
+  onclick={cycleBackdrop}
+>
   <svg viewBox="0 0 24 24" aria-hidden="true">
     <path
       d="M2.5 18.5 8.5 8l4 6 2.5-3.5L21.5 18.5"
@@ -17,7 +25,6 @@
 
 <style>
   .switch {
-    view-transition-name: backdrop-switch;
     display: grid;
     place-items: center;
     width: 2.75rem;
@@ -27,6 +34,9 @@
     background: color-mix(in oklab, var(--ground) 55%, transparent);
     color: var(--ink-muted);
     cursor: pointer;
+    transition:
+      color 200ms ease,
+      border-color 200ms ease;
   }
 
   .switch svg {
@@ -39,5 +49,16 @@
     color: var(--ink);
     border-color: var(--nord4);
     outline: none;
+  }
+
+  .compact {
+    width: 2rem;
+    height: 2rem;
+    background: transparent;
+  }
+
+  .compact svg {
+    width: 0.95rem;
+    height: 0.95rem;
   }
 </style>

@@ -89,17 +89,20 @@
   --nord4: #d8dee9;
   --nord6: #eceff4;
   --nord8: #88c0d0;
+  --nord9: #81a1c1;
   --nord13: #ebcb8b;
   --nord14: #a3be8c;
+  --nord15: #b48ead;
 
   --ink: var(--nord6);
   --ink-muted: color-mix(in oklab, var(--nord4) 70%, transparent);
   --ink-accent: var(--nord14);
   --ground: #1b1f27;
-}
-
-html {
-  scroll-behavior: smooth;
+  --sidebar-width: 15rem;
+  --rail-mini: 3.5rem;
+  --rail-speed: 460ms;
+  --ease-slide: cubic-bezier(0.7, 0, 0.2, 1);
+  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
 body {
@@ -112,7 +115,6 @@ body {
   z-index: 0;
   background: var(--ground);
   pointer-events: none;
-  view-transition-name: site-backdrop;
 }
 
 .site-backdrop .photo,
@@ -144,6 +146,11 @@ body {
   animation: backdrop-in 700ms ease forwards;
 }
 
+.site-backdrop .over.shown.settled {
+  animation: none;
+  opacity: 1;
+}
+
 .site-backdrop .veil {
   z-index: 2;
   background: radial-gradient(
@@ -165,126 +172,139 @@ body {
   }
 }
 
-html[data-vt] .site-nav {
-  view-transition-name: site-nav;
-}
-
-html[data-vt] .page-stack {
+html[data-vt-phase='new'] .inner-shell .transition {
   view-transition-name: page;
 }
 
+html[data-vt='enter'][data-vt-phase='new'] .rail,
+html[data-vt='leave']:not([data-vt-phase]) .rail {
+  view-transition-name: site-rail;
+}
+
+.to-top {
+  position: fixed;
+  z-index: 30;
+  right: max(1.25rem, env(safe-area-inset-right));
+  bottom: max(1.25rem, env(safe-area-inset-bottom));
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  border: 1px solid color-mix(in oklab, var(--nord4) 35%, transparent);
+  border-radius: 9999px;
+  background: color-mix(in oklab, var(--ground) 55%, transparent);
+  color: var(--ink-muted);
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 200ms ease;
+}
+
+.to-top svg {
+  width: 1.05rem;
+  height: 1.05rem;
+}
+
+.to-top.shown {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.to-top:hover,
+.to-top:focus-visible {
+  color: var(--ink);
+  border-color: var(--nord4);
+  outline: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .to-top {
+    transition: none;
+  }
+}
+
+/* Page changes: the outgoing screen (exactly as it was, scroll and all) fades
+   out on top of the incoming one, then only the new page content rises in.
+   Everything shared, like the sidebar and ridge, never visibly moves. */
+::view-transition-group(*) {
+  animation-duration: 380ms;
+  animation-timing-function: var(--ease-out);
+}
+
 ::view-transition-group(root),
-::view-transition-old(root),
 ::view-transition-new(root) {
   animation: none;
 }
 
+::view-transition-old(root),
+::view-transition-new(root) {
+  mix-blend-mode: normal;
+}
+
+::view-transition-old(root) {
+  z-index: 1;
+  animation: vt-fade-out 200ms cubic-bezier(0.4, 0, 1, 1) both;
+}
+
+html[data-vt='enter']::view-transition-old(root),
+html[data-vt='leave']::view-transition-old(root) {
+  animation-duration: 280ms;
+}
+
 ::view-transition-group(page),
 ::view-transition-group(about-tabs),
+::view-transition-group(site-rail) {
+  animation: none;
+}
+
+::view-transition-new(page) {
+  animation: vt-rise 420ms var(--ease-out) 110ms both;
+}
+
 ::view-transition-old(about-tabs),
-::view-transition-new(about-tabs),
-::view-transition-group(site-backdrop),
-::view-transition-old(site-backdrop),
-::view-transition-new(site-backdrop),
-::view-transition-group(backdrop-switch),
-::view-transition-old(backdrop-switch),
-::view-transition-new(backdrop-switch) {
-  animation: none;
-}
-
-::view-transition-group(page) {
-  z-index: 1;
-}
-
-::view-transition-group(about-tabs) {
-  z-index: 2;
-}
-
-::view-transition-group(site-nav) {
-  z-index: 3;
-}
-
-::view-transition-group(backdrop-switch) {
-  z-index: 5;
-}
-
-::view-transition-image-pair(page) {
-  overflow: clip;
-}
-
-::view-transition-old(page),
-::view-transition-new(page),
-::view-transition-old(site-nav),
-::view-transition-new(site-nav) {
+::view-transition-new(about-tabs) {
   mix-blend-mode: normal;
-  object-fit: none;
-  object-position: top left;
-}
-
-html[data-vt='nav-persist']::view-transition-group(site-nav),
-html[data-vt='nav-persist']::view-transition-old(site-nav),
-html[data-vt='nav-persist']::view-transition-new(site-nav),
-html[data-vt='nav-leave']::view-transition-group(site-nav),
-html[data-vt='nav-enter']::view-transition-group(site-nav) {
   animation: none;
 }
 
-html[data-vt='nav-persist']::view-transition-old(page),
-html[data-vt='nav-enter']::view-transition-old(page) {
-  animation: page-leave 280ms ease both;
+::view-transition-old(about-tabs):only-child {
+  animation: vt-fade-out 200ms ease both;
 }
 
-html[data-vt='nav-persist']::view-transition-new(page),
-html[data-vt='nav-enter']::view-transition-new(page) {
-  animation: page-enter 320ms ease both;
+::view-transition-new(about-tabs):only-child {
+  animation: vt-rise 420ms var(--ease-out) 110ms both;
 }
 
-html[data-vt='nav-leave']::view-transition-old(page) {
-  animation: page-leave 260ms ease both;
+::view-transition-new(site-rail) {
+  animation: vt-rail-in 560ms var(--ease-slide) both;
 }
 
-html[data-vt='nav-leave']::view-transition-new(page) {
-  animation: none;
-  opacity: 0;
+::view-transition-old(site-rail) {
+  animation: vt-rail-out 360ms var(--ease-slide) both;
 }
 
-html[data-vt='nav-leave']::view-transition-old(site-nav) {
-  animation: nav-slide-up 280ms ease forwards;
-}
-
-html[data-vt='nav-enter']::view-transition-new(site-nav) {
-  animation: nav-slide-down 420ms ease both;
-}
-
-html[data-vt='nav-leave'] .landing.is-return .reveal,
-html[data-vt='nav-leave'] .landing .logo.quick {
-  animation: none !important;
-  opacity: 0 !important;
-}
-
-@keyframes page-leave {
+@keyframes vt-fade-out {
   to {
     opacity: 0;
-    translate: 0 -0.75rem;
   }
 }
 
-@keyframes page-enter {
+@keyframes vt-rise {
   from {
     opacity: 0;
-    translate: 0 0.8rem;
+    translate: 0 0.75rem;
   }
 }
 
-@keyframes nav-slide-up {
-  to {
-    translate: 0 -120%;
-  }
-}
-
-@keyframes nav-slide-down {
+@keyframes vt-rail-in {
   from {
-    translate: 0 -120%;
+    translate: -100% 0;
+  }
+}
+
+@keyframes vt-rail-out {
+  to {
+    translate: -100% 0;
   }
 }
 
@@ -302,6 +322,335 @@ html[data-vt='nav-leave'] .landing .logo.quick {
   color: var(--ink-accent);
   background-size: 100% 1px;
   outline: none;
+}
+
+.studio {
+  max-width: 48rem;
+  margin-inline: auto;
+  padding: 2.25rem 1.5rem 3rem;
+  color: var(--ink);
+}
+
+.studio > h1,
+.studio .head h1 {
+  margin: 0;
+  font-size: clamp(2.4rem, 5vw, 3rem);
+  font-weight: 500;
+}
+
+.studio nav ul {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem 1.4rem;
+  margin: 0 0 2.5rem;
+  padding: 0;
+  list-style: none;
+  font-variant: small-caps;
+  letter-spacing: 0.14em;
+  font-size: 1.3rem;
+}
+
+.studio nav a[aria-current='page'] {
+  color: var(--ink);
+}
+
+.studio nav .side {
+  margin-left: auto;
+}
+
+.studio .head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem 1.5rem;
+}
+
+.studio .note,
+.studio .meta {
+  color: var(--ink-muted);
+}
+
+.studio .note {
+  margin: 0.45rem 0 0;
+  font-size: 1.15rem;
+}
+
+.studio .error {
+  margin: 0 0 0.8rem;
+  color: #bf616a;
+  font-size: 1.15rem;
+}
+
+.studio .ok {
+  margin: 0 0 0.8rem;
+  color: var(--ink-accent);
+  font-size: 1.15rem;
+}
+
+.studio .field {
+  display: grid;
+  gap: 0.3rem;
+  margin-top: 1.15rem;
+  color: var(--ink-muted);
+  font-size: 1.02rem;
+}
+
+.studio .field input,
+.studio .field textarea,
+.studio .field select {
+  width: 100%;
+  border: 0;
+  border-bottom: 1px solid color-mix(in oklab, var(--nord4) 40%, transparent);
+  background: transparent;
+  color: var(--ink);
+  color-scheme: dark;
+  font: inherit;
+  font-size: 1.2rem;
+  padding: 0.35rem 0;
+}
+
+.studio .field textarea {
+  min-height: 7rem;
+  resize: vertical;
+}
+
+.studio .body-field textarea {
+  min-height: 18rem;
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.studio .field input:focus-visible,
+.studio .field textarea:focus-visible,
+.studio .field select:focus-visible {
+  outline: none;
+  border-bottom-color: var(--ink-accent);
+}
+
+.studio .field input[type='file'] {
+  border-bottom: 0;
+  font-size: 1rem;
+}
+
+.studio .check {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  margin-top: 1.3rem;
+  font-size: 1.15rem;
+}
+
+.studio .check input {
+  accent-color: var(--nord14);
+}
+
+.studio .bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem 1.25rem;
+  align-items: center;
+  margin-top: 1.6rem;
+}
+
+.studio a.solid,
+.studio button.solid {
+  display: inline-block;
+  border: 1px solid color-mix(in oklab, var(--nord4) 35%, transparent);
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-variant: small-caps;
+  letter-spacing: 0.12em;
+  padding: 0.4rem 0.85rem;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.studio a.solid:hover,
+.studio button.solid:hover,
+.studio a.solid:focus-visible,
+.studio button.solid:focus-visible {
+  color: var(--ink-accent);
+  border-color: var(--ink-accent);
+  outline: none;
+}
+
+.studio button.text {
+  border: 0;
+  background: none;
+  color: var(--ink-muted);
+  font: inherit;
+  font-variant: small-caps;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+}
+
+.studio button.text:hover,
+.studio button.text:focus-visible {
+  color: var(--ink-accent);
+  outline: none;
+}
+
+.studio section.editor {
+  margin-top: 2.75rem;
+}
+
+.studio section.editor h2,
+.studio form.editor h2 {
+  margin: 0;
+  font-size: 2rem;
+  font-weight: 500;
+}
+
+.studio .block {
+  margin-top: 1.2rem;
+  padding-top: 0.4rem;
+  border-top: 1px solid color-mix(in oklab, var(--nord4) 22%, transparent);
+}
+
+.studio .pair {
+  display: grid;
+  gap: 0.4rem 1rem;
+  align-items: end;
+}
+
+.studio .row-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 1rem;
+  margin-top: 0.7rem;
+}
+
+.studio .row-actions button,
+.studio .pair > button {
+  border: 0;
+  background: none;
+  color: var(--ink-muted);
+  font: inherit;
+  cursor: pointer;
+  padding: 0;
+}
+
+.studio .row-actions button:hover,
+.studio .pair > button:hover,
+.studio .row-actions button:focus-visible,
+.studio .pair > button:focus-visible {
+  color: var(--ink-accent);
+  outline: none;
+}
+
+.studio .index {
+  margin: 1.8rem 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.studio .index a {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+  padding: 1rem 0;
+  border-top: 1px solid color-mix(in oklab, var(--nord4) 22%, transparent);
+  color: inherit;
+  text-decoration: none;
+}
+
+.studio .index a.has-image {
+  display: grid;
+  grid-template-columns: 7.5rem 1fr;
+}
+
+.studio .index img {
+  width: 7.5rem;
+  height: 5rem;
+  object-fit: cover;
+}
+
+.studio .index .name {
+  display: block;
+  font-size: 1.45rem;
+}
+
+.studio .index a:hover .name,
+.studio .index a:focus-visible .name {
+  color: var(--ink-accent);
+  outline: none;
+}
+
+.studio .meta {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.98rem;
+  letter-spacing: 0.04em;
+}
+
+.preview-dialog {
+  margin: auto;
+  width: min(46rem, calc(100vw - 2rem));
+  max-height: min(88svh, 54rem);
+  overflow: auto;
+  padding: 0;
+  border: 1px solid color-mix(in oklab, var(--nord4) 28%, transparent);
+  background: color-mix(in oklab, var(--ground) 94%, transparent);
+  color: var(--ink);
+}
+
+.preview-dialog.narrow {
+  width: min(40rem, calc(100vw - 2rem));
+}
+
+.preview-dialog::backdrop {
+  background: color-mix(in oklab, var(--ground) 72%, transparent);
+}
+
+.preview-bar {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  display: flex;
+  justify-content: flex-end;
+  padding: 0.75rem;
+  background: color-mix(in oklab, var(--ground) 88%, transparent);
+}
+
+.preview-close {
+  border: 1px solid color-mix(in oklab, var(--nord4) 35%, transparent);
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-variant: small-caps;
+  letter-spacing: 0.12em;
+  padding: 0.35rem 0.8rem;
+  cursor: pointer;
+}
+
+.preview-copy {
+  padding: 0.25rem 1.5rem 2.5rem;
+}
+
+@media (min-width: 720px) {
+  .studio .pair {
+    grid-template-columns: 1fr 1fr auto;
+  }
+}
+
+@media (max-width: 640px) {
+  .studio nav .side {
+    margin-left: 0;
+  }
+
+  .studio .index a.has-image {
+    grid-template-columns: 1fr;
+  }
+
+  .studio .index img {
+    width: 100%;
+    height: 9rem;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {

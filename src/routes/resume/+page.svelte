@@ -41,7 +41,7 @@
     position: relative;
     max-width: 56rem;
     margin-inline: auto;
-    padding: 7.5rem 1.25rem 2.5rem;
+    padding: 2.25rem 1.25rem 2.5rem;
   }
 
   header {
@@ -72,7 +72,7 @@
     width: 100%;
     height: 80svh;
     margin-top: 1.5rem;
-    border: 0;
+    border: 1px solid color-mix(in oklab, var(--nord4) 28%, transparent);
     background: var(--nord6);
   }
 

@@ -2,6 +2,14 @@
   import { onMount } from 'svelte';
   import { backdrop, photos, restoreBackdrop } from '#lib/backdrop.svelte.ts';
 
+  // Coming back to the landing, the photo is already loaded: show it without fading in again.
+  const startIndex = backdrop.index;
+  let settled = $state(backdrop.revealed);
+
+  $effect.pre(() => {
+    if (backdrop.index !== startIndex) settled = false;
+  });
+
   onMount(restoreBackdrop);
 </script>
 
@@ -15,6 +23,7 @@
     <div
       class="photo over"
       class:shown={backdrop.revealed}
+      class:settled
       style:background-image="url('{photos[backdrop.index]}')"
     ></div>
   {/key}

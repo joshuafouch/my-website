@@ -78,7 +78,7 @@
   .blog {
     max-width: 46rem;
     margin-inline: auto;
-    padding: 7.5rem 1.5rem 2rem;
+    padding: 2.25rem 1.5rem 2rem;
     color: var(--ink);
   }
 
@@ -136,19 +136,19 @@
   }
 
   ul {
+    display: grid;
+    gap: 0.85rem;
     margin: 2.5rem 0 0;
     padding: 0;
     list-style: none;
   }
 
-  li + li {
-    border-top: 1px solid color-mix(in oklab, var(--nord4) 22%, transparent);
-  }
-
   li a {
     display: grid;
     gap: 1rem;
-    padding: 1.4rem 0;
+    padding: 0.85rem;
+    border: 1px solid color-mix(in oklab, var(--nord4) 28%, transparent);
+    background: color-mix(in oklab, var(--nord1) 72%, transparent);
     color: inherit;
   }
 

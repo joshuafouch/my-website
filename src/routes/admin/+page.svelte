@@ -1,36 +1,43 @@
 <script lang="ts">
   import { resolve } from '$app/paths';
-  import PostEditor from '#lib/components/PostEditor.svelte';
+  import { formatDate } from '#lib/utils.ts';
 
-  let { data, form } = $props();
+  let { data } = $props();
 </script>
 
 <svelte:head>
-  <title>Admin</title>
+  <title>Blog posts</title>
 </svelte:head>
 
-<section>
-  <h1 class="font-title mb-4 text-3xl font-bold">Posts</h1>
-  {#if data.posts.length === 0}
-    <p class="font-main opacity-70">No posts yet.</p>
-  {:else}
-    <ul class="space-y-3">
-      {#each data.posts as post (post.id)}
-        <li class="card bg-base-300 card-body flex-row items-center justify-between p-4">
-          <div>
-            <a class="font-title link" href={resolve('/admin/[slug]', { slug: post.slug })}
-              >{post.title}</a
-            >
-            <p class="font-main text-sm opacity-70">{post.date}</p>
-          </div>
-          <span class="badge {post.published ? 'badge-success' : 'badge-ghost'}">
-            {post.published ? 'Published' : 'Draft'}
-          </span>
-        </li>
-      {/each}
-    </ul>
-  {/if}
-</section>
+<header class="head">
+  <div>
+    <h1>Blog posts</h1>
+    <p class="note">Drafts stay off the site until you publish them.</p>
+  </div>
+  <a class="solid" href={resolve('/admin/new')}>New post</a>
+</header>
 
-<h2 class="font-title mt-10 mb-6 text-2xl">New post</h2>
-<PostEditor {form} />
+{#if data.posts.length === 0}
+  <p class="note">No posts yet.</p>
+{:else}
+  <ul class="index">
+    {#each data.posts as post (post.id)}
+      <li>
+        <a
+          class:has-image={Boolean(post.image)}
+          href={resolve('/admin/[slug]', { slug: post.slug })}
+        >
+          {#if post.image}
+            <img src={post.image} alt="" />
+          {/if}
+          <span>
+            <span class="name">{post.title}</span>
+            <span class="meta"
+              >{formatDate(post.date)} · {post.published ? 'Published' : 'Draft'}</span
+            >
+          </span>
+        </a>
+      </li>
+    {/each}
+  </ul>
+{/if}

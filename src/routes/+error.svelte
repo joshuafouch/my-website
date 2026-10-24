@@ -4,7 +4,7 @@
 
 <div
   class="text-content font-main mx-auto max-w-4xl px-4
-  pt-24 pb-16 text-center"
+  pt-8 pb-16 text-center"
 >
   <div class="error">
     <h1>{page.status}: {page.error?.message}</h1>
