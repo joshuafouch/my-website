@@ -588,6 +588,89 @@ html[data-vt='leave']::view-transition-old(root) {
   letter-spacing: 0.04em;
 }
 
+.studio.wide {
+  max-width: 104rem;
+  container-type: inline-size;
+}
+
+.split {
+  margin-top: 1.4rem;
+}
+
+.split-tabs {
+  display: flex;
+  gap: 1.25rem;
+  margin-bottom: 1.4rem;
+  font-variant: small-caps;
+  letter-spacing: 0.12em;
+  font-size: 1.15rem;
+}
+
+.split-tabs button {
+  padding: 0 0 0.15rem;
+  border: 0;
+  border-bottom: 1px solid transparent;
+  background: none;
+  color: var(--ink-muted);
+  font: inherit;
+  cursor: pointer;
+}
+
+.split-tabs button[aria-pressed='true'] {
+  border-bottom-color: var(--ink-accent);
+  color: var(--ink);
+}
+
+.split-tabs button:focus-visible {
+  color: var(--ink-accent);
+  outline: none;
+}
+
+.split[data-view='write'] .split-preview,
+.split[data-view='preview'] .split-write {
+  display: none;
+}
+
+.split-preview {
+  border: 1px solid color-mix(in oklab, var(--nord4) 28%, transparent);
+  background: color-mix(in oklab, var(--ground) 94%, transparent);
+}
+
+.split-preview .compact {
+  padding-top: 1.5rem;
+}
+
+@container (min-width: 60rem) {
+  .split {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+    gap: 2.25rem;
+    align-items: start;
+  }
+
+  .split-tabs {
+    display: none;
+  }
+
+  .split[data-view] .split-write,
+  .split[data-view] .split-preview {
+    display: block;
+  }
+
+  .split-preview {
+    position: sticky;
+    top: 1rem;
+    max-height: calc(100svh - 2rem);
+    overflow: auto;
+  }
+
+  .split-preview.narrow {
+    justify-self: center;
+    width: 100%;
+    max-width: 40rem;
+  }
+}
+
 .preview-dialog {
   margin: auto;
   width: min(46rem, calc(100vw - 2rem));

@@ -47,7 +47,7 @@
   let tags = $state(untrack(() => form?.tags ?? project?.tags?.join(', ') ?? ''));
   let sourceUrl = $state(untrack(() => form?.sourceUrl ?? project?.source_url ?? ''));
   let published = $state(untrack(() => form?.published ?? project?.published ?? false));
-  let dialog = $state<HTMLDialogElement>();
+  let view = $state<'write' | 'preview'>('write');
 
   const extraImages = $derived(
     images
@@ -66,123 +66,108 @@
     title = (event.currentTarget as HTMLInputElement).value;
     if (!slugTouched) slug = slugify(title);
   }
-
-  function openPreview() {
-    if (dialog && !dialog.open) dialog.showModal();
-  }
-
-  function closePreview() {
-    dialog?.close();
-  }
 </script>
 
-<form method="POST" action="?/save">
-  {#if project}
-    <input type="hidden" name="id" value={project.id} />
-  {/if}
+<div class="split" data-view={view}>
+  <div class="split-tabs" role="group" aria-label="Editor view">
+    <button type="button" aria-pressed={view === 'write'} onclick={() => (view = 'write')}
+      >Write</button
+    >
+    <button type="button" aria-pressed={view === 'preview'} onclick={() => (view = 'preview')}
+      >Preview</button
+    >
+  </div>
 
-  {#if form?.error}
-    <p class="error">{form.error}</p>
-  {/if}
-  <p class="note">
-    Preview opens the same detail view as the projects page. It stays private until you publish and
-    save.
-  </p>
+  <div class="split-write">
+    <form method="POST" action="?/save">
+      {#if project}
+        <input type="hidden" name="id" value={project.id} />
+      {/if}
 
-  <label class="field">
-    <span>Title</span>
-    <input name="title" required value={title} oninput={onTitleInput} />
-  </label>
+      {#if form?.error}
+        <p class="error">{form.error}</p>
+      {/if}
+      <p class="note">
+        The preview matches the opened card on the projects page. It stays private until you publish
+        and save.
+      </p>
 
-  <label class="field">
-    <span>Slug</span>
-    <input
-      name="slug"
-      required
-      value={slug}
-      oninput={(event) => {
-        slugTouched = true;
-        slug = (event.currentTarget as HTMLInputElement).value;
-      }}
+      <label class="field">
+        <span>Title</span>
+        <input name="title" required value={title} oninput={onTitleInput} />
+      </label>
+
+      <label class="field">
+        <span>Slug</span>
+        <input
+          name="slug"
+          required
+          value={slug}
+          oninput={(event) => {
+            slugTouched = true;
+            slug = (event.currentTarget as HTMLInputElement).value;
+          }}
+        />
+      </label>
+
+      <label class="field">
+        <span>Short description</span>
+        <textarea name="description" rows="3" bind:value={description}></textarea>
+      </label>
+
+      <label class="field">
+        <span>Details</span>
+        <textarea name="details" rows="8" bind:value={details}></textarea>
+      </label>
+      <p class="note">The longer writeup in the opened card. Line breaks are kept.</p>
+
+      <label class="field">
+        <span>Date</span>
+        <input type="date" name="date" required bind:value={date} />
+      </label>
+
+      <label class="field">
+        <span>Cover image URL</span>
+        <input name="image" bind:value={image} placeholder="/assets/hero-bg.webp" />
+      </label>
+
+      <label class="field">
+        <span>Extra image URLs</span>
+        <textarea name="images" rows="4" placeholder="/assets/one.webp" bind:value={images}
+        ></textarea>
+      </label>
+      <p class="note">One path or URL per line. They show at the end of the opened card.</p>
+
+      <label class="field">
+        <span>Tags</span>
+        <input name="tags" placeholder="sveltekit, tailwindcss" bind:value={tags} />
+      </label>
+
+      <label class="field">
+        <span>Source URL</span>
+        <input name="sourceUrl" bind:value={sourceUrl} placeholder="https://github.com/..." />
+      </label>
+
+      <label class="check">
+        <input type="checkbox" name="published" bind:checked={published} />
+        Published
+      </label>
+
+      <div class="bar">
+        <button class="solid" type="submit">Save project</button>
+      </div>
+    </form>
+  </div>
+
+  <aside class="split-preview narrow" aria-label="Live preview">
+    <ProjectPreview
+      {title}
+      {description}
+      {details}
+      {image}
+      images={extraImages}
+      tags={previewTags}
+      {sourceUrl}
     />
-  </label>
-
-  <label class="field">
-    <span>Short description</span>
-    <textarea name="description" rows="3" bind:value={description}></textarea>
-  </label>
-
-  <label class="field">
-    <span>Details</span>
-    <textarea name="details" rows="8" bind:value={details}></textarea>
-  </label>
-  <p class="note">The longer writeup in the opened card. Line breaks are kept.</p>
-
-  <label class="field">
-    <span>Date</span>
-    <input type="date" name="date" required bind:value={date} />
-  </label>
-
-  <label class="field">
-    <span>Cover image URL</span>
-    <input name="image" bind:value={image} placeholder="/assets/hero-bg.webp" />
-  </label>
-  {#if image}
-    <img class="thumb" src={image} alt="" />
-  {/if}
-
-  <label class="field">
-    <span>Extra image URLs</span>
-    <textarea name="images" rows="4" placeholder="/assets/one.webp" bind:value={images}></textarea>
-  </label>
-  <p class="note">One path or URL per line. They show at the end of the opened card.</p>
-
-  <label class="field">
-    <span>Tags</span>
-    <input name="tags" placeholder="sveltekit, tailwindcss" bind:value={tags} />
-  </label>
-
-  <label class="field">
-    <span>Source URL</span>
-    <input name="sourceUrl" bind:value={sourceUrl} placeholder="https://github.com/..." />
-  </label>
-
-  <label class="check">
-    <input type="checkbox" name="published" bind:checked={published} />
-    Published
-  </label>
-
-  <div class="bar">
-    <button class="solid" type="submit">Save project</button>
-    <button class="solid" type="button" onclick={openPreview}>Preview</button>
-  </div>
-</form>
-
-<dialog
-  class="preview-dialog narrow"
-  bind:this={dialog}
-  onclick={(event) => event.target === dialog && closePreview()}
->
-  <div class="preview-bar">
-    <button class="preview-close" type="button" onclick={closePreview}>Close</button>
-  </div>
-  <ProjectPreview
-    {title}
-    {description}
-    {details}
-    {image}
-    images={extraImages}
-    tags={previewTags}
-    {sourceUrl}
-  />
-</dialog>
-
-<style>
-  .thumb {
-    display: block;
-    width: 100%;
-    max-height: 14rem;
-    margin-top: 0.8rem;
-    object-fit: cover;
-  }
-</style>
+  </aside>
+</div>
