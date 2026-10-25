@@ -6,15 +6,19 @@
 
   const section = $derived.by(() => {
     const path = page.url.pathname;
+    if (path === '/admin') return 'home';
+    if (path.startsWith('/admin/blog')) return 'posts';
     if (path.startsWith('/admin/projects')) return 'projects';
     if (path.startsWith('/admin/about/personal')) return 'personal';
     if (path.startsWith('/admin/about')) return 'professional';
-    if (path.startsWith('/admin/mfa') || path.startsWith('/admin/login')) return '';
-    return 'posts';
+    if (path.startsWith('/admin/resume')) return 'resume';
+    return '';
   });
+
+  const wide = $derived(/^\/admin\/(blog|projects)\/[^/]+$/.test(page.url.pathname));
 </script>
 
-<div class="studio font-serif">
+<div class="studio font-serif" class:wide>
   {#if data.isAdmin}
     <nav aria-label="Admin">
       <ul>
@@ -23,6 +27,13 @@
             <a
               class="quiet-link"
               href={resolve('/admin')}
+              aria-current={section === 'home' ? 'page' : undefined}>Home</a
+            >
+          </li>
+          <li>
+            <a
+              class="quiet-link"
+              href={resolve('/admin/blog')}
               aria-current={section === 'posts' ? 'page' : undefined}>Blog</a
             >
           </li>
@@ -45,6 +56,13 @@
               class="quiet-link"
               href={resolve('/admin/about/personal')}
               aria-current={section === 'personal' ? 'page' : undefined}>Personal</a
+            >
+          </li>
+          <li>
+            <a
+              class="quiet-link"
+              href={resolve('/admin/resume')}
+              aria-current={section === 'resume' ? 'page' : undefined}>Resume</a
             >
           </li>
           <li class="side">

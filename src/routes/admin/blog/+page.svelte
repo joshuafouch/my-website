@@ -14,7 +14,7 @@
     <h1>Blog posts</h1>
     <p class="note">Drafts stay off the site until you publish them.</p>
   </div>
-  <a class="solid" href={resolve('/admin/new')}>New post</a>
+  <a class="solid" href={resolve('/admin/blog/new')}>New post</a>
 </header>
 
 {#if data.posts.length === 0}
@@ -25,7 +25,7 @@
       <li>
         <a
           class:has-image={Boolean(post.image)}
-          href={resolve('/admin/[slug]', { slug: post.slug })}
+          href={resolve('/admin/blog/[slug]', { slug: post.slug })}
         >
           {#if post.image}
             <img src={post.image} alt="" />

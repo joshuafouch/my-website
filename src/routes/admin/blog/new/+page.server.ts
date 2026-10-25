@@ -12,7 +12,7 @@ export const actions: Actions = {
       return fail(400, { error: result.error, ...result.values });
     }
 
-    redirect(303, `/admin/${result.slug}?saved=1`);
+    redirect(303, `/admin/blog/${result.slug}?saved=1`);
   },
 
   inline: async ({ request, locals }) => {

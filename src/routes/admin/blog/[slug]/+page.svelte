@@ -16,7 +16,7 @@
       <p class="ok">Saved.</p>
     {/if}
   </div>
-  <a class="quiet-link" href={resolve('/admin')}>All posts</a>
+  <a class="quiet-link" href={resolve('/admin/blog')}>All posts</a>
 </header>
 
 {#if data.post.published}
