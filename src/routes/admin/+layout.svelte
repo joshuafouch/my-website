@@ -4,6 +4,8 @@
 
   let { data, children } = $props();
 
+  let menu = $state(false);
+
   const section = $derived.by(() => {
     const path = page.url.pathname;
     if (path === '/admin') return 'home';
@@ -16,70 +18,86 @@
   });
 
   const wide = $derived(/^\/admin\/(blog|projects)\/[^/]+$/.test(page.url.pathname));
+
+  const links = $derived([
+    { href: resolve('/admin'), label: 'Home', current: section === 'home' },
+    { href: resolve('/admin/blog'), label: 'Blog', current: section === 'posts' },
+    { href: resolve('/admin/projects'), label: 'Projects', current: section === 'projects' },
+    {
+      href: resolve('/admin/about/professional'),
+      label: 'Professional',
+      current: section === 'professional'
+    },
+    { href: resolve('/admin/about/personal'), label: 'Personal', current: section === 'personal' },
+    { href: resolve('/admin/resume'), label: 'Resume', current: section === 'resume' },
+    {
+      href: resolve('/admin/mfa'),
+      label: 'Authenticator',
+      current: page.url.pathname.startsWith('/admin/mfa')
+    }
+  ]);
+
+  const here = $derived(links.find((link) => link.current)?.label ?? 'Admin');
+
+  $effect(() => {
+    if (page.url.pathname) menu = false;
+  });
 </script>
+
+<svelte:window
+  onkeydown={(event) => {
+    if (event.key === 'Escape') menu = false;
+  }}
+/>
 
 <div class="studio font-serif" class:wide>
   {#if data.isAdmin}
-    <nav aria-label="Admin">
-      <ul>
-        {#if !data.needsMfa}
-          <li>
-            <a
-              class="quiet-link"
-              href={resolve('/admin')}
-              aria-current={section === 'home' ? 'page' : undefined}>Home</a
-            >
-          </li>
-          <li>
-            <a
-              class="quiet-link"
-              href={resolve('/admin/blog')}
-              aria-current={section === 'posts' ? 'page' : undefined}>Blog</a
-            >
-          </li>
-          <li>
-            <a
-              class="quiet-link"
-              href={resolve('/admin/projects')}
-              aria-current={section === 'projects' ? 'page' : undefined}>Projects</a
-            >
-          </li>
-          <li>
-            <a
-              class="quiet-link"
-              href={resolve('/admin/about/professional')}
-              aria-current={section === 'professional' ? 'page' : undefined}>Professional</a
-            >
-          </li>
-          <li>
-            <a
-              class="quiet-link"
-              href={resolve('/admin/about/personal')}
-              aria-current={section === 'personal' ? 'page' : undefined}>Personal</a
-            >
-          </li>
-          <li>
-            <a
-              class="quiet-link"
-              href={resolve('/admin/resume')}
-              aria-current={section === 'resume' ? 'page' : undefined}>Resume</a
-            >
-          </li>
-          <li class="side">
-            <a
-              class="quiet-link"
-              href={resolve('/admin/mfa')}
-              aria-current={page.url.pathname.startsWith('/admin/mfa') ? 'page' : undefined}
-              >Authenticator</a
-            >
-          </li>
-        {/if}
-        <li>
-          <form method="POST" action="/admin/logout">
-            <button class="text" type="submit">Log out</button>
-          </form>
-        </li>
-      </ul>
+    <nav class="admin-nav" class:open={menu} aria-label="Admin">
+      {#if !data.needsMfa}
+        <button
+          type="button"
+          class="menu-btn"
+          aria-expanded={menu}
+          aria-controls="admin-links"
+          onclick={() => (menu = !menu)}
+        >
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            {#if menu}
+              <path
+                d="M6 6l12 12M18 6 6 18"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+              />
+            {:else}
+              <path
+                d="M4 7h16M4 12h16M4 17h16"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.5"
+                stroke-linecap="round"
+              />
+            {/if}
+          </svg>
+          <span>{here}</span>
+        </button>
+        <ul id="admin-links">
+          {#each links as link (link.href)}
+            <li>
+              <a
+                class="quiet-link"
+                href={link.href}
+                aria-current={link.current ? 'page' : undefined}
+                onclick={() => (menu = false)}>{link.label}</a
+              >
+            </li>
+          {/each}
+        </ul>
+      {/if}
+      <form method="POST" action="/admin/logout">
+        <button class="text" type="submit">Log out</button>
+      </form>
     </nav>
   {/if}
 

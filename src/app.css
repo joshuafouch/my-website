@@ -329,6 +329,7 @@ html[data-vt='leave']::view-transition-old(root) {
   margin-inline: auto;
   padding: 2.25rem 1.5rem 3rem;
   color: var(--ink);
+  container-type: inline-size;
 }
 
 .studio > h1,
@@ -338,25 +339,111 @@ html[data-vt='leave']::view-transition-old(root) {
   font-weight: 500;
 }
 
+.studio nav {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin: 0 0 1.75rem;
+  padding: 0.15rem;
+  border: 1px solid color-mix(in oklab, var(--nord4) 28%, transparent);
+}
+
 .studio nav ul {
   display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0.35rem 1.4rem;
-  margin: 0 0 2.5rem;
+  flex: 1;
+  flex-wrap: nowrap;
+  gap: 0.1rem;
+  min-width: 0;
+  margin: 0;
   padding: 0;
+  overflow-x: auto;
   list-style: none;
+  scrollbar-width: thin;
   font-variant: small-caps;
-  letter-spacing: 0.14em;
-  font-size: 1.3rem;
+  letter-spacing: 0.08em;
+  font-size: 0.98rem;
+}
+
+.studio nav form {
+  flex: none;
+}
+
+.studio nav .menu-btn {
+  display: none;
+}
+
+@container (max-width: 42rem) {
+  .studio nav .menu-btn {
+    display: inline-flex;
+    flex: 1;
+    align-items: center;
+    gap: 0.6rem;
+    min-width: 0;
+    padding: 0.35rem 0.55rem;
+    border: 0;
+    background: none;
+    color: var(--ink);
+    font: inherit;
+    font-variant: small-caps;
+    letter-spacing: 0.08em;
+    font-size: 0.98rem;
+    cursor: pointer;
+  }
+
+  .studio nav .menu-btn svg {
+    width: 1.15rem;
+    height: 1.15rem;
+    flex: none;
+  }
+
+  .studio nav .menu-btn span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .studio nav .menu-btn:focus-visible {
+    color: var(--ink-accent);
+    outline: none;
+  }
+
+  .studio nav ul {
+    display: none;
+  }
+
+  .studio nav.open {
+    flex-wrap: wrap;
+  }
+
+  .studio nav.open ul {
+    display: flex;
+    flex-basis: 100%;
+    flex-direction: column;
+    gap: 0;
+    overflow: visible;
+    order: 1;
+    margin-top: 0.15rem;
+    padding-top: 0.2rem;
+    border-top: 1px solid color-mix(in oklab, var(--nord4) 22%, transparent);
+  }
+
+  .studio nav.open ul a {
+    display: block;
+    padding: 0.7rem 0.7rem;
+  }
+}
+
+.studio nav a,
+.studio nav button.text {
+  padding: 0.28rem 0.55rem;
+  white-space: nowrap;
+  font-size: inherit;
+  letter-spacing: inherit;
 }
 
 .studio nav a[aria-current='page'] {
   color: var(--ink);
-}
-
-.studio nav .side {
-  margin-left: auto;
+  background-size: 100% 1px;
 }
 
 .studio .head {
@@ -722,10 +809,6 @@ html[data-vt='leave']::view-transition-old(root) {
 }
 
 @media (max-width: 640px) {
-  .studio nav .side {
-    margin-left: 0;
-  }
-
   .studio .index a.has-image {
     grid-template-columns: 1fr;
   }
