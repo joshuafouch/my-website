@@ -831,3 +831,27 @@ html[data-vt='leave']::view-transition-old(root) {
     opacity: 1;
   }
 }
+
+/* The pause control sets this before paint. Short durations let a reveal
+   finish on its end state instead of freezing halfway through. */
+html[data-motion='off'] *,
+html[data-motion='off'] *::before,
+html[data-motion='off'] *::after {
+  animation-duration: 0.01ms !important;
+  animation-delay: 0ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  transition-delay: 0ms !important;
+  scroll-behavior: auto !important;
+}
+
+html[data-motion='off']::view-transition-group(*),
+html[data-motion='off']::view-transition-old(*),
+html[data-motion='off']::view-transition-new(*) {
+  animation: none !important;
+}
+
+html[data-motion='off'] .site-backdrop .over.shown {
+  animation: none;
+  opacity: 1;
+}

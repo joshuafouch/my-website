@@ -9,6 +9,7 @@
   import SignatureLogo from '#lib/components/SignatureLogo.svelte';
   import JafCrest from '#lib/components/JafCrest.svelte';
   import { backdrop, photos, restoreBackdrop } from '#lib/backdrop.svelte.ts';
+  import { reducedMotion, restoreMotion } from '#lib/motion.svelte.ts';
   import { restoreSidebar, sidebar } from '#lib/sidebar.svelte.ts';
 
   let { children, data } = $props();
@@ -21,12 +22,12 @@
   const sigReveal = $derived(Math.min(1, Math.max(0, scrollY / (ridgePx || 1))));
 
   function scrollUp() {
-    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
+    window.scrollTo({ top: 0, behavior: reducedMotion() ? 'auto' : 'smooth' });
   }
 
   onMount(() => {
     restoreSidebar();
+    restoreMotion();
     const measure = () => {
       const ridge = document.querySelector('.ridge');
       if (ridge) ridgePx = ridge.getBoundingClientRect().height;
@@ -45,7 +46,7 @@
     const from = navigation.from?.url.pathname;
     const to = navigation.to?.url.pathname;
     if (!from || !to || from === to) return;
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (reducedMotion()) return;
 
     const root = document.documentElement;
     const token = String(Date.now());
@@ -400,6 +401,28 @@
 
   @media (max-width: 767px) and (prefers-reduced-motion: reduce) {
     .turn {
+      opacity: 0.82;
+    }
+  }
+
+  :global(html[data-motion='off']) .inner-shell .page-stack,
+  :global(html[data-motion='off']) .watermark {
+    transition: none;
+  }
+
+  :global(html[data-motion='off']) .ridge .photo.fade {
+    opacity: 1;
+    animation: none;
+  }
+
+  :global(html[data-motion='off']) .turn {
+    animation: none;
+    color: var(--nord4);
+    opacity: 0.16;
+  }
+
+  @media (max-width: 767px) {
+    :global(html[data-motion='off']) .turn {
       opacity: 0.82;
     }
   }

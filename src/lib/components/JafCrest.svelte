@@ -57,4 +57,8 @@
       animation: none;
     }
   }
+
+  :global(html[data-motion='off']) .jaf-crest {
+    animation: none;
+  }
 </style>

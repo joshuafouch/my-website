@@ -4,6 +4,15 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" href="/favicon.png" />
+    <script>
+      try {
+        if (localStorage.getItem('site-motion') === 'off') {
+          document.documentElement.dataset.motion = 'off';
+        }
+      } catch {
+        /* Private mode can block storage. Motion stays on for this visit. */
+      }
+    </script>
     %sveltekit.head%
   </head>
 

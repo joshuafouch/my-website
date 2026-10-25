@@ -2,6 +2,7 @@
   import { tick } from 'svelte';
   import Metadata from '#lib/components/Metadata.svelte';
   import ProjectPreview from '#lib/components/ProjectPreview.svelte';
+  import { motion, reducedMotion } from '#lib/motion.svelte.ts';
   import type { Project } from '#lib/types.ts';
 
   let { data } = $props();
@@ -10,10 +11,6 @@
   let selected: Project | null = $state(null);
   let origin: DOMRect | null = null;
   let closing = false;
-
-  function reducedMotion() {
-    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  }
 
   function shift(box: DOMRect) {
     if (!origin) return null;
@@ -26,7 +23,7 @@
   }
 
   function playOpen() {
-    if (!dialog) return;
+    if (!dialog || motion.off) return;
     if (reducedMotion() || !origin) {
       dialog.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 150, easing: 'ease' });
       return;

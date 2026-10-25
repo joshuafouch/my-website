@@ -5,6 +5,7 @@
   import { links } from '#lib/config.ts';
   import { sidebar, toggleSidebar } from '#lib/sidebar.svelte.ts';
   import BackgroundSwitch from '#lib/components/BackgroundSwitch.svelte';
+  import MotionToggle from '#lib/components/MotionToggle.svelte';
   import JafCrest from '#lib/components/JafCrest.svelte';
 
   let menu = $state(false);
@@ -101,6 +102,7 @@
         />
       </svg>
     </button>
+    <MotionToggle compact />
   </div>
 
   <nav id="site-links" aria-label="Pages">
@@ -500,5 +502,19 @@
     .pages a:focus-visible {
       translate: none;
     }
+  }
+
+  :global(html[data-motion='off']) .rail,
+  :global(html[data-motion='off']) .mark,
+  :global(html[data-motion='off']) .tools,
+  :global(html[data-motion='off']) nav,
+  :global(html[data-motion='off']) .fold svg,
+  :global(html[data-motion='off']) .pages a {
+    transition: none;
+  }
+
+  :global(html[data-motion='off']) .pages a:hover,
+  :global(html[data-motion='off']) .pages a:focus-visible {
+    translate: none;
   }
 </style>
