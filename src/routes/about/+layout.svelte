@@ -11,6 +11,7 @@
 </script>
 
 <div class="about-shell font-serif">
+  <h1>About Me</h1>
   <nav class="about-tabs" aria-label="About">
     <ul>
       {#each tabs as tab (tab.href)}
@@ -38,9 +39,15 @@
     color: var(--ink);
   }
 
+  h1 {
+    margin: 0 0 1.1rem;
+    font-size: clamp(2.4rem, 5vw, 3rem);
+    font-weight: 500;
+  }
+
   .about-tabs {
     view-transition-name: about-tabs;
-    margin-bottom: 3rem;
+    margin-bottom: 2.5rem;
   }
 
   ul {
