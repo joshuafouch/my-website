@@ -13,11 +13,14 @@
         } catch (e) {}
         try {
           var saved = localStorage.getItem('site-theme');
-          var mode = saved === 'light' || saved === 'dark' ? saved : 'dark';
+          var mode = 'polar-night';
+          if (saved === 'light' || saved === 'snow-storm') mode = 'snow-storm';
+          else if (saved === 'frost') mode = 'frost';
+          var daisy = mode === 'snow-storm' ? 'nord' : mode === 'frost' ? 'frost' : 'nord-dark';
           var doc = document.documentElement;
-          doc.setAttribute('data-theme', mode === 'dark' ? 'nord-dark' : 'nord');
+          doc.setAttribute('data-theme', daisy);
           doc.classList.add(mode);
-          doc.style.colorScheme = mode;
+          doc.style.colorScheme = mode === 'snow-storm' ? 'light' : 'dark';
         } catch (e) {}
       })();
     </script>

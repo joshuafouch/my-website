@@ -5,13 +5,11 @@
 
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { goto } from '$app/navigation';
   import Metadata from '#lib/components/Metadata.svelte';
   import SignatureLogo from '#lib/components/SignatureLogo.svelte';
   import BackgroundSwitch from '#lib/components/BackgroundSwitch.svelte';
   import ThemeSwitch from '#lib/components/ThemeSwitch.svelte';
   import MotionToggle from '#lib/components/MotionToggle.svelte';
-  import { reducedMotion } from '#lib/motion.svelte.ts';
   import { resolve } from '$app/paths';
 
   const heroImage = '/assets/hero-bg.webp';
@@ -31,28 +29,6 @@
   const returning = landingSeen;
   let ready = $state(landingSeen);
   let replay = $state(0);
-  let leaving = $state(false);
-
-  function depart(event: MouseEvent) {
-    if (leaving) {
-      event.preventDefault();
-      return;
-    }
-    const anchor = event.currentTarget;
-    if (!(anchor instanceof HTMLAnchorElement) || anchor.target === '_blank') return;
-    if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0)
-      return;
-    if (reducedMotion()) return;
-
-    const url = new URL(anchor.href);
-    if (url.origin !== window.location.origin) return;
-
-    event.preventDefault();
-    leaving = true;
-    window.setTimeout(() => {
-      goto(url.pathname + url.search + url.hash);
-    }, 100);
-  }
 
   onMount(() => {
     if (landingSeen) return;
@@ -101,7 +77,6 @@
   class="landing relative flex flex-col font-serif"
   class:is-ready={ready}
   class:is-return={returning}
-  class:is-leaving={leaving}
 >
   {#if !returning}
     <div class="loader absolute inset-0 flex items-center justify-center" aria-hidden="true">
@@ -131,34 +106,31 @@
         onclick={() => replay++}
       >
         {#key replay}
-          <SignatureLogo play={ready} instant={returning && replay === 0} erase={leaving} drift />
+          <SignatureLogo play={ready} instant={returning && replay === 0} drift />
         {/key}
       </button>
     </div>
 
-    <p
-      class="hello reveal mt-4 max-w-md text-xl leading-relaxed sm:text-2xl"
-      style="--step: 0; --leave-y: -1.4rem"
-    >
+    <p class="hello reveal mt-4 max-w-md text-xl leading-relaxed sm:text-2xl" style="--step: 0">
       Hello! My name is <em class="name">Joshua Fouch</em>. Welcome to my corner of the web.
     </p>
 
-    <nav aria-label="Pages" class="reveal mt-10" style="--step: 1; --leave-x: 1.75rem">
+    <nav aria-label="Pages" class="reveal mt-10" style="--step: 1">
       <ul class="pages flex flex-wrap items-center justify-center gap-y-1 text-base sm:text-xl">
         {#each pages as page, index (page.text)}
           {#if index > 0}
             <li aria-hidden="true" class="dot">·</li>
           {/if}
-          <li><a class="link-line" href={page.href} onclick={depart}>{page.text}</a></li>
+          <li><a class="link-line" href={page.href}>{page.text}</a></li>
         {/each}
       </ul>
     </nav>
   </div>
 
-  <footer class="foot reveal text-center" style="--step: 2; --leave-y: 1.6rem">
+  <footer class="foot reveal text-center" style="--step: 2">
     <ul class="socials flex flex-wrap justify-center">
       <li>
-        <a class="social-link link-line" href={resolve('/resume')} onclick={depart}>
+        <a class="social-link link-line" href={resolve('/resume')}>
           <svg viewBox="0 0 24 24" aria-hidden="true">
             <path d="M6 2h8.2L20 7.8V22H6V2z" />
           </svg>
@@ -191,12 +163,7 @@
         </li>
       {/each}
     </ul>
-    <a
-      class="icon-btn admin"
-      href={resolve('/admin/login')}
-      aria-label="Admin login"
-      onclick={depart}
-    >
+    <a class="icon-btn admin" href={resolve('/admin/login')} aria-label="Admin login">
       <svg viewBox="0 0 24 24" aria-hidden="true">
         <circle cx="12" cy="8" r="3.15" fill="none" stroke="currentColor" stroke-width="1.6" />
         <path
@@ -337,17 +304,6 @@
     animation-delay: 0ms;
   }
 
-  .is-leaving .reveal:not(.corner) {
-    animation: depart 100ms ease forwards;
-  }
-
-  @keyframes depart {
-    to {
-      opacity: 0;
-      transform: translate(var(--leave-x, 0), var(--leave-y, -1rem));
-    }
-  }
-
   @keyframes rise {
     from {
       opacity: 0;
@@ -365,6 +321,13 @@
 
   .name {
     color: var(--ink);
+  }
+
+  /* The page fade is the motion when arriving from another page. */
+  :global(html[data-fade]) .is-ready .reveal,
+  :global(html[data-fade]) .is-ready .logo.quick {
+    animation: none;
+    opacity: 1;
   }
 
   .pages {
@@ -533,8 +496,7 @@
     }
 
     .is-ready .reveal,
-    .is-ready .logo.quick,
-    .is-leaving .reveal {
+    .is-ready .logo.quick {
       animation: none;
       opacity: 1;
     }
@@ -550,8 +512,7 @@
   }
 
   :global(html[data-motion='off']) .is-ready .reveal,
-  :global(html[data-motion='off']) .is-ready .logo.quick,
-  :global(html[data-motion='off']) .is-leaving .reveal {
+  :global(html[data-motion='off']) .is-ready .logo.quick {
     animation: none;
     opacity: 1;
   }
