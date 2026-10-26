@@ -115,7 +115,8 @@
 
   @keyframes signature-color {
     0% {
-      filter: hue-rotate(0deg) saturate(0.25) brightness(1.15);
+      filter: hue-rotate(0deg) saturate(var(--sig-end-saturate, 0.25))
+        brightness(var(--sig-end-brightness, 1.15));
     }
 
     28% {
@@ -131,7 +132,8 @@
     }
 
     100% {
-      filter: hue-rotate(360deg) saturate(0.25) brightness(1.15);
+      filter: hue-rotate(360deg) saturate(var(--sig-end-saturate, 0.25))
+        brightness(var(--sig-end-brightness, 1.15));
     }
   }
 
@@ -142,7 +144,7 @@
 
     .drift {
       animation: none;
-      color: inherit;
+      color: var(--signature-rest, inherit);
       filter: none;
     }
   }
@@ -153,7 +155,7 @@
 
   :global(html[data-motion='off']) .drift {
     animation: none;
-    color: inherit;
+    color: var(--signature-rest, inherit);
     filter: none;
   }
 </style>

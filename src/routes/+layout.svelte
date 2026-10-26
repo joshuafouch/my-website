@@ -287,7 +287,8 @@
   /* From nord8: desaturated reads as nord4, 118deg as nord15, 259deg as nord14. */
   @keyframes signature-drift {
     0% {
-      filter: hue-rotate(0deg) saturate(0.25) brightness(1.15);
+      filter: hue-rotate(0deg) saturate(var(--sig-end-saturate, 0.25))
+        brightness(var(--sig-end-brightness, 1.15));
       opacity: 0.14;
     }
 
@@ -307,7 +308,8 @@
     }
 
     100% {
-      filter: hue-rotate(360deg) saturate(0.25) brightness(1.15);
+      filter: hue-rotate(360deg) saturate(var(--sig-end-saturate, 0.25))
+        brightness(var(--sig-end-brightness, 1.15));
       opacity: 0.14;
     }
   }
@@ -363,7 +365,7 @@
       top: auto;
       left: auto;
       width: 100%;
-      color: var(--ink-muted);
+      color: var(--signature-rest, var(--ink-muted));
       opacity: 0.82;
       transform: none;
       animation: none;
@@ -399,7 +401,7 @@
 
     .turn {
       animation: none;
-      color: var(--nord4);
+      color: var(--signature-rest, var(--nord4));
       opacity: 0.16;
     }
   }
@@ -422,7 +424,7 @@
 
   :global(html[data-motion='off']) .turn {
     animation: none;
-    color: var(--nord4);
+    color: var(--signature-rest, var(--nord4));
     opacity: 0.16;
   }
 

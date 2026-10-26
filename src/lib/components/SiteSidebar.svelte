@@ -8,6 +8,7 @@
   import ThemeSwitch from '#lib/components/ThemeSwitch.svelte';
   import MotionToggle from '#lib/components/MotionToggle.svelte';
   import JafCrest from '#lib/components/JafCrest.svelte';
+  import JafMark from '#lib/components/JafMark.svelte';
 
   let menu = $state(false);
   let narrow = $state(false);
@@ -37,7 +38,7 @@
 <aside class="rail font-serif" class:closed={!sidebar.open} class:expanded={menu}>
   <div class="bar">
     <a class="mark" href={resolve('/')} aria-label="Home" inert={folded}>
-      <img src="/assets/jaf.svg" alt="" />
+      <JafMark />
     </a>
     <button
       type="button"
@@ -210,19 +211,13 @@
     width: 3.4rem;
     height: 3.4rem;
     margin: 1.35rem;
+    color: var(--logo-outline, #242933);
+    transition: color 250ms ease;
   }
 
-  .mark img {
+  .mark :global(.jaf-mark) {
     width: 2.5rem;
     height: 2.5rem;
-    max-width: none;
-    object-fit: contain;
-    transition: filter 250ms ease;
-  }
-
-  :global(html[data-theme='nord-dark']) .mark img,
-  :global(html.dark) .mark img {
-    filter: invert(1) hue-rotate(180deg) brightness(1.2);
   }
 
   .mark:focus-visible {
@@ -415,7 +410,7 @@
       margin: 0 0.85rem;
     }
 
-    .mark img {
+    .mark :global(.jaf-mark) {
       width: 1.75rem;
       height: 1.75rem;
     }

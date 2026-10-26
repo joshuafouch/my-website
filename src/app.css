@@ -64,6 +64,48 @@
   --depth: 1;
   --noise: 1;
 }
+@plugin 'daisyui/theme' {
+  name: 'frost';
+  color-scheme: 'dark';
+  /* Nord Frost: dusk surfaces from nord8-nord10, Frost and Aurora hues unchanged */
+  --color-base-100: #3d5166;
+  --color-base-200: #466078;
+  --color-base-300: #50708a;
+  --color-base-content: #eceff4; /* nord6 */
+
+  --color-primary: oklch(67.2% 0.057 257.73); /* nord9 (#81A1C1) - Frost Blue */
+  --color-primary-content: oklch(21% 0.022 260);
+
+  --color-secondary: oklch(74.49% 0.046 195.06); /* nord7 (#8FBCBB) - Frost Teal */
+  --color-secondary-content: oklch(21% 0.022 260);
+
+  --color-accent: oklch(67.75% 0.07 313.52); /* nord15 (#B48EAD) - Aurora Purple */
+  --color-accent-content: oklch(21% 0.022 260);
+
+  --color-neutral: #466078;
+  --color-neutral-content: #eceff4;
+
+  --color-info: oklch(56.95% 0.076 257.25); /* nord10 (#5E81AC) */
+  --color-info-content: #eceff4;
+
+  --color-success: oklch(73.57% 0.076 138.83); /* nord14 (#A3BE8C) */
+  --color-success-content: oklch(21% 0.022 260);
+
+  --color-warning: oklch(85.34% 0.096 97.4); /* nord13 (#EBCB8B) */
+  --color-warning-content: oklch(21% 0.022 260);
+
+  --color-error: oklch(59.16% 0.128 13.9); /* nord11 (#BF616A) */
+  --color-error-content: #eceff4;
+
+  --radius-selector: 2rem;
+  --radius-field: 0.5rem;
+  --radius-box: 2rem;
+  --size-selector: 0.25rem;
+  --size-field: 0.25rem;
+  --border: 2px;
+  --depth: 1;
+  --noise: 1;
+}
 
 /*custom font classes*/
 .font-main {
@@ -108,13 +150,11 @@
   --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
-/* Default / Dark Mode: Deep Polar Night ("more dark mode") */
+/* Polar Night: deep dark surfaces */
 :root,
-html[data-theme='nord-dark'],
-html.dark {
+html[data-theme='nord-dark'] {
   color-scheme: dark;
 
-  /* Rich, deeper dark mode background & surfaces */
   --ground: #13161c;
   --surface: #171a22;
   --surface-raised: #1f232d;
@@ -139,26 +179,28 @@ html.dark {
   --crest-color: var(--nord8);
   --watermark-color: var(--nord8);
   --watermark-opacity: 0.16;
+  --logo-outline: #88c0d0;
+  --signature-rest: #88c0d0;
+  --sig-end-saturate: 1;
+  --sig-end-brightness: 1;
 
   --input-border: color-mix(in oklab, var(--nord4) 35%, transparent);
   --veil-inner: color-mix(in oklab, var(--ground) 72%, transparent);
   --veil-outer: color-mix(in oklab, var(--ground) 90%, transparent);
 }
 
-/* Light Mode: Snow Storm (official Nord light ambiance from nordtheme.com) */
-html[data-theme='nord'],
-html.light {
+/* Snow Storm: official Nord light ambiance from nordtheme.com */
+html[data-theme='nord'] {
   color-scheme: light;
 
-  /* Crisp Snow Storm base & clean surfaces */
   --ground: #eceff4; /* nord6 */
   --surface: #f4f6fa;
   --surface-raised: #ffffff;
   --surface-elevated: #e5e9f0; /* nord5 */
 
-  --ink: var(--nord0); /* #2e3440 - deep polar night text */
-  --ink-muted: var(--nord3); /* #4c566a - readable muted text */
-  --ink-accent: var(--nord10); /* #5e81ac - arctic frost deep blue */
+  --ink: var(--nord0); /* #2e3440 */
+  --ink-muted: var(--nord3); /* #4c566a */
+  --ink-accent: var(--nord10); /* #5e81ac */
 
   --card-bg: color-mix(in oklab, #ffffff 88%, transparent);
   --card-border: color-mix(in oklab, var(--nord3) 18%, transparent);
@@ -175,10 +217,52 @@ html.light {
   --crest-color: var(--nord10);
   --watermark-color: var(--nord9);
   --watermark-opacity: 0.14;
+  --logo-outline: #242933;
+  --signature-rest: initial;
+  --sig-end-saturate: 0.25;
+  --sig-end-brightness: 1.15;
 
   --input-border: color-mix(in oklab, var(--nord3) 30%, transparent);
-  --veil-inner: color-mix(in oklab, var(--ground) 65%, transparent);
-  --veil-outer: color-mix(in oklab, var(--ground) 85%, transparent);
+  --veil-inner: color-mix(in oklab, var(--nord5) 40%, transparent);
+  --veil-outer: color-mix(in oklab, var(--nord4) 64%, transparent);
+}
+
+/* Frost: dusk built from nord7–nord10, between Polar Night and Snow Storm */
+html[data-theme='frost'] {
+  color-scheme: dark;
+
+  --ground: #3d5166;
+  --surface: #466078;
+  --surface-raised: #50708a;
+  --surface-elevated: #62829b;
+
+  --ink: var(--nord6); /* #eceff4 */
+  --ink-muted: var(--nord4); /* #d8dee9 */
+  --ink-accent: var(--nord7); /* #8fbcbb */
+
+  --card-bg: color-mix(in oklab, var(--nord8) 18%, var(--surface-raised));
+  --card-border: color-mix(in oklab, var(--nord8) 40%, transparent);
+  --border-subtle: color-mix(in oklab, var(--nord8) 28%, transparent);
+  --border-strong: color-mix(in oklab, var(--nord8) 48%, transparent);
+
+  --btn-bg: color-mix(in oklab, var(--nord8) 18%, var(--ground));
+  --btn-border: color-mix(in oklab, var(--nord8) 45%, transparent);
+
+  --dialog-bg: color-mix(in oklab, var(--ground) 88%, var(--nord8));
+  --dialog-bar: color-mix(in oklab, var(--ground) 82%, var(--nord8));
+  --dialog-backdrop: color-mix(in oklab, var(--ground) 72%, transparent);
+
+  --crest-color: var(--nord8);
+  --watermark-color: var(--nord8);
+  --watermark-opacity: 0.22;
+  --logo-outline: #88c0d0;
+  --signature-rest: #88c0d0;
+  --sig-end-saturate: 1;
+  --sig-end-brightness: 1;
+
+  --input-border: color-mix(in oklab, var(--nord8) 40%, transparent);
+  --veil-inner: color-mix(in oklab, var(--nord8) 40%, transparent);
+  --veil-outer: color-mix(in oklab, var(--ground) 78%, var(--nord8));
 }
 
 body {
