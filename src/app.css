@@ -156,9 +156,9 @@ html[data-theme='nord-dark'] {
   color-scheme: dark;
 
   --ground: #13161c;
-  --surface: #171a22;
-  --surface-raised: #1f232d;
-  --surface-elevated: #282e3b;
+  --surface: #2e3440; /* nord0 */
+  --surface-raised: #3b4252; /* nord1 */
+  --surface-elevated: #434c5e; /* nord2 */
 
   --ink: var(--nord6); /* #eceff4 */
   --ink-muted: color-mix(in oklab, var(--nord4) 75%, transparent);

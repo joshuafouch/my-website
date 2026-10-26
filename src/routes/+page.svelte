@@ -367,6 +367,26 @@
     color: var(--ink);
   }
 
+  /* Snow Storm sits on a bright photo, so the muted gray disappears into the snow. */
+  :global(html[data-theme='nord']) .hello,
+  :global(html[data-theme='nord']) .pages,
+  :global(html[data-theme='nord']) .socials,
+  :global(html[data-theme='nord']) .social-link {
+    color: var(--nord0);
+    font-weight: 500;
+  }
+
+  :global(html[data-theme='nord']) .hello,
+  :global(html[data-theme='nord']) .name,
+  :global(html[data-theme='nord']) .pages a,
+  :global(html[data-theme='nord']) .social-link {
+    text-shadow: 0 0 0.6px var(--nord0);
+  }
+
+  :global(html[data-theme='nord']) .dot {
+    color: color-mix(in oklab, var(--nord0) 62%, transparent);
+  }
+
   .pages {
     font-variant: small-caps;
     letter-spacing: 0.08em;
