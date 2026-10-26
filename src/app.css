@@ -185,8 +185,8 @@ html[data-theme='nord-dark'] {
   --sig-end-brightness: 1;
 
   --input-border: color-mix(in oklab, var(--nord4) 35%, transparent);
-  --veil-inner: color-mix(in oklab, var(--ground) 72%, transparent);
-  --veil-outer: color-mix(in oklab, var(--ground) 90%, transparent);
+  --veil-inner: color-mix(in oklab, var(--ground) 58%, transparent);
+  --veil-outer: color-mix(in oklab, var(--ground) 74%, transparent);
 }
 
 /* Snow Storm: official Nord light ambiance from nordtheme.com */
@@ -223,8 +223,8 @@ html[data-theme='nord'] {
   --sig-end-brightness: 1.15;
 
   --input-border: color-mix(in oklab, var(--nord3) 30%, transparent);
-  --veil-inner: color-mix(in oklab, var(--nord5) 40%, transparent);
-  --veil-outer: color-mix(in oklab, var(--nord4) 64%, transparent);
+  --veil-inner: color-mix(in oklab, var(--nord5) 48%, transparent);
+  --veil-outer: color-mix(in oklab, var(--nord4) 62%, transparent);
 }
 
 /* Frost: dusk built from nord7–nord10, between Polar Night and Snow Storm */
@@ -261,16 +261,13 @@ html[data-theme='frost'] {
   --sig-end-brightness: 1;
 
   --input-border: color-mix(in oklab, var(--nord8) 40%, transparent);
-  --veil-inner: color-mix(in oklab, var(--nord8) 40%, transparent);
-  --veil-outer: color-mix(in oklab, var(--ground) 78%, var(--nord8));
+  --veil-inner: color-mix(in oklab, var(--ground) 52%, transparent);
+  --veil-outer: color-mix(in oklab, var(--ground) 68%, transparent);
 }
 
 body {
   background: var(--ground);
   color: var(--ink);
-  transition:
-    background-color 250ms ease,
-    color 250ms ease;
 }
 
 .site-backdrop {
@@ -279,7 +276,6 @@ body {
   z-index: 0;
   background: var(--ground);
   pointer-events: none;
-  transition: background-color 250ms ease;
 }
 
 .site-backdrop .photo,
@@ -319,7 +315,6 @@ body {
 .site-backdrop .veil {
   z-index: 2;
   background: radial-gradient(ellipse at center, var(--veil-inner) 0%, var(--veil-outer) 70%);
-  transition: background 250ms ease;
 }
 
 @keyframes backdrop-in {
@@ -334,8 +329,63 @@ body {
   }
 }
 
-html[data-vt-phase='new'] .inner-shell .transition {
+html[data-vt] .inner-shell .transition {
   view-transition-name: page;
+}
+
+/* The side signature is thousands of paths. Leave it out of snapshots. */
+html[data-vt] .watermark,
+html[data-vt] .floor-crest,
+html[data-theme-fade] .watermark,
+html[data-theme-fade] .floor-crest {
+  visibility: hidden;
+}
+
+html[data-vt] .turn,
+html[data-vt] .jaf-crest,
+html[data-fade] .turn,
+html[data-fade] .drift,
+html[data-fade] .jaf-crest,
+html[data-theme-fade] .turn,
+html[data-theme-fade] .drift,
+html[data-theme-fade] .jaf-crest {
+  animation-play-state: paused;
+}
+
+/* Color and filter tweens repaint the signature every frame. Hold them off during the crossfade. */
+html[data-theme-fade] *,
+html[data-theme-fade] *::before,
+html[data-theme-fade] *::after {
+  transition: none !important;
+}
+
+html[data-fade='out'] .site-backdrop,
+html[data-fade='out'] .landing,
+html[data-fade='out'] .inner-shell {
+  opacity: 0;
+  transition: opacity 200ms ease;
+}
+
+html[data-fade='in'] .site-backdrop,
+html[data-fade='in'] .landing,
+html[data-fade='in'] .inner-shell {
+  animation: page-fade-in 240ms ease both;
+}
+
+html[data-fade='in'] [data-fade-hold] {
+  opacity: 0;
+  animation: none;
+}
+
+html[data-fade] .landing,
+html[data-fade] .inner-shell {
+  pointer-events: none;
+}
+
+@keyframes page-fade-in {
+  from {
+    opacity: 0;
+  }
 }
 
 html[data-vt='enter'][data-vt-phase='new'] .rail,
@@ -389,42 +439,39 @@ html[data-vt='leave']:not([data-vt-phase]) .rail {
   }
 }
 
-/* Page changes: the outgoing screen (exactly as it was, scroll and all) fades
-   out on top of the incoming one, then only the new page content rises in.
-   Everything shared, like the sidebar and ridge, never visibly moves. */
+/* Inner pages only move the page column. Theme changes crossfade the whole screen once. */
 ::view-transition-group(*) {
-  animation-duration: 380ms;
+  animation-duration: 280ms;
   animation-timing-function: var(--ease-out);
 }
 
 ::view-transition-group(root),
-::view-transition-new(root) {
-  animation: none;
-}
-
 ::view-transition-old(root),
-::view-transition-new(root) {
-  mix-blend-mode: normal;
-}
-
-::view-transition-old(root) {
-  z-index: 1;
-  animation: vt-fade-out 200ms cubic-bezier(0.4, 0, 1, 1) both;
-}
-
-html[data-vt='enter']::view-transition-old(root),
-html[data-vt='leave']::view-transition-old(root) {
-  animation-duration: 280ms;
-}
-
+::view-transition-new(root),
 ::view-transition-group(page),
 ::view-transition-group(about-tabs),
 ::view-transition-group(site-rail) {
   animation: none;
 }
 
+::view-transition-old(root),
+::view-transition-new(root),
+::view-transition-old(page),
 ::view-transition-new(page) {
-  animation: vt-rise 420ms var(--ease-out) 110ms both;
+  mix-blend-mode: normal;
+}
+
+html[data-theme-fade]::view-transition-old(root) {
+  z-index: 1;
+  animation: vt-fade-out 240ms ease both;
+}
+
+::view-transition-old(page) {
+  animation: vt-fade-out 180ms ease both;
+}
+
+::view-transition-new(page) {
+  animation: vt-rise 280ms var(--ease-out) both;
 }
 
 ::view-transition-old(about-tabs),

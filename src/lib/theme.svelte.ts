@@ -1,3 +1,5 @@
+import { reducedMotion } from '#lib/motion.svelte.ts';
+
 const STORAGE_KEY = 'site-theme';
 
 export const THEME_ORDER = ['polar-night', 'snow-storm', 'frost'] as const;
@@ -63,9 +65,41 @@ function persist(mode: ThemeMode) {
 
 export function toggleTheme() {
   const next = nextTheme(theme.current);
-  theme.current = next;
-  applyTheme(next);
-  persist(next);
+  const apply = () => {
+    theme.current = next;
+    applyTheme(next);
+    persist(next);
+  };
+
+  if (typeof document === 'undefined' || reducedMotion()) {
+    apply();
+    return;
+  }
+
+  const root = document.documentElement;
+  root.dataset.themeFade = '';
+
+  // One crossfade. Interpolating color and the signature filter repaints thousands of paths.
+  if (typeof document.startViewTransition !== 'function') {
+    apply();
+    requestAnimationFrame(() => delete root.dataset.themeFade);
+    return;
+  }
+
+  let transition: ViewTransition;
+  try {
+    transition = document.startViewTransition(async () => {
+      apply();
+      await Promise.resolve();
+    });
+  } catch {
+    apply();
+    delete root.dataset.themeFade;
+    return;
+  }
+
+  const clear = () => delete root.dataset.themeFade;
+  transition.finished.then(clear, clear);
 }
 
 export function setTheme(mode: ThemeMode) {

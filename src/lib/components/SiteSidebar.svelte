@@ -172,11 +172,7 @@
     background: var(--surface-raised);
     border-right: 1px solid var(--border-subtle);
     translate: 0 0;
-    transition:
-      translate var(--rail-speed) var(--ease-slide),
-      background-color 250ms ease,
-      border-color 250ms ease;
-    will-change: translate;
+    transition: translate var(--rail-speed) var(--ease-slide);
   }
 
   .rail.closed {

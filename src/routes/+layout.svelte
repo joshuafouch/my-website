@@ -37,37 +37,115 @@
     measure();
     window.addEventListener('resize', measure);
     const stopBackdrop = restoreBackdrop();
+
+    // Start the landing fade on click. The route data can take a moment, and the fade should not wait for it.
+    const startFade = (event: MouseEvent) => {
+      if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
+        return;
+      if (reducedMotion()) return;
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      const anchor = target.closest('a');
+      if (!(anchor instanceof HTMLAnchorElement) || anchor.target === '_blank') return;
+
+      let url: URL;
+      try {
+        url = new URL(anchor.href);
+      } catch {
+        return;
+      }
+      if (url.origin !== window.location.origin) return;
+      const from = window.location.pathname;
+      const to = url.pathname;
+      if (!from || from === to || (from !== '/' && to !== '/')) return;
+
+      const root = document.documentElement;
+      if (root.dataset.fade) return;
+      root.dataset.fade = 'out';
+      window.setTimeout(() => {
+        if (root.dataset.fade === 'out' && !root.dataset.fadeId) delete root.dataset.fade;
+      }, 800);
+    };
+    document.addEventListener('click', startFade, true);
+
     return () => {
       window.removeEventListener('resize', measure);
+      document.removeEventListener('click', startFade, true);
       stopBackdrop?.();
     };
   });
 
   onNavigate((navigation) => {
-    if (!document.startViewTransition) return;
+    if (reducedMotion()) return;
     const from = navigation.from?.url.pathname;
     const to = navigation.to?.url.pathname;
     if (!from || !to || from === to) return;
-    if (reducedMotion()) return;
 
     const root = document.documentElement;
+
+    // Landing includes the handwritten mark. Fade opacity instead of snapshotting it.
+    if (from === '/' || to === '/') {
+      const token = String(Date.now());
+      root.dataset.fade = 'out';
+      root.dataset.fadeId = token;
+
+      return new Promise((resolve) => {
+        const outgoing = document.querySelector('.landing, .inner-shell');
+        let started = false;
+        const go = () => {
+          if (started) return;
+          started = true;
+          if (root.dataset.fadeId !== token) {
+            resolve();
+            return;
+          }
+          document.querySelectorAll('.landing, .inner-shell, .site-backdrop').forEach((node) => {
+            if (node instanceof HTMLElement) node.dataset.fadeHold = '';
+          });
+          root.dataset.fade = 'in';
+          resolve();
+          navigation.complete.finally(() => {
+            window.setTimeout(() => {
+              if (root.dataset.fadeId !== token) return;
+              delete root.dataset.fade;
+              delete root.dataset.fadeId;
+            }, 280);
+          });
+        };
+
+        if (
+          !(outgoing instanceof HTMLElement) ||
+          Number(getComputedStyle(outgoing).opacity) < 0.05
+        ) {
+          go();
+          return;
+        }
+
+        const timer = window.setTimeout(go, 280);
+        outgoing.addEventListener('transitionend', function onEnd(event) {
+          if (event.target !== outgoing || event.propertyName !== 'opacity') return;
+          outgoing.removeEventListener('transitionend', onEnd);
+          window.clearTimeout(timer);
+          go();
+        });
+      });
+    }
+
+    if (!document.startViewTransition) return;
+
     const token = String(Date.now());
-    root.dataset.vt = from === '/' ? 'enter' : to === '/' ? 'leave' : 'swap';
+    root.dataset.vt = 'swap';
     root.dataset.vtId = token;
-    delete root.dataset.vtPhase;
 
     return new Promise((resolve) => {
       const transition = document.startViewTransition(async () => {
         resolve();
         await navigation.complete;
-        // Only the incoming page gets its own layer; the outgoing one fades as part of the root.
-        root.dataset.vtPhase = 'new';
       });
       const clear = () => {
         if (root.dataset.vtId !== token) return;
         delete root.dataset.vt;
         delete root.dataset.vtId;
-        delete root.dataset.vtPhase;
       };
       transition.finished.then(clear, clear);
     });
@@ -164,7 +242,6 @@
     min-height: 100svh;
     overflow-x: clip;
     background: var(--surface);
-    transition: background-color 250ms ease;
   }
 
   .page-stack {
@@ -189,7 +266,6 @@
     margin-right: calc(var(--sidebar-width) * -1);
     overflow: hidden;
     background-color: var(--surface-raised);
-    transition: background-color 250ms ease;
   }
 
   .ridge .photo {
@@ -210,7 +286,6 @@
     z-index: 1;
     inset: 0;
     background: linear-gradient(transparent 35%, var(--surface));
-    transition: background 250ms ease;
   }
 
   @keyframes ridge-in {
