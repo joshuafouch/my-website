@@ -1,33 +1,18 @@
-import { error, fail, redirect } from '@sveltejs/kit';
-import {
-  getAdminPostBySlug,
-  requireAdmin,
-  savePostFromForm,
-  uploadBlogImage
-} from '#lib/server/admin-posts.ts';
-import type { Actions, PageServerLoad } from './$types';
-
-export const load: PageServerLoad = async ({ locals, params, url }) => {
-  const post = await getAdminPostBySlug(locals.supabase, params.slug);
-  if (!post) error(404, `Could not find ${params.slug}`);
-
-  return { post, saved: url.searchParams.has('saved') };
-};
+import { fail, redirect } from '@sveltejs/kit';
+import { requireAdmin, savePostFromForm, uploadBlogImage } from '#lib/server/admin-posts.ts';
+import type { Actions } from './$types';
 
 export const actions: Actions = {
-  save: async ({ request, locals, params }) => {
+  save: async ({ request, locals }) => {
     await requireAdmin(locals.supabase);
-    const existing = await getAdminPostBySlug(locals.supabase, params.slug);
-    if (!existing) error(404, `Could not find ${params.slug}`);
-
     const form = await request.formData();
-    const result = await savePostFromForm(locals.supabase, form, existing.id);
+    const result = await savePostFromForm(locals.supabase, form);
 
     if ('error' in result) {
       return fail(400, { error: result.error, ...result.values });
     }
 
-    redirect(303, `/admin/${result.slug}?saved=1`);
+    redirect(303, `/admin/blog/${result.slug}?saved=1`);
   },
 
   inline: async ({ request, locals }) => {

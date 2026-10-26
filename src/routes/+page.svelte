@@ -9,6 +9,9 @@
   import Metadata from '#lib/components/Metadata.svelte';
   import SignatureLogo from '#lib/components/SignatureLogo.svelte';
   import BackgroundSwitch from '#lib/components/BackgroundSwitch.svelte';
+  import ThemeSwitch from '#lib/components/ThemeSwitch.svelte';
+  import MotionToggle from '#lib/components/MotionToggle.svelte';
+  import { reducedMotion } from '#lib/motion.svelte.ts';
   import { resolve } from '$app/paths';
 
   const heroImage = '/assets/hero-bg.webp';
@@ -39,7 +42,7 @@
     if (!(anchor instanceof HTMLAnchorElement) || anchor.target === '_blank') return;
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0)
       return;
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (reducedMotion()) return;
 
     const url = new URL(anchor.href);
     if (url.origin !== window.location.origin) return;
@@ -95,7 +98,7 @@
 </svelte:head>
 
 <section
-  class="landing relative flex min-h-svh flex-col font-serif"
+  class="landing relative flex flex-col font-serif"
   class:is-ready={ready}
   class:is-return={returning}
   class:is-leaving={leaving}
@@ -115,17 +118,8 @@
 
   <div class="corner reveal" style="--step: 0">
     <BackgroundSwitch />
-    <button type="button" class="icon-btn" aria-label="Color mode">
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path
-          d="M21 14.5A8.5 8.5 0 1 1 9.5 3a7 7 0 0 0 11.5 11.5z"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.5"
-          stroke-linejoin="round"
-        />
-      </svg>
-    </button>
+    <ThemeSwitch />
+    <MotionToggle />
   </div>
 
   <div class="relative flex flex-1 flex-col items-center justify-center px-6 text-center">
@@ -137,7 +131,7 @@
         onclick={() => replay++}
       >
         {#key replay}
-          <SignatureLogo play={ready} instant={returning && replay === 0} erase={leaving} />
+          <SignatureLogo play={ready} instant={returning && replay === 0} erase={leaving} drift />
         {/key}
       </button>
     </div>
@@ -204,9 +198,9 @@
       onclick={depart}
     >
       <svg viewBox="0 0 24 24" aria-hidden="true">
-        <circle cx="7" cy="12" r="3.25" fill="none" stroke="currentColor" stroke-width="1.6" />
+        <circle cx="12" cy="8" r="3.15" fill="none" stroke="currentColor" stroke-width="1.6" />
         <path
-          d="M10.2 12H20M16 12v2.7M19.2 12v2.7"
+          d="M5.2 19.4c1.15-3.35 3.55-4.9 6.8-4.9s5.65 1.55 6.8 4.9"
           fill="none"
           stroke="currentColor"
           stroke-width="1.6"
@@ -220,6 +214,8 @@
 <style>
   .landing {
     color: var(--ink);
+    min-height: 100svh;
+    min-height: 100dvh;
   }
 
   .corner {
@@ -236,11 +232,15 @@
     place-items: center;
     width: 2.75rem;
     height: 2.75rem;
-    border: 1px solid color-mix(in oklab, var(--nord4) 35%, transparent);
+    border: 1px solid var(--btn-border);
     border-radius: 9999px;
-    background: color-mix(in oklab, var(--ground) 55%, transparent);
+    background: var(--btn-bg);
     color: var(--ink-muted);
     cursor: pointer;
+    transition:
+      color 200ms ease,
+      border-color 200ms ease,
+      background-color 200ms ease;
   }
 
   .icon-btn svg {
@@ -251,7 +251,7 @@
   .icon-btn:hover,
   .icon-btn:focus-visible {
     color: var(--ink);
-    border-color: var(--nord4);
+    border-color: var(--border-strong);
     outline: none;
   }
 
@@ -394,6 +394,9 @@
   .admin {
     grid-column: 3;
     justify-self: end;
+    border: 0;
+    border-radius: 0;
+    background: none;
   }
 
   .socials {
@@ -438,13 +441,57 @@
     outline: none;
   }
 
+  @media (max-width: 767px) {
+    .landing {
+      height: 100svh;
+      height: 100dvh;
+    }
+
+    /* Pinned to the bottom edge, so the signature group centers in the full screen. */
+    .foot {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-inline: max(1rem, env(safe-area-inset-left)) max(0.85rem, env(safe-area-inset-right));
+      padding-bottom: max(0.55rem, env(safe-area-inset-bottom));
+    }
+
+    .socials {
+      width: auto;
+      flex-wrap: nowrap;
+      justify-content: flex-start;
+      gap: 0.35rem 1rem;
+      margin: 0;
+      padding-inline: 0;
+    }
+
+    .admin {
+      position: static;
+      flex: none;
+      width: 1.7rem;
+      height: 1.7rem;
+      opacity: 0.4;
+    }
+
+    .admin svg {
+      width: 0.72rem;
+      height: 0.72rem;
+    }
+
+    .admin:hover,
+    .admin:focus-visible {
+      opacity: 1;
+    }
+  }
+
   @media (max-width: 520px) {
     .socials {
-      grid-column: 1 / -1;
-      justify-content: center;
-      gap: 0.45rem 0.9rem;
-      padding-inline: 3.25rem;
-      letter-spacing: 0.08em;
+      gap: 0.25rem 0.85rem;
+      letter-spacing: 0.06em;
       font-size: 0.72rem;
     }
   }
@@ -491,5 +538,21 @@
       animation: none;
       opacity: 1;
     }
+  }
+
+  :global(html[data-motion='off']) .loader {
+    transition: none;
+  }
+
+  :global(html[data-motion='off']) .ellipsis span {
+    animation: none;
+    opacity: 0.9;
+  }
+
+  :global(html[data-motion='off']) .is-ready .reveal,
+  :global(html[data-motion='off']) .is-ready .logo.quick,
+  :global(html[data-motion='off']) .is-leaving .reveal {
+    animation: none;
+    opacity: 1;
   }
 </style>

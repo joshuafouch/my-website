@@ -1,8 +1,9 @@
 <script lang="ts">
   import Metadata from '#lib/components/Metadata.svelte';
-  import { asset } from '$app/paths';
 
-  const pdf = asset('assets/jf_resume26-27.pdf');
+  let { data } = $props();
+
+  const pdf = $derived(data.resume.url);
   const heroImage = '/assets/hero-bg.webp';
 </script>
 
@@ -22,7 +23,7 @@
         <a class="quiet-link phone-only" href={pdf} target="_blank" rel="noopener noreferrer"
           >Open resume</a
         >
-        <a class="quiet-link" href={pdf} download="jf_resume.pdf">Download</a>
+        <a class="quiet-link" href={pdf} download={data.resume.filename}>Download</a>
       </p>
     </header>
 

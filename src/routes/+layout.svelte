@@ -9,7 +9,9 @@
   import SignatureLogo from '#lib/components/SignatureLogo.svelte';
   import JafCrest from '#lib/components/JafCrest.svelte';
   import { backdrop, photos, restoreBackdrop } from '#lib/backdrop.svelte.ts';
+  import { reducedMotion, restoreMotion } from '#lib/motion.svelte.ts';
   import { restoreSidebar, sidebar } from '#lib/sidebar.svelte.ts';
+  import { restoreTheme } from '#lib/theme.svelte.ts';
 
   let { children, data } = $props();
 
@@ -21,12 +23,13 @@
   const sigReveal = $derived(Math.min(1, Math.max(0, scrollY / (ridgePx || 1))));
 
   function scrollUp() {
-    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' });
+    window.scrollTo({ top: 0, behavior: reducedMotion() ? 'auto' : 'smooth' });
   }
 
   onMount(() => {
+    restoreTheme();
     restoreSidebar();
+    restoreMotion();
     const measure = () => {
       const ridge = document.querySelector('.ridge');
       if (ridge) ridgePx = ridge.getBoundingClientRect().height;
@@ -45,7 +48,7 @@
     const from = navigation.from?.url.pathname;
     const to = navigation.to?.url.pathname;
     if (!from || !to || from === to) return;
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (reducedMotion()) return;
 
     const root = document.documentElement;
     const token = String(Date.now());
@@ -160,7 +163,8 @@
     position: relative;
     min-height: 100svh;
     overflow-x: clip;
-    background: var(--nord0);
+    background: var(--surface);
+    transition: background-color 250ms ease;
   }
 
   .page-stack {
@@ -184,7 +188,8 @@
     height: var(--ridge-height);
     margin-right: calc(var(--sidebar-width) * -1);
     overflow: hidden;
-    background-color: var(--nord1);
+    background-color: var(--surface-raised);
+    transition: background-color 250ms ease;
   }
 
   .ridge .photo {
@@ -204,7 +209,8 @@
     position: absolute;
     z-index: 1;
     inset: 0;
-    background: linear-gradient(transparent 35%, var(--nord0));
+    background: linear-gradient(transparent 35%, var(--surface));
+    transition: background 250ms ease;
   }
 
   @keyframes ridge-in {
@@ -247,8 +253,8 @@
     top: 50%;
     left: 50%;
     width: var(--sig-length);
-    color: var(--nord8);
-    opacity: 0.16;
+    color: var(--watermark-color);
+    opacity: var(--watermark-opacity);
     transform: translate(-50%, -50%) rotate(-90deg);
     animation: signature-drift 24s ease-in-out infinite;
     pointer-events: none;
@@ -349,7 +355,7 @@
       background:
         linear-gradient(currentColor, currentColor) left center / calc(50% - 3.6rem) 1px no-repeat,
         linear-gradient(currentColor, currentColor) right center / calc(50% - 3.6rem) 1px no-repeat;
-      color: color-mix(in oklab, var(--nord4) 70%, transparent);
+      color: var(--border-subtle);
     }
 
     .turn {
@@ -357,7 +363,7 @@
       top: auto;
       left: auto;
       width: 100%;
-      color: var(--nord4);
+      color: var(--ink-muted);
       opacity: 0.82;
       transform: none;
       animation: none;
@@ -400,6 +406,28 @@
 
   @media (max-width: 767px) and (prefers-reduced-motion: reduce) {
     .turn {
+      opacity: 0.82;
+    }
+  }
+
+  :global(html[data-motion='off']) .inner-shell .page-stack,
+  :global(html[data-motion='off']) .watermark {
+    transition: none;
+  }
+
+  :global(html[data-motion='off']) .ridge .photo.fade {
+    opacity: 1;
+    animation: none;
+  }
+
+  :global(html[data-motion='off']) .turn {
+    animation: none;
+    color: var(--nord4);
+    opacity: 0.16;
+  }
+
+  @media (max-width: 767px) {
+    :global(html[data-motion='off']) .turn {
       opacity: 0.82;
     }
   }

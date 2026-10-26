@@ -11,7 +11,7 @@
 
 <header class="head">
   <h1>New post</h1>
-  <a class="quiet-link" href={resolve('/admin')}>All posts</a>
+  <a class="quiet-link" href={resolve('/admin/blog')}>All posts</a>
 </header>
 
 <PostEditor {form} />

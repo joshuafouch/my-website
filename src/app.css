@@ -24,32 +24,32 @@
   default: true;
   prefersdark: true;
   color-scheme: 'dark';
-  /* Nord Dark Theme for DaisyUI */
-  --color-base-100: oklch(33.1% 0.027 259.62); /* nord0 (#2E3440) - Main background */
-  --color-base-200: oklch(38.07% 0.032 258.12); /* nord1 (#3B4252) - Lighter background */
-  --color-base-300: oklch(42.34% 0.035 257.21); /* nord2 (#434C5E) - UI elements */
+  /* Nord Dark Theme for DaisyUI - Deeper Polar Night */
+  --color-base-100: oklch(21% 0.022 260); /* Deep Polar Night (#14171d) */
+  --color-base-200: oklch(25.5% 0.026 258); /* Elevated Polar Night (#1f232d) */
+  --color-base-300: oklch(31% 0.03 257); /* UI elements (#282e3b) */
   --color-base-content: oklch(95.27% 0.011 258.91); /* nord6 (#ECEFF4) - Base text */
 
   --color-primary: oklch(67.2% 0.057 257.73); /* nord9 (#81A1C1) - Frost Blue */
-  --color-primary-content: oklch(33.1% 0.027 259.62); /* nord0 (#2E3440) - Text on primary */
+  --color-primary-content: oklch(21% 0.022 260); /* Text on primary */
 
   --color-secondary: oklch(74.49% 0.046 195.06); /* nord7 (#8FBCBB) - Frost Teal */
-  --color-secondary-content: oklch(33.1% 0.027 259.62); /* nord0 (#2E3440) - Text on secondary */
+  --color-secondary-content: oklch(21% 0.022 260); /* Text on secondary */
 
   --color-accent: oklch(67.75% 0.07 313.52); /* nord15 (#B48EAD) - Aurora Purple */
-  --color-accent-content: oklch(33.1% 0.027 259.62); /* nord0 (#2E3440) - Text on accent */
+  --color-accent-content: oklch(21% 0.022 260); /* Text on accent */
 
-  --color-neutral: oklch(46.3% 0.039 256.3); /* nord3 (#4C566A) - UI elements, slight contrast */
+  --color-neutral: oklch(36% 0.035 256.3); /* Dark neutral */
   --color-neutral-content: oklch(95.27% 0.011 258.91); /* nord6 (#ECEFF4) - Text on neutral */
 
   --color-info: oklch(56.95% 0.076 257.25); /* nord10 (#5E81AC) - Darker Frost Blue */
   --color-info-content: oklch(95.27% 0.011 258.91); /* nord6 (#ECEFF4) - Text on info */
 
   --color-success: oklch(73.57% 0.076 138.83); /* nord14 (#A3BE8C) - Aurora Green */
-  --color-success-content: oklch(33.1% 0.027 259.62); /* nord0 (#2E3440) - Text on success */
+  --color-success-content: oklch(21% 0.022 260); /* Text on success */
 
   --color-warning: oklch(85.34% 0.096 97.4); /* nord13 (#EBCB8B) - Aurora Yellow */
-  --color-warning-content: oklch(33.1% 0.027 259.62); /* nord0 (#2E3440) - Text on warning */
+  --color-warning-content: oklch(21% 0.022 260); /* Text on warning */
 
   --color-error: oklch(59.16% 0.128 13.9); /* nord11 (#BF616A) - Aurora Red */
   --color-error-content: oklch(95.27% 0.011 258.91); /* nord6 (#ECEFF4) - Text on error */
@@ -83,21 +83,24 @@
 }
 
 :root {
+  /* Nord official palette tokens */
   --nord0: #2e3440;
   --nord1: #3b4252;
+  --nord2: #434c5e;
   --nord3: #4c566a;
   --nord4: #d8dee9;
+  --nord5: #e5e9f0;
   --nord6: #eceff4;
+  --nord7: #8fbcbb;
   --nord8: #88c0d0;
   --nord9: #81a1c1;
+  --nord10: #5e81ac;
+  --nord11: #bf616a;
+  --nord12: #d08770;
   --nord13: #ebcb8b;
   --nord14: #a3be8c;
   --nord15: #b48ead;
 
-  --ink: var(--nord6);
-  --ink-muted: color-mix(in oklab, var(--nord4) 70%, transparent);
-  --ink-accent: var(--nord14);
-  --ground: #1b1f27;
   --sidebar-width: 15rem;
   --rail-mini: 3.5rem;
   --rail-speed: 460ms;
@@ -105,8 +108,85 @@
   --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
+/* Default / Dark Mode: Deep Polar Night ("more dark mode") */
+:root,
+html[data-theme='nord-dark'],
+html.dark {
+  color-scheme: dark;
+
+  /* Rich, deeper dark mode background & surfaces */
+  --ground: #13161c;
+  --surface: #171a22;
+  --surface-raised: #1f232d;
+  --surface-elevated: #282e3b;
+
+  --ink: var(--nord6); /* #eceff4 */
+  --ink-muted: color-mix(in oklab, var(--nord4) 75%, transparent);
+  --ink-accent: var(--nord14); /* #a3be8c */
+
+  --card-bg: color-mix(in oklab, var(--surface-raised) 75%, transparent);
+  --card-border: color-mix(in oklab, var(--nord4) 18%, transparent);
+  --border-subtle: color-mix(in oklab, var(--nord4) 22%, transparent);
+  --border-strong: color-mix(in oklab, var(--nord4) 40%, transparent);
+
+  --btn-bg: color-mix(in oklab, var(--ground) 65%, transparent);
+  --btn-border: color-mix(in oklab, var(--nord4) 30%, transparent);
+
+  --dialog-bg: color-mix(in oklab, var(--ground) 94%, transparent);
+  --dialog-bar: color-mix(in oklab, var(--ground) 88%, transparent);
+  --dialog-backdrop: color-mix(in oklab, var(--ground) 72%, transparent);
+
+  --crest-color: var(--nord8);
+  --watermark-color: var(--nord8);
+  --watermark-opacity: 0.16;
+
+  --input-border: color-mix(in oklab, var(--nord4) 35%, transparent);
+  --veil-inner: color-mix(in oklab, var(--ground) 72%, transparent);
+  --veil-outer: color-mix(in oklab, var(--ground) 90%, transparent);
+}
+
+/* Light Mode: Snow Storm (official Nord light ambiance from nordtheme.com) */
+html[data-theme='nord'],
+html.light {
+  color-scheme: light;
+
+  /* Crisp Snow Storm base & clean surfaces */
+  --ground: #eceff4; /* nord6 */
+  --surface: #f4f6fa;
+  --surface-raised: #ffffff;
+  --surface-elevated: #e5e9f0; /* nord5 */
+
+  --ink: var(--nord0); /* #2e3440 - deep polar night text */
+  --ink-muted: var(--nord3); /* #4c566a - readable muted text */
+  --ink-accent: var(--nord10); /* #5e81ac - arctic frost deep blue */
+
+  --card-bg: color-mix(in oklab, #ffffff 88%, transparent);
+  --card-border: color-mix(in oklab, var(--nord3) 18%, transparent);
+  --border-subtle: color-mix(in oklab, var(--nord3) 16%, transparent);
+  --border-strong: color-mix(in oklab, var(--nord3) 38%, transparent);
+
+  --btn-bg: color-mix(in oklab, #ffffff 80%, transparent);
+  --btn-border: color-mix(in oklab, var(--nord3) 22%, transparent);
+
+  --dialog-bg: color-mix(in oklab, #ffffff 96%, transparent);
+  --dialog-bar: color-mix(in oklab, var(--nord5) 90%, transparent);
+  --dialog-backdrop: color-mix(in oklab, var(--nord0) 35%, transparent);
+
+  --crest-color: var(--nord10);
+  --watermark-color: var(--nord9);
+  --watermark-opacity: 0.14;
+
+  --input-border: color-mix(in oklab, var(--nord3) 30%, transparent);
+  --veil-inner: color-mix(in oklab, var(--ground) 65%, transparent);
+  --veil-outer: color-mix(in oklab, var(--ground) 85%, transparent);
+}
+
 body {
   background: var(--ground);
+  color: var(--ink);
+  transition:
+    background-color 250ms ease,
+    color 250ms ease;
 }
 
 .site-backdrop {
@@ -115,6 +195,7 @@ body {
   z-index: 0;
   background: var(--ground);
   pointer-events: none;
+  transition: background-color 250ms ease;
 }
 
 .site-backdrop .photo,
@@ -153,11 +234,8 @@ body {
 
 .site-backdrop .veil {
   z-index: 2;
-  background: radial-gradient(
-    ellipse at center,
-    color-mix(in oklab, var(--ground) 72%, transparent) 0%,
-    color-mix(in oklab, var(--ground) 90%, transparent) 70%
-  );
+  background: radial-gradient(ellipse at center, var(--veil-inner) 0%, var(--veil-outer) 70%);
+  transition: background 250ms ease;
 }
 
 @keyframes backdrop-in {
@@ -190,14 +268,18 @@ html[data-vt='leave']:not([data-vt-phase]) .rail {
   place-items: center;
   width: 2.75rem;
   height: 2.75rem;
-  border: 1px solid color-mix(in oklab, var(--nord4) 35%, transparent);
+  border: 1px solid var(--btn-border);
   border-radius: 9999px;
-  background: color-mix(in oklab, var(--ground) 55%, transparent);
+  background: var(--btn-bg);
   color: var(--ink-muted);
   cursor: pointer;
   opacity: 0;
   pointer-events: none;
-  transition: opacity 200ms ease;
+  transition:
+    opacity 200ms ease,
+    color 200ms ease,
+    border-color 200ms ease,
+    background-color 200ms ease;
 }
 
 .to-top svg {
@@ -213,7 +295,7 @@ html[data-vt='leave']:not([data-vt-phase]) .rail {
 .to-top:hover,
 .to-top:focus-visible {
   color: var(--ink);
-  border-color: var(--nord4);
+  border-color: var(--border-strong);
   outline: none;
 }
 
@@ -329,6 +411,7 @@ html[data-vt='leave']::view-transition-old(root) {
   margin-inline: auto;
   padding: 2.25rem 1.5rem 3rem;
   color: var(--ink);
+  container-type: inline-size;
 }
 
 .studio > h1,
@@ -338,25 +421,111 @@ html[data-vt='leave']::view-transition-old(root) {
   font-weight: 500;
 }
 
+.studio nav {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin: 0 0 1.75rem;
+  padding: 0.15rem;
+  border: 1px solid color-mix(in oklab, var(--nord4) 28%, transparent);
+}
+
 .studio nav ul {
   display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0.35rem 1.4rem;
-  margin: 0 0 2.5rem;
+  flex: 1;
+  flex-wrap: nowrap;
+  gap: 0.1rem;
+  min-width: 0;
+  margin: 0;
   padding: 0;
+  overflow-x: auto;
   list-style: none;
+  scrollbar-width: thin;
   font-variant: small-caps;
-  letter-spacing: 0.14em;
-  font-size: 1.3rem;
+  letter-spacing: 0.08em;
+  font-size: 0.98rem;
+}
+
+.studio nav form {
+  flex: none;
+}
+
+.studio nav .menu-btn {
+  display: none;
+}
+
+@container (max-width: 42rem) {
+  .studio nav .menu-btn {
+    display: inline-flex;
+    flex: 1;
+    align-items: center;
+    gap: 0.6rem;
+    min-width: 0;
+    padding: 0.35rem 0.55rem;
+    border: 0;
+    background: none;
+    color: var(--ink);
+    font: inherit;
+    font-variant: small-caps;
+    letter-spacing: 0.08em;
+    font-size: 0.98rem;
+    cursor: pointer;
+  }
+
+  .studio nav .menu-btn svg {
+    width: 1.15rem;
+    height: 1.15rem;
+    flex: none;
+  }
+
+  .studio nav .menu-btn span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .studio nav .menu-btn:focus-visible {
+    color: var(--ink-accent);
+    outline: none;
+  }
+
+  .studio nav ul {
+    display: none;
+  }
+
+  .studio nav.open {
+    flex-wrap: wrap;
+  }
+
+  .studio nav.open ul {
+    display: flex;
+    flex-basis: 100%;
+    flex-direction: column;
+    gap: 0;
+    overflow: visible;
+    order: 1;
+    margin-top: 0.15rem;
+    padding-top: 0.2rem;
+    border-top: 1px solid color-mix(in oklab, var(--nord4) 22%, transparent);
+  }
+
+  .studio nav.open ul a {
+    display: block;
+    padding: 0.7rem 0.7rem;
+  }
+}
+
+.studio nav a,
+.studio nav button.text {
+  padding: 0.28rem 0.55rem;
+  white-space: nowrap;
+  font-size: inherit;
+  letter-spacing: inherit;
 }
 
 .studio nav a[aria-current='page'] {
   color: var(--ink);
-}
-
-.studio nav .side {
-  margin-left: auto;
+  background-size: 100% 1px;
 }
 
 .studio .head {
@@ -402,10 +571,10 @@ html[data-vt='leave']::view-transition-old(root) {
 .studio .field select {
   width: 100%;
   border: 0;
-  border-bottom: 1px solid color-mix(in oklab, var(--nord4) 40%, transparent);
+  border-bottom: 1px solid var(--input-border);
   background: transparent;
   color: var(--ink);
-  color-scheme: dark;
+  color-scheme: inherit;
   font: inherit;
   font-size: 1.2rem;
   padding: 0.35rem 0;
@@ -458,8 +627,8 @@ html[data-vt='leave']::view-transition-old(root) {
 .studio a.solid,
 .studio button.solid {
   display: inline-block;
-  border: 1px solid color-mix(in oklab, var(--nord4) 35%, transparent);
-  background: transparent;
+  border: 1px solid var(--btn-border);
+  background: var(--btn-bg);
   color: var(--ink);
   font: inherit;
   font-variant: small-caps;
@@ -508,7 +677,7 @@ html[data-vt='leave']::view-transition-old(root) {
 .studio .block {
   margin-top: 1.2rem;
   padding-top: 0.4rem;
-  border-top: 1px solid color-mix(in oklab, var(--nord4) 22%, transparent);
+  border-top: 1px solid var(--border-subtle);
 }
 
 .studio .pair {
@@ -554,7 +723,7 @@ html[data-vt='leave']::view-transition-old(root) {
   gap: 1rem;
   align-items: center;
   padding: 1rem 0;
-  border-top: 1px solid color-mix(in oklab, var(--nord4) 22%, transparent);
+  border-top: 1px solid var(--border-subtle);
   color: inherit;
   text-decoration: none;
 }
@@ -588,14 +757,97 @@ html[data-vt='leave']::view-transition-old(root) {
   letter-spacing: 0.04em;
 }
 
+.studio.wide {
+  max-width: 104rem;
+  container-type: inline-size;
+}
+
+.split {
+  margin-top: 1.4rem;
+}
+
+.split-tabs {
+  display: flex;
+  gap: 1.25rem;
+  margin-bottom: 1.4rem;
+  font-variant: small-caps;
+  letter-spacing: 0.12em;
+  font-size: 1.15rem;
+}
+
+.split-tabs button {
+  padding: 0 0 0.15rem;
+  border: 0;
+  border-bottom: 1px solid transparent;
+  background: none;
+  color: var(--ink-muted);
+  font: inherit;
+  cursor: pointer;
+}
+
+.split-tabs button[aria-pressed='true'] {
+  border-bottom-color: var(--ink-accent);
+  color: var(--ink);
+}
+
+.split-tabs button:focus-visible {
+  color: var(--ink-accent);
+  outline: none;
+}
+
+.split[data-view='write'] .split-preview,
+.split[data-view='preview'] .split-write {
+  display: none;
+}
+
+.split-preview {
+  border: 1px solid color-mix(in oklab, var(--nord4) 28%, transparent);
+  background: color-mix(in oklab, var(--ground) 94%, transparent);
+}
+
+.split-preview .compact {
+  padding-top: 1.5rem;
+}
+
+@container (min-width: 60rem) {
+  .split {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr);
+    gap: 2.25rem;
+    align-items: start;
+  }
+
+  .split-tabs {
+    display: none;
+  }
+
+  .split[data-view] .split-write,
+  .split[data-view] .split-preview {
+    display: block;
+  }
+
+  .split-preview {
+    position: sticky;
+    top: 1rem;
+    max-height: calc(100svh - 2rem);
+    overflow: auto;
+  }
+
+  .split-preview.narrow {
+    justify-self: center;
+    width: 100%;
+    max-width: 40rem;
+  }
+}
+
 .preview-dialog {
   margin: auto;
   width: min(46rem, calc(100vw - 2rem));
   max-height: min(88svh, 54rem);
   overflow: auto;
   padding: 0;
-  border: 1px solid color-mix(in oklab, var(--nord4) 28%, transparent);
-  background: color-mix(in oklab, var(--ground) 94%, transparent);
+  border: 1px solid var(--card-border);
+  background: var(--dialog-bg);
   color: var(--ink);
 }
 
@@ -604,7 +856,7 @@ html[data-vt='leave']::view-transition-old(root) {
 }
 
 .preview-dialog::backdrop {
-  background: color-mix(in oklab, var(--ground) 72%, transparent);
+  background: var(--dialog-backdrop);
 }
 
 .preview-bar {
@@ -614,11 +866,11 @@ html[data-vt='leave']::view-transition-old(root) {
   display: flex;
   justify-content: flex-end;
   padding: 0.75rem;
-  background: color-mix(in oklab, var(--ground) 88%, transparent);
+  background: var(--dialog-bar);
 }
 
 .preview-close {
-  border: 1px solid color-mix(in oklab, var(--nord4) 35%, transparent);
+  border: 1px solid var(--btn-border);
   background: transparent;
   color: var(--ink);
   font: inherit;
@@ -639,10 +891,6 @@ html[data-vt='leave']::view-transition-old(root) {
 }
 
 @media (max-width: 640px) {
-  .studio nav .side {
-    margin-left: 0;
-  }
-
   .studio .index a.has-image {
     grid-template-columns: 1fr;
   }
@@ -664,4 +912,28 @@ html[data-vt='leave']::view-transition-old(root) {
     animation: none;
     opacity: 1;
   }
+}
+
+/* The pause control sets this before paint. Short durations let a reveal
+   finish on its end state instead of freezing halfway through. */
+html[data-motion='off'] *,
+html[data-motion='off'] *::before,
+html[data-motion='off'] *::after {
+  animation-duration: 0.01ms !important;
+  animation-delay: 0ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  transition-delay: 0ms !important;
+  scroll-behavior: auto !important;
+}
+
+html[data-motion='off']::view-transition-group(*),
+html[data-motion='off']::view-transition-old(*),
+html[data-motion='off']::view-transition-new(*) {
+  animation: none !important;
+}
+
+html[data-motion='off'] .site-backdrop .over.shown {
+  animation: none;
+  opacity: 1;
 }

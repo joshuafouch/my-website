@@ -4,6 +4,23 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" href="/favicon.png" />
+    <script>
+      (function () {
+        try {
+          if (localStorage.getItem('site-motion') === 'off') {
+            document.documentElement.dataset.motion = 'off';
+          }
+        } catch (e) {}
+        try {
+          var saved = localStorage.getItem('site-theme');
+          var mode = saved === 'light' || saved === 'dark' ? saved : 'dark';
+          var doc = document.documentElement;
+          doc.setAttribute('data-theme', mode === 'dark' ? 'nord-dark' : 'nord');
+          doc.classList.add(mode);
+          doc.style.colorScheme = mode;
+        } catch (e) {}
+      })();
+    </script>
     %sveltekit.head%
   </head>
 

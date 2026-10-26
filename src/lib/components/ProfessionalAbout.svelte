@@ -94,18 +94,16 @@
     {#if groups.length > 0}
       <div class="groups">
         {#each groups as group (group.id)}
-          <div>
+          <div class="tool-row">
             <h3>{group.title}</h3>
             <ul>
               {#each group.items as item (item.text + item.href)}
                 {@const href = safeHref(item.href)}
                 <li>
                   {#if href}
-                    <a class="quiet-link" {href} target="_blank" rel="noopener noreferrer"
-                      >{item.text}</a
-                    >
+                    <a class="chip" {href} target="_blank" rel="noopener noreferrer">{item.text}</a>
                   {:else}
-                    {item.text}
+                    <span class="chip">{item.text}</span>
                   {/if}
                 </li>
               {/each}
@@ -178,11 +176,10 @@
     list-style: none;
   }
 
-  ol > li,
-  .groups > div {
+  ol > li {
     padding: 1.15rem 1.25rem;
-    border: 1px solid color-mix(in oklab, var(--nord4) 28%, transparent);
-    background: color-mix(in oklab, var(--nord1) 72%, transparent);
+    border: 1px solid var(--card-border);
+    background: var(--card-bg);
   }
 
   .role {
@@ -210,17 +207,48 @@
 
   .groups {
     display: grid;
-    gap: 0.85rem;
-    margin-top: 1.5rem;
+    gap: 1.35rem;
+    margin-top: 1.6rem;
+  }
+
+  .tool-row {
+    display: grid;
+    gap: 0.55rem;
+  }
+
+  .groups h3 {
+    margin: 0;
+    font-size: 0.95rem;
+    font-weight: 500;
+    font-variant: small-caps;
+    letter-spacing: 0.14em;
+    color: var(--ink-muted);
   }
 
   .groups ul {
-    margin: 0.4rem 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.55rem;
+    margin: 0;
     padding: 0;
     list-style: none;
-    color: var(--ink-muted);
-    font-size: 1.15rem;
-    line-height: 1.6;
+  }
+
+  .chip {
+    display: inline-block;
+    border: 1px solid color-mix(in oklab, var(--nord4) 40%, transparent);
+    padding: 0.35rem 0.7rem;
+    color: var(--ink);
+    font-size: 1.02rem;
+    line-height: 1.3;
+    text-decoration: none;
+  }
+
+  a.chip:hover,
+  a.chip:focus-visible {
+    color: var(--ink-accent);
+    border-color: var(--ink-accent);
+    outline: none;
   }
 
   @media (min-width: 640px) {
@@ -248,8 +276,14 @@
       gap: 1rem;
     }
 
-    .groups {
-      grid-template-columns: 1fr 1fr;
+    .tool-row {
+      grid-template-columns: 9.5rem minmax(0, 1fr);
+      gap: 1.15rem 1.5rem;
+      align-items: start;
+    }
+
+    .groups h3 {
+      margin-top: 0.4rem;
     }
   }
 </style>

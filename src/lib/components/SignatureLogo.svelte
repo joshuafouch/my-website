@@ -1,6 +1,7 @@
 <script lang="ts">
   import gsap from 'gsap';
   import logo from '#lib/assets/jaf-logo.svg?raw';
+  import { reducedMotion } from '#lib/motion.svelte.ts';
 
   type Props = {
     /** Start writing. Hold false until a loader finishes. */
@@ -11,9 +12,17 @@
     erase?: boolean;
     /** Drop the extra space under the mark. Used in the nav. */
     compact?: boolean;
+    /** Cycle the ink through the same hues as the side signature. */
+    drift?: boolean;
   };
 
-  let { play = true, instant = false, erase = false, compact = false }: Props = $props();
+  let {
+    play = true,
+    instant = false,
+    erase = false,
+    compact = false,
+    drift = false
+  }: Props = $props();
 
   let host: HTMLDivElement | undefined = $state();
 
@@ -23,8 +32,11 @@
     if (!svg) return;
 
     const paths = [...svg.querySelectorAll('path')];
-    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const showFinished = (instant && !erase) || (reduce && !erase);
+    const reduce = reducedMotion();
+    const showFinished =
+      (instant && !erase) ||
+      (reduce && !erase) ||
+      (!erase && paths.every((path) => path.style.opacity === '1'));
 
     if (showFinished) {
       for (const path of paths) path.style.opacity = '1';
@@ -32,6 +44,10 @@
     }
 
     if (erase) {
+      if (reduce) {
+        svg.style.opacity = '0';
+        return;
+      }
       const duration = 100;
       const started = performance.now();
       svg.style.opacity = '1';
@@ -68,7 +84,13 @@
   });
 </script>
 
-<div bind:this={host} class="signature" class:pb-2={!compact} class:shown={instant && !erase}>
+<div
+  bind:this={host}
+  class="signature"
+  class:drift
+  class:pb-2={!compact}
+  class:shown={instant && !erase}
+>
   <!-- eslint-disable-next-line svelte/no-at-html-tags -- bundled SVG asset, not user input -->
   {@html logo}
 </div>
@@ -83,9 +105,55 @@
     opacity: 1;
   }
 
+  /* Same hue stops as the side signature. Only the filter moves, so the
+     compositor recolors the rasterized strokes without repainting them. */
+  .drift {
+    color: var(--nord8);
+    isolation: isolate;
+    animation: signature-color 24s ease-in-out infinite;
+  }
+
+  @keyframes signature-color {
+    0% {
+      filter: hue-rotate(0deg) saturate(0.25) brightness(1.15);
+    }
+
+    28% {
+      filter: hue-rotate(0deg) saturate(1) brightness(1);
+    }
+
+    52% {
+      filter: hue-rotate(118deg) saturate(1) brightness(1);
+    }
+
+    76% {
+      filter: hue-rotate(259deg) saturate(1) brightness(1);
+    }
+
+    100% {
+      filter: hue-rotate(360deg) saturate(0.25) brightness(1.15);
+    }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     .signature :global(path) {
       opacity: 1;
     }
+
+    .drift {
+      animation: none;
+      color: inherit;
+      filter: none;
+    }
+  }
+
+  :global(html[data-motion='off']) .signature :global(path) {
+    opacity: 1;
+  }
+
+  :global(html[data-motion='off']) .drift {
+    animation: none;
+    color: inherit;
+    filter: none;
   }
 </style>

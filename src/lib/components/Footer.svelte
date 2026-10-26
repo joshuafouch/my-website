@@ -15,7 +15,7 @@
     gap: 1.5rem;
     margin-top: 4rem;
     padding: 2.5rem 1.5rem 2rem;
-    border-top: 1px solid color-mix(in oklab, var(--nord4) 22%, transparent);
+    border-top: 1px solid var(--border-subtle);
     color: var(--ink-muted);
   }
 

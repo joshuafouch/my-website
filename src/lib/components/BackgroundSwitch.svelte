@@ -29,14 +29,15 @@
     place-items: center;
     width: 2.75rem;
     height: 2.75rem;
-    border: 1px solid color-mix(in oklab, var(--nord4) 35%, transparent);
+    border: 1px solid var(--btn-border);
     border-radius: 9999px;
-    background: color-mix(in oklab, var(--ground) 55%, transparent);
+    background: var(--btn-bg);
     color: var(--ink-muted);
     cursor: pointer;
     transition:
       color 200ms ease,
-      border-color 200ms ease;
+      border-color 200ms ease,
+      background-color 200ms ease;
   }
 
   .switch svg {
@@ -47,7 +48,7 @@
   .switch:hover,
   .switch:focus-visible {
     color: var(--ink);
-    border-color: var(--nord4);
+    border-color: var(--border-strong);
     outline: none;
   }
 

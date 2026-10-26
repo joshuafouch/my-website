@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
   import { fade } from 'svelte/transition';
+  import { reducedMotion } from '#lib/motion.svelte.ts';
 
   type Props = {
     children: Snippet;
@@ -11,7 +12,7 @@
 
   function fallbackFade(node: Element) {
     const native = 'startViewTransition' in document;
-    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const reduce = reducedMotion();
     return fade(node, { duration: native || reduce ? 0 : 250 });
   }
 </script>

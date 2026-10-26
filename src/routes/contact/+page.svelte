@@ -1,7 +1,8 @@
 <script lang="ts">
   import emailjs from '@emailjs/browser';
-  import { asset } from '$app/paths';
   import Metadata from '#lib/components/Metadata.svelte';
+
+  export let data: { resumeUrl: string };
 
   const SERVICE_ID = 'service_fasfba7';
   const TEMPLATE_ID = 'template_sm4vbpc';
@@ -70,11 +71,8 @@
         target="_blank"
         rel="noopener noreferrer">LinkedIn</a
       >
-      <a
-        class="quiet-link"
-        href={asset('assets/jf_resume26-27.pdf')}
-        target="_blank"
-        rel="noopener noreferrer">Resume</a
+      <a class="quiet-link" href={data.resumeUrl} target="_blank" rel="noopener noreferrer"
+        >Resume</a
       >
     </p>
 
@@ -117,8 +115,8 @@
   .panel {
     margin-top: 1.5rem;
     padding: 1.4rem 1.35rem 1.5rem;
-    border: 1px solid color-mix(in oklab, var(--nord4) 28%, transparent);
-    background: color-mix(in oklab, var(--nord1) 72%, transparent);
+    border: 1px solid var(--card-border);
+    background: var(--card-bg);
   }
 
   .lead {
@@ -158,7 +156,7 @@
   textarea {
     width: 100%;
     border: 0;
-    border-bottom: 1px solid color-mix(in oklab, var(--nord4) 40%, transparent);
+    border-bottom: 1px solid var(--input-border);
     background: transparent;
     color: var(--ink);
     font: inherit;

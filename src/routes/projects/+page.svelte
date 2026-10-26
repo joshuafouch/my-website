@@ -2,6 +2,7 @@
   import { tick } from 'svelte';
   import Metadata from '#lib/components/Metadata.svelte';
   import ProjectPreview from '#lib/components/ProjectPreview.svelte';
+  import { motion, reducedMotion } from '#lib/motion.svelte.ts';
   import type { Project } from '#lib/types.ts';
 
   let { data } = $props();
@@ -10,10 +11,6 @@
   let selected: Project | null = $state(null);
   let origin: DOMRect | null = null;
   let closing = false;
-
-  function reducedMotion() {
-    return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  }
 
   function shift(box: DOMRect) {
     if (!origin) return null;
@@ -26,7 +23,7 @@
   }
 
   function playOpen() {
-    if (!dialog) return;
+    if (!dialog || motion.off) return;
     if (reducedMotion() || !origin) {
       dialog.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 150, easing: 'ease' });
       return;
@@ -181,9 +178,9 @@
     height: 16rem;
     padding: 0;
     overflow: hidden;
-    border: 1px solid color-mix(in oklab, var(--nord4) 28%, transparent);
+    border: 1px solid var(--card-border);
     border-radius: 0.75rem;
-    background: var(--ground);
+    background: var(--surface-raised);
     color: inherit;
     font: inherit;
     text-align: left;
@@ -215,7 +212,7 @@
   }
 
   .project-card:focus-visible {
-    outline: 1px solid var(--nord4);
+    outline: 1px solid var(--border-strong);
     outline-offset: 4px;
   }
 
@@ -230,15 +227,15 @@
     max-height: min(85svh, 48rem);
     overflow: auto;
     padding: 0;
-    border: 1px solid color-mix(in oklab, var(--nord4) 28%, transparent);
+    border: 1px solid var(--card-border);
     border-radius: 1rem;
-    background: color-mix(in oklab, var(--ground) 94%, transparent);
+    background: var(--dialog-bg);
     color: var(--ink);
     transform-origin: center;
   }
 
   dialog::backdrop {
-    background: color-mix(in oklab, var(--ground) 72%, transparent);
+    background: var(--dialog-backdrop);
   }
 
   .close {
@@ -248,8 +245,8 @@
     float: right;
     margin: 0.75rem 0.75rem -2.4rem 0;
     padding: 0.35rem 0.8rem;
-    border: 1px solid color-mix(in oklab, var(--nord4) 35%, transparent);
-    background: color-mix(in oklab, var(--ground) 72%, transparent);
+    border: 1px solid var(--btn-border);
+    background: var(--btn-bg);
     color: inherit;
     font: inherit;
     font-variant: small-caps;
