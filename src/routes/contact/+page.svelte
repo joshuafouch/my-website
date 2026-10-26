@@ -115,8 +115,8 @@
   .panel {
     margin-top: 1.5rem;
     padding: 1.4rem 1.35rem 1.5rem;
-    border: 1px solid color-mix(in oklab, var(--nord4) 28%, transparent);
-    background: color-mix(in oklab, var(--nord1) 72%, transparent);
+    border: 1px solid var(--card-border);
+    background: var(--card-bg);
   }
 
   .lead {
@@ -156,7 +156,7 @@
   textarea {
     width: 100%;
     border: 0;
-    border-bottom: 1px solid color-mix(in oklab, var(--nord4) 40%, transparent);
+    border-bottom: 1px solid var(--input-border);
     background: transparent;
     color: var(--ink);
     font: inherit;

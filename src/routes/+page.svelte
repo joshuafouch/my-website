@@ -9,6 +9,7 @@
   import Metadata from '#lib/components/Metadata.svelte';
   import SignatureLogo from '#lib/components/SignatureLogo.svelte';
   import BackgroundSwitch from '#lib/components/BackgroundSwitch.svelte';
+  import ThemeSwitch from '#lib/components/ThemeSwitch.svelte';
   import MotionToggle from '#lib/components/MotionToggle.svelte';
   import { reducedMotion } from '#lib/motion.svelte.ts';
   import { resolve } from '$app/paths';
@@ -117,17 +118,7 @@
 
   <div class="corner reveal" style="--step: 0">
     <BackgroundSwitch />
-    <button type="button" class="icon-btn" aria-label="Color mode">
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path
-          d="M21 14.5A8.5 8.5 0 1 1 9.5 3a7 7 0 0 0 11.5 11.5z"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.5"
-          stroke-linejoin="round"
-        />
-      </svg>
-    </button>
+    <ThemeSwitch />
     <MotionToggle />
   </div>
 
@@ -241,11 +232,15 @@
     place-items: center;
     width: 2.75rem;
     height: 2.75rem;
-    border: 1px solid color-mix(in oklab, var(--nord4) 35%, transparent);
+    border: 1px solid var(--btn-border);
     border-radius: 9999px;
-    background: color-mix(in oklab, var(--ground) 55%, transparent);
+    background: var(--btn-bg);
     color: var(--ink-muted);
     cursor: pointer;
+    transition:
+      color 200ms ease,
+      border-color 200ms ease,
+      background-color 200ms ease;
   }
 
   .icon-btn svg {
@@ -256,7 +251,7 @@
   .icon-btn:hover,
   .icon-btn:focus-visible {
     color: var(--ink);
-    border-color: var(--nord4);
+    border-color: var(--border-strong);
     outline: none;
   }
 

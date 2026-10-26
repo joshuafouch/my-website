@@ -16,7 +16,7 @@
   /* Hue shifts from nord8 land on red, yellow, green, then purple. Animating
      filter instead of color keeps the drift on the compositor: no repaints. */
   .jaf-crest {
-    color: var(--nord8);
+    color: var(--crest-color, var(--nord8));
     animation: crest-drift 30s ease-in-out infinite;
   }
 

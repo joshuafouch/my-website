@@ -105,7 +105,7 @@
   select {
     min-height: 2.75rem;
     border: 0;
-    border-bottom: 1px solid color-mix(in oklab, var(--nord4) 40%, transparent);
+    border-bottom: 1px solid var(--input-border);
     background: transparent;
     color: var(--ink);
     font: inherit;
@@ -147,8 +147,8 @@
     display: grid;
     gap: 1rem;
     padding: 0.85rem;
-    border: 1px solid color-mix(in oklab, var(--nord4) 28%, transparent);
-    background: color-mix(in oklab, var(--nord1) 72%, transparent);
+    border: 1px solid var(--card-border);
+    background: var(--card-bg);
     color: inherit;
   }
 

@@ -111,8 +111,8 @@
 
   li {
     padding: 1.05rem 1.2rem;
-    border: 1px solid color-mix(in oklab, var(--nord4) 28%, transparent);
-    background: color-mix(in oklab, var(--nord1) 72%, transparent);
+    border: 1px solid var(--card-border);
+    background: var(--card-bg);
   }
 
   .title {
@@ -134,7 +134,7 @@
     width: 100%;
     aspect-ratio: 16 / 9;
     margin-top: 1.25rem;
-    border: 1px solid color-mix(in oklab, var(--nord4) 28%, transparent);
-    background: color-mix(in oklab, var(--nord1) 72%, transparent);
+    border: 1px solid var(--card-border);
+    background: var(--card-bg);
   }
 </style>

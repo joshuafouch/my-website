@@ -5,6 +5,7 @@
   import { links } from '#lib/config.ts';
   import { sidebar, toggleSidebar } from '#lib/sidebar.svelte.ts';
   import BackgroundSwitch from '#lib/components/BackgroundSwitch.svelte';
+  import ThemeSwitch from '#lib/components/ThemeSwitch.svelte';
   import MotionToggle from '#lib/components/MotionToggle.svelte';
   import JafCrest from '#lib/components/JafCrest.svelte';
 
@@ -91,17 +92,7 @@
 
   <div class="tools" role="group" aria-label="Appearance" inert={folded}>
     <BackgroundSwitch compact />
-    <button type="button" class="tool" aria-label="Color mode">
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <path
-          d="M21 14.5A8.5 8.5 0 1 1 9.5 3a7 7 0 0 0 11.5 11.5z"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.5"
-          stroke-linejoin="round"
-        />
-      </svg>
-    </button>
+    <ThemeSwitch compact />
     <MotionToggle compact />
   </div>
 
@@ -177,10 +168,13 @@
     flex-direction: column;
     width: var(--sidebar-width);
     overflow: hidden;
-    background: var(--nord1);
-    border-right: 1px solid color-mix(in oklab, var(--nord4) 22%, transparent);
+    background: var(--surface-raised);
+    border-right: 1px solid var(--border-subtle);
     translate: 0 0;
-    transition: translate var(--rail-speed) var(--ease-slide);
+    transition:
+      translate var(--rail-speed) var(--ease-slide),
+      background-color 250ms ease,
+      border-color 250ms ease;
     will-change: translate;
   }
 
@@ -223,6 +217,12 @@
     height: 2.5rem;
     max-width: none;
     object-fit: contain;
+    transition: filter 250ms ease;
+  }
+
+  :global(html[data-theme='nord-dark']) .mark img,
+  :global(html.dark) .mark img {
+    filter: invert(1) hue-rotate(180deg) brightness(1.2);
   }
 
   .mark:focus-visible {
@@ -231,7 +231,6 @@
   }
 
   .fold,
-  .tool,
   .menu-btn {
     display: grid;
     place-items: center;
@@ -259,7 +258,6 @@
   }
 
   .fold svg,
-  .tool svg,
   .menu-btn svg {
     width: 1rem;
     height: 1rem;
@@ -272,8 +270,6 @@
 
   .fold:hover,
   .fold:focus-visible,
-  .tool:hover,
-  .tool:focus-visible,
   .menu-btn:hover,
   .menu-btn:focus-visible {
     color: var(--ink);
@@ -334,7 +330,7 @@
     z-index: 1;
     margin-top: auto;
     padding: 3.15rem 0 1.2rem;
-    border-top: 1px solid color-mix(in oklab, var(--nord4) 18%, transparent);
+    border-top: 1px solid var(--border-subtle);
   }
 
   .crest {
@@ -355,13 +351,6 @@
     left: 1rem;
     display: flex;
     gap: 0.35rem;
-  }
-
-  .tool {
-    width: 2rem;
-    height: 2rem;
-    border: 1px solid color-mix(in oklab, var(--nord4) 35%, transparent);
-    border-radius: 9999px;
   }
 
   .socials {
@@ -403,7 +392,7 @@
       height: auto;
       overflow: visible;
       border-right: 0;
-      border-bottom: 1px solid color-mix(in oklab, var(--nord4) 22%, transparent);
+      border-bottom: 1px solid var(--border-subtle);
       translate: none;
       will-change: auto;
     }
@@ -465,7 +454,7 @@
 
     .expanded nav {
       grid-template-rows: 1fr;
-      border-top: 1px solid color-mix(in oklab, var(--nord4) 18%, transparent);
+      border-top: 1px solid var(--border-subtle);
     }
 
     .sheet {

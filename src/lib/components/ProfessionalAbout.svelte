@@ -178,8 +178,8 @@
 
   ol > li {
     padding: 1.15rem 1.25rem;
-    border: 1px solid color-mix(in oklab, var(--nord4) 28%, transparent);
-    background: color-mix(in oklab, var(--nord1) 72%, transparent);
+    border: 1px solid var(--card-border);
+    background: var(--card-bg);
   }
 
   .role {

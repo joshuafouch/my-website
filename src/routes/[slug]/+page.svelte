@@ -33,7 +33,7 @@
     <p class="opacity-80">{formatDate(data.meta.date)}</p>
   </header>
 
-  <article class="prose prose-invert mx-auto px-4 py-8">
+  <article class="prose dark:prose-invert mx-auto px-4 py-8">
     {#if data.meta.image}
       <img class="mb-8 w-full" src={data.meta.image} alt={data.meta.title} />
     {/if}

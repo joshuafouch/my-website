@@ -11,6 +11,7 @@
   import { backdrop, photos, restoreBackdrop } from '#lib/backdrop.svelte.ts';
   import { reducedMotion, restoreMotion } from '#lib/motion.svelte.ts';
   import { restoreSidebar, sidebar } from '#lib/sidebar.svelte.ts';
+  import { restoreTheme } from '#lib/theme.svelte.ts';
 
   let { children, data } = $props();
 
@@ -26,6 +27,7 @@
   }
 
   onMount(() => {
+    restoreTheme();
     restoreSidebar();
     restoreMotion();
     const measure = () => {
@@ -161,7 +163,8 @@
     position: relative;
     min-height: 100svh;
     overflow-x: clip;
-    background: var(--nord0);
+    background: var(--surface);
+    transition: background-color 250ms ease;
   }
 
   .page-stack {
@@ -185,7 +188,8 @@
     height: var(--ridge-height);
     margin-right: calc(var(--sidebar-width) * -1);
     overflow: hidden;
-    background-color: var(--nord1);
+    background-color: var(--surface-raised);
+    transition: background-color 250ms ease;
   }
 
   .ridge .photo {
@@ -205,7 +209,8 @@
     position: absolute;
     z-index: 1;
     inset: 0;
-    background: linear-gradient(transparent 35%, var(--nord0));
+    background: linear-gradient(transparent 35%, var(--surface));
+    transition: background 250ms ease;
   }
 
   @keyframes ridge-in {
@@ -248,8 +253,8 @@
     top: 50%;
     left: 50%;
     width: var(--sig-length);
-    color: var(--nord8);
-    opacity: 0.16;
+    color: var(--watermark-color);
+    opacity: var(--watermark-opacity);
     transform: translate(-50%, -50%) rotate(-90deg);
     animation: signature-drift 24s ease-in-out infinite;
     pointer-events: none;
@@ -350,7 +355,7 @@
       background:
         linear-gradient(currentColor, currentColor) left center / calc(50% - 3.6rem) 1px no-repeat,
         linear-gradient(currentColor, currentColor) right center / calc(50% - 3.6rem) 1px no-repeat;
-      color: color-mix(in oklab, var(--nord4) 70%, transparent);
+      color: var(--border-subtle);
     }
 
     .turn {
@@ -358,7 +363,7 @@
       top: auto;
       left: auto;
       width: 100%;
-      color: var(--nord4);
+      color: var(--ink-muted);
       opacity: 0.82;
       transform: none;
       animation: none;
