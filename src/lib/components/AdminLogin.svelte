@@ -1,8 +1,10 @@
 <script lang="ts">
   import { resolve } from '$app/paths';
+
+  let { compact = false }: { compact?: boolean } = $props();
 </script>
 
-<a class="admin" href={resolve('/admin/login')} aria-label="Admin login">
+<a class="admin" class:compact href={resolve('/admin/login')} aria-label="Admin login">
   <svg viewBox="0 0 24 24" aria-hidden="true">
     <circle cx="12" cy="8" r="3.15" fill="none" stroke="currentColor" stroke-width="1.6" />
     <path
@@ -36,6 +38,16 @@
   .admin svg {
     width: 1.05rem;
     height: 1.05rem;
+  }
+
+  .compact {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .compact svg {
+    width: 0.95rem;
+    height: 0.95rem;
   }
 
   .admin:hover,

@@ -92,10 +92,13 @@
     </button>
   </div>
 
-  <div class="tools" role="group" aria-label="Appearance" inert={folded}>
-    <BackgroundSwitch compact />
-    <ThemeSwitch compact />
-    <MotionToggle compact />
+  <div class="tools" inert={folded}>
+    <div class="tool-group" role="group" aria-label="Appearance">
+      <BackgroundSwitch compact />
+      <ThemeSwitch compact />
+      <MotionToggle compact />
+    </div>
+    <AdminLogin compact />
   </div>
 
   <nav id="site-links" aria-label="Pages">
@@ -176,7 +179,6 @@
               </a>
             </li>
           </ul>
-          <AdminLogin />
         </div>
       </div>
     </div>
@@ -363,8 +365,16 @@
   .tools {
     position: absolute;
     z-index: 3;
+    right: 0.35rem;
     bottom: 8.15rem;
     left: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.35rem;
+  }
+
+  .tool-group {
     display: flex;
     gap: 0.35rem;
   }
@@ -463,9 +473,14 @@
       grid-column: 3;
       grid-row: 1;
       align-items: center;
+      justify-content: flex-end;
       height: auto;
       margin: 0;
       padding-right: 0.15rem;
+    }
+
+    .tools > :global(.admin) {
+      display: none;
     }
 
     nav {
@@ -479,7 +494,13 @@
 
     .expanded nav {
       grid-template-rows: 1fr;
+      min-height: auto;
       border-top: 1px solid var(--border-subtle);
+    }
+
+    .expanded .sheet {
+      min-height: auto;
+      overflow: visible;
     }
 
     .sheet {
