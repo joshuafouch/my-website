@@ -1,13 +1,20 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type {
-  Job,
-  MusicEntry,
-  Org,
-  PersonalContent,
-  Portrait,
-  ProfessionalContent,
-  TechGroup,
-  TechItem
+import {
+  ALBUMS_BUCKET,
+  loadMusicLibrary,
+  musicImageUrl,
+  type Job,
+  type MusicAlbum,
+  type MusicArtist,
+  type MusicImage,
+  type MusicLibrary,
+  type MusicSong,
+  type Org,
+  type PersonalContent,
+  type Portrait,
+  type ProfessionalContent,
+  type TechGroup,
+  type TechItem
 } from '#lib/about.ts';
 import type { Database, Json } from '#lib/database.types.ts';
 import { safeHref } from '#lib/links.ts';
@@ -27,7 +34,28 @@ type JobWire = {
   orgs: { name: string; href: string }[];
 };
 type GroupWire = { id: string; title: string; items: { text: string; href: string }[] };
-type MusicWire = { id: string; title: string; artist: string; note: string; url: string };
+type ArtistWire = { id: string; name: string; note: string; url: string; imageId: string };
+type AlbumWire = {
+  id: string;
+  title: string;
+  artistName: string;
+  note: string;
+  url: string;
+  imageId: string;
+};
+type SongWire = {
+  id: string;
+  title: string;
+  artistName: string;
+  albumName: string;
+  note: string;
+  url: string;
+  imageId: string;
+};
+
+const MUSIC_LIMIT = 80;
+const COVER_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp']);
+const MAX_COVER_BYTES = 2 * 1024 * 1024;
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === 'object' && !Array.isArray(value);
@@ -154,25 +182,97 @@ function parseGroups(value: unknown): { ok: GroupWire[] } | { error: string } {
   return { ok: groups };
 }
 
-function parseMusic(value: unknown): { ok: MusicWire[] } | { error: string } {
-  if (!Array.isArray(value)) return { error: 'Music could not be read.' };
-  if (value.length > 40) return { error: 'Keep music to 40 entries or fewer.' };
-  const music: MusicWire[] = [];
+function optionalId(value: unknown): { ok: string } | { error: string } {
+  if (typeof value !== 'string' || value.trim() === '') return { ok: '' };
+  return checkId(value);
+}
+
+function parseArtists(value: unknown): { ok: ArtistWire[] } | { error: string } {
+  if (!Array.isArray(value)) return { error: 'Artists could not be read.' };
+  if (value.length > MUSIC_LIMIT) return { error: 'Keep artists to 80 or fewer.' };
+  const artists: ArtistWire[] = [];
   for (const item of value) {
-    if (!isRecord(item)) return { error: 'Music could not be read.' };
+    if (!isRecord(item)) return { error: 'Artists could not be read.' };
     const id = checkId(item.id);
     if ('error' in id) return id;
-    const title = text(item.title);
-    const artist = text(item.artist);
+    const imageId = optionalId(item.imageId);
+    if ('error' in imageId) return imageId;
+    const name = text(item.name);
     const note = text(item.note);
     const url = text(item.url);
-    if (title.length > 160 || artist.length > 160 || note.length > 500) {
-      return { error: 'A music field is too long.' };
-    }
-    music.push({ id: id.ok, title, artist, note, url });
+    if (name.length > 160 || note.length > 500) return { error: 'An artist field is too long.' };
+    artists.push({ id: id.ok, name, note, url, imageId: imageId.ok });
   }
-  if (duplicate(music.map((entry) => entry.id))) return { error: 'Each song needs its own id.' };
-  return { ok: music };
+  if (duplicate(artists.map((artist) => artist.id)))
+    return { error: 'Each artist needs its own id.' };
+  return { ok: artists };
+}
+
+function parseAlbums(value: unknown): { ok: AlbumWire[] } | { error: string } {
+  if (!Array.isArray(value)) return { error: 'Albums could not be read.' };
+  if (value.length > MUSIC_LIMIT) return { error: 'Keep albums to 80 or fewer.' };
+  const albums: AlbumWire[] = [];
+  for (const item of value) {
+    if (!isRecord(item)) return { error: 'Albums could not be read.' };
+    const id = checkId(item.id);
+    if ('error' in id) return id;
+    const imageId = optionalId(item.imageId);
+    if ('error' in imageId) return imageId;
+    const title = text(item.title);
+    const artistName = text(item.artistName);
+    const note = text(item.note);
+    const url = text(item.url);
+    if (title.length > 160 || artistName.length > 160 || note.length > 500) {
+      return { error: 'An album field is too long.' };
+    }
+    albums.push({
+      id: id.ok,
+      title,
+      artistName,
+      note,
+      url,
+      imageId: imageId.ok
+    });
+  }
+  if (duplicate(albums.map((album) => album.id))) return { error: 'Each album needs its own id.' };
+  return { ok: albums };
+}
+
+function parseSongs(value: unknown): { ok: SongWire[] } | { error: string } {
+  if (!Array.isArray(value)) return { error: 'Songs could not be read.' };
+  if (value.length > MUSIC_LIMIT) return { error: 'Keep songs to 80 or fewer.' };
+  const songs: SongWire[] = [];
+  for (const item of value) {
+    if (!isRecord(item)) return { error: 'Songs could not be read.' };
+    const id = checkId(item.id);
+    if ('error' in id) return id;
+    const imageId = optionalId(item.imageId);
+    if ('error' in imageId) return imageId;
+    const title = text(item.title);
+    const artistName = text(item.artistName);
+    const albumName = text(item.albumName);
+    const note = text(item.note);
+    const url = text(item.url);
+    if (
+      title.length > 160 ||
+      artistName.length > 160 ||
+      albumName.length > 160 ||
+      note.length > 500
+    ) {
+      return { error: 'A song field is too long.' };
+    }
+    songs.push({
+      id: id.ok,
+      title,
+      artistName,
+      albumName,
+      note,
+      url,
+      imageId: imageId.ok
+    });
+  }
+  if (duplicate(songs.map((song) => song.id))) return { error: 'Each song needs its own id.' };
+  return { ok: songs };
 }
 
 function jobsFromWire(jobs: JobWire[]): Job[] {
@@ -200,13 +300,44 @@ function emptyGroup(group: TechGroup): boolean {
   return !group.title && group.items.every((item) => !item.text && !item.href);
 }
 
-function emptyMusic(entry: MusicEntry): boolean {
-  return !entry.title && !entry.artist && !entry.note && !entry.url;
+function emptyArtist(entry: ArtistWire): boolean {
+  return !entry.name && !entry.note && !entry.url && !entry.imageId;
+}
+
+function emptyAlbum(entry: AlbumWire): boolean {
+  return !entry.title && !entry.artistName && !entry.note && !entry.url && !entry.imageId;
+}
+
+function emptySong(entry: SongWire): boolean {
+  return (
+    !entry.title &&
+    !entry.artistName &&
+    !entry.albumName &&
+    !entry.note &&
+    !entry.url &&
+    !entry.imageId
+  );
+}
+
+function knownId(
+  id: string,
+  ids: Set<string>,
+  message: string
+): { ok: string } | { error: string } {
+  if (!id) return { ok: '' };
+  if (!ids.has(id)) return { error: message };
+  return { ok: id };
 }
 
 async function deleteMissing(
   supabase: Client,
-  table: 'portraits' | 'work_experiences' | 'tech_groups' | 'music_entries',
+  table:
+    | 'portraits'
+    | 'work_experiences'
+    | 'tech_groups'
+    | 'music_artists'
+    | 'music_albums'
+    | 'music_songs',
   ids: string[]
 ): Promise<string | null> {
   if (ids.length === 0) {
@@ -372,6 +503,14 @@ export async function saveProfessionalFromForm(
   return { ok: true };
 }
 
+function personalContent(
+  intro: string,
+  youtubeUrl: string,
+  library: MusicLibrary
+): PersonalContent {
+  return { intro, youtubeUrl, library };
+}
+
 export async function savePersonalFromForm(
   supabase: Client,
   form: FormData
@@ -384,25 +523,73 @@ export async function savePersonalFromForm(
   const youtube = checkHref(youtubeUrl, 'The video link');
   if ('error' in youtube) return { error: youtube.error };
 
-  const musicJson = parseJson(String(form.get('music') ?? ''));
-  if ('error' in musicJson) return musicJson;
-  const musicParsed = parseMusic(musicJson.ok);
-  if ('error' in musicParsed) return musicParsed;
+  const artistsJson = parseJson(String(form.get('artists') ?? ''));
+  if ('error' in artistsJson) return artistsJson;
+  const albumsJson = parseJson(String(form.get('albums') ?? ''));
+  if ('error' in albumsJson) return albumsJson;
+  const songsJson = parseJson(String(form.get('songs') ?? ''));
+  if ('error' in songsJson) return songsJson;
 
-  const content: PersonalContent = {
-    intro,
-    youtubeUrl,
-    music: musicParsed.ok
-  };
+  const artistsParsed = parseArtists(artistsJson.ok);
+  if ('error' in artistsParsed) return artistsParsed;
+  const albumsParsed = parseAlbums(albumsJson.ok);
+  if ('error' in albumsParsed) return albumsParsed;
+  const songsParsed = parseSongs(songsJson.ok);
+  if ('error' in songsParsed) return songsParsed;
 
-  const music: MusicEntry[] = [];
-  for (const entry of musicParsed.ok) {
-    if (emptyMusic(entry)) continue;
-    if (!entry.title) return { error: 'Each piece of music needs a title.', content };
-    const url = checkHref(entry.url, 'A music link');
-    if ('error' in url) return { error: url.error, content };
-    music.push({ ...entry, url: url.ok });
+  const images = await loadMusicLibrary(supabase);
+  const imageIds = new Set((images?.images ?? []).map((image) => image.id));
+  const draft = personalContent(intro, youtube.ok, {
+    images: images?.images ?? [],
+    artists: artistsParsed.ok,
+    albums: albumsParsed.ok,
+    songs: songsParsed.ok
+  });
+  if (!images) return { error: 'The image library could not be read.', content: draft };
+
+  const artists: MusicArtist[] = [];
+  for (const entry of artistsParsed.ok) {
+    if (emptyArtist(entry)) continue;
+    if (!entry.name) return { error: 'Each artist needs a name.', content: draft };
+    const url = checkHref(entry.url, 'An artist link');
+    if ('error' in url) return { error: url.error, content: draft };
+    const imageId = knownId(entry.imageId, imageIds, 'Choose an image from the library.');
+    if ('error' in imageId) return { error: imageId.error, content: draft };
+    artists.push({ ...entry, url: url.ok, imageId: imageId.ok });
   }
+
+  const albums: MusicAlbum[] = [];
+  for (const entry of albumsParsed.ok) {
+    if (emptyAlbum(entry)) continue;
+    if (!entry.title) return { error: 'Each album needs a title.', content: draft };
+    const url = checkHref(entry.url, 'An album link');
+    if ('error' in url) return { error: url.error, content: draft };
+    const imageId = knownId(entry.imageId, imageIds, 'Choose an image from the library.');
+    if ('error' in imageId) return { error: imageId.error, content: draft };
+    albums.push({ ...entry, url: url.ok, imageId: imageId.ok });
+  }
+
+  const songs: MusicSong[] = [];
+  for (const entry of songsParsed.ok) {
+    if (emptySong(entry)) continue;
+    if (!entry.title) return { error: 'Each song needs a title.', content: draft };
+    const url = checkHref(entry.url, 'A song link');
+    if ('error' in url) return { error: url.error, content: draft };
+    const imageId = knownId(entry.imageId, imageIds, 'Choose an image from the library.');
+    if ('error' in imageId) return { error: imageId.error, content: draft };
+    songs.push({
+      ...entry,
+      url: url.ok,
+      imageId: imageId.ok
+    });
+  }
+
+  const content = personalContent(intro, youtube.ok, {
+    images: images.images,
+    artists,
+    albums,
+    songs
+  });
 
   const { error: profileError } = await supabase.from('about_personal').upsert({
     id: 1,
@@ -412,23 +599,137 @@ export async function savePersonalFromForm(
   });
   if (profileError) return { error: profileError.message, content };
 
-  for (const [index, entry] of music.entries()) {
-    const { error: upsertError } = await supabase.from('music_entries').upsert({
+  for (const [index, entry] of artists.entries()) {
+    const { error: upsertError } = await supabase.from('music_artists').upsert({
       id: entry.id,
-      title: entry.title,
-      artist: entry.artist,
+      name: entry.name,
       note: entry.note,
       url: entry.url || null,
+      image_id: entry.imageId || null,
       sort_order: index
     });
     if (upsertError) return { error: upsertError.message, content };
   }
-  const musicDelete = await deleteMissing(
-    supabase,
-    'music_entries',
-    music.map((entry) => entry.id)
-  );
-  if (musicDelete) return { error: musicDelete, content };
 
+  for (const [index, entry] of albums.entries()) {
+    const { error: upsertError } = await supabase.from('music_albums').upsert({
+      id: entry.id,
+      title: entry.title,
+      artist_name: entry.artistName,
+      note: entry.note,
+      url: entry.url || null,
+      image_id: entry.imageId || null,
+      sort_order: index
+    });
+    if (upsertError) return { error: upsertError.message, content };
+  }
+
+  for (const [index, entry] of songs.entries()) {
+    const { error: upsertError } = await supabase.from('music_songs').upsert({
+      id: entry.id,
+      title: entry.title,
+      artist_name: entry.artistName,
+      album_name: entry.albumName,
+      note: entry.note,
+      url: entry.url || null,
+      image_id: entry.imageId || null,
+      sort_order: index
+    });
+    if (upsertError) return { error: upsertError.message, content };
+  }
+
+  const songDelete = await deleteMissing(
+    supabase,
+    'music_songs',
+    songs.map((entry) => entry.id)
+  );
+  if (songDelete) return { error: songDelete, content };
+  const albumDelete = await deleteMissing(
+    supabase,
+    'music_albums',
+    albums.map((entry) => entry.id)
+  );
+  if (albumDelete) return { error: albumDelete, content };
+  const artistDelete = await deleteMissing(
+    supabase,
+    'music_artists',
+    artists.map((entry) => entry.id)
+  );
+  if (artistDelete) return { error: artistDelete, content };
+
+  return { ok: true };
+}
+
+export async function uploadMusicImage(
+  supabase: Client,
+  file: File,
+  altText: string
+): Promise<{ image: MusicImage } | { error: string }> {
+  await requireAdmin(supabase);
+
+  if (!COVER_TYPES.has(file.type)) return { error: 'Use a JPEG, PNG, or WebP.' };
+  if (file.size === 0) return { error: 'Choose an image.' };
+  if (file.size > MAX_COVER_BYTES) return { error: 'Image must be 2 MB or smaller.' };
+
+  const extension = file.type === 'image/png' ? 'png' : file.type === 'image/jpeg' ? 'jpg' : 'webp';
+  const path = `${crypto.randomUUID()}.${extension}`;
+  const alt = text(altText).slice(0, 160) || 'Album cover';
+  const { error: uploadError } = await supabase.storage.from(ALBUMS_BUCKET).upload(path, file, {
+    contentType: file.type,
+    cacheControl: '86400',
+    upsert: false
+  });
+  if (uploadError) return { error: uploadError.message };
+
+  const { data, error: insertError } = await supabase
+    .from('music_images')
+    .insert({ path, alt })
+    .select('id, alt')
+    .single();
+  if (insertError || !data) {
+    await supabase.storage.from(ALBUMS_BUCKET).remove([path]);
+    return { error: insertError?.message ?? 'Could not save that image.' };
+  }
+
+  return { image: { id: data.id, url: musicImageUrl(supabase, path), alt: data.alt } };
+}
+
+export async function deleteMusicImage(
+  supabase: Client,
+  id: string
+): Promise<{ ok: true } | { error: string }> {
+  await requireAdmin(supabase);
+  const checked = checkId(id);
+  if ('error' in checked) return { error: 'That image could not be found.' };
+
+  const [artists, albums, songs] = await Promise.all([
+    supabase.from('music_artists').select('id').eq('image_id', checked.ok).limit(1),
+    supabase.from('music_albums').select('id').eq('image_id', checked.ok).limit(1),
+    supabase.from('music_songs').select('id').eq('image_id', checked.ok).limit(1)
+  ]);
+  if (artists.error || albums.error || songs.error) {
+    return { error: 'Could not check where that image is used.' };
+  }
+  if (
+    (artists.data?.length ?? 0) > 0 ||
+    (albums.data?.length ?? 0) > 0 ||
+    (songs.data?.length ?? 0) > 0
+  ) {
+    return { error: 'That image is still used by a saved entry.' };
+  }
+
+  const { data: row, error: readError } = await supabase
+    .from('music_images')
+    .select('path')
+    .eq('id', checked.ok)
+    .maybeSingle();
+  if (readError) return { error: readError.message };
+  if (!row) return { error: 'That image is already gone.' };
+
+  const { error: deleteError } = await supabase.from('music_images').delete().eq('id', checked.ok);
+  if (deleteError) return { error: deleteError.message };
+
+  const { error: storageError } = await supabase.storage.from(ALBUMS_BUCKET).remove([row.path]);
+  if (storageError) console.error('Failed to remove album image', storageError);
   return { ok: true };
 }

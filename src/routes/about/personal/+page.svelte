@@ -13,4 +13,4 @@
   imageAlt="Joshua Fouch"
 />
 
-<PersonalAbout introHtml={data.introHtml} youtubeUrl={data.youtubeUrl} music={data.music} />
+<PersonalAbout introHtml={data.introHtml} youtubeUrl={data.youtubeUrl} library={data.library} />

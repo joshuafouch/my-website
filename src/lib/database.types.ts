@@ -210,29 +210,113 @@ export type Database = {
         };
         Relationships: [];
       };
-      music_entries: {
+      music_images: {
+        Row: {
+          id: string;
+          path: string;
+          alt: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          path: string;
+          alt?: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          path?: string;
+          alt?: string;
+          created_at?: string;
+        };
+        Relationships: [];
+      };
+      music_artists: {
+        Row: {
+          id: string;
+          name: string;
+          note: string;
+          url: string | null;
+          image_id: string | null;
+          sort_order: number;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          note?: string;
+          url?: string | null;
+          image_id?: string | null;
+          sort_order?: number;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          note?: string;
+          url?: string | null;
+          image_id?: string | null;
+          sort_order?: number;
+        };
+        Relationships: [];
+      };
+      music_albums: {
         Row: {
           id: string;
           title: string;
-          artist: string;
+          artist_name: string;
           note: string;
           url: string | null;
+          image_id: string | null;
           sort_order: number;
         };
         Insert: {
           id?: string;
           title: string;
-          artist?: string;
+          artist_name?: string;
           note?: string;
           url?: string | null;
+          image_id?: string | null;
           sort_order?: number;
         };
         Update: {
           id?: string;
           title?: string;
-          artist?: string;
+          artist_name?: string;
           note?: string;
           url?: string | null;
+          image_id?: string | null;
+          sort_order?: number;
+        };
+        Relationships: [];
+      };
+      music_songs: {
+        Row: {
+          id: string;
+          title: string;
+          artist_name: string;
+          album_name: string;
+          note: string;
+          url: string | null;
+          image_id: string | null;
+          sort_order: number;
+        };
+        Insert: {
+          id?: string;
+          title: string;
+          artist_name?: string;
+          album_name?: string;
+          note?: string;
+          url?: string | null;
+          image_id?: string | null;
+          sort_order?: number;
+        };
+        Update: {
+          id?: string;
+          title?: string;
+          artist_name?: string;
+          album_name?: string;
+          note?: string;
+          url?: string | null;
+          image_id?: string | null;
           sort_order?: number;
         };
         Relationships: [];
