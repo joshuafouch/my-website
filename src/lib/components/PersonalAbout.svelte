@@ -1,15 +1,16 @@
 <script lang="ts">
-  import type { MusicEntry } from '#lib/about.ts';
+  import { emptyLibrary, type MusicLibrary } from '#lib/about.ts';
+  import MusicLibraryView from '#lib/components/MusicLibrary.svelte';
   import { safeHref, youtubeId } from '#lib/links.ts';
 
   let {
     introHtml = '',
     youtubeUrl = '',
-    music = []
+    library = emptyLibrary()
   }: {
     introHtml?: string;
     youtubeUrl?: string;
-    music?: MusicEntry[];
+    library?: MusicLibrary;
   } = $props();
 
   const videoId = $derived(youtubeId(youtubeUrl));
@@ -24,30 +25,7 @@
 
   <section class="block">
     <h2>Favorite music</h2>
-    {#if music.length > 0}
-      <ul>
-        {#each music as entry (entry.id)}
-          {@const href = safeHref(entry.url)}
-          <li>
-            <p class="title">
-              {#if href}
-                <a class="quiet-link" {href} target="_blank" rel="noopener noreferrer"
-                  >{entry.title}</a
-                >
-              {:else}
-                {entry.title}
-              {/if}
-              {#if entry.artist}
-                <span> · {entry.artist}</span>
-              {/if}
-            </p>
-            {#if entry.note}
-              <p class="note">{entry.note}</p>
-            {/if}
-          </li>
-        {/each}
-      </ul>
-    {/if}
+    <MusicLibraryView {library} />
   </section>
 
   {#if videoId || videoHref}
@@ -71,16 +49,11 @@
 </div>
 
 <style>
-  .copy :global(p),
-  .note,
-  .title {
+  .copy :global(p) {
+    margin: 0;
     color: var(--ink-muted);
     font-size: 1.25rem;
     line-height: 1.55;
-  }
-
-  .copy :global(p) {
-    margin: 0;
   }
 
   .copy :global(p) + :global(p) {
@@ -99,34 +72,6 @@
     margin: 0;
     font-size: 2.4rem;
     font-weight: 500;
-  }
-
-  ul {
-    display: grid;
-    gap: 0.85rem;
-    margin: 1.5rem 0 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  li {
-    padding: 1.05rem 1.2rem;
-    border: 1px solid var(--card-border);
-    background: var(--card-bg);
-  }
-
-  .title {
-    margin: 0;
-    color: var(--ink);
-  }
-
-  .title span {
-    color: var(--ink-muted);
-  }
-
-  .note {
-    margin: 0.3rem 0 0;
-    font-size: 1.15rem;
   }
 
   iframe {
