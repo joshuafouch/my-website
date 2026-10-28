@@ -118,7 +118,22 @@
   }
 
   select {
-    padding-inline: 0.2rem;
+    appearance: none;
+    padding-inline: 0.2rem 1.35rem;
+    background-color: transparent;
+    background-image:
+      linear-gradient(45deg, transparent 50%, var(--ink-muted) 50%),
+      linear-gradient(-45deg, transparent 50%, var(--ink-muted) 50%);
+    background-position:
+      calc(100% - 0.72rem) 58%,
+      calc(100% - 0.48rem) 58%;
+    background-size: 0.28rem 0.28rem;
+    background-repeat: no-repeat;
+  }
+
+  select option {
+    background-color: #eceff4;
+    color: #2e3440;
   }
 
   input:focus-visible,

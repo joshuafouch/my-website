@@ -2,7 +2,7 @@
   import { resolve } from '$app/paths';
   import PostEditor from '#lib/components/PostEditor.svelte';
 
-  let { form } = $props();
+  let { data, form } = $props();
 </script>
 
 <svelte:head>
@@ -14,4 +14,4 @@
   <a class="quiet-link" href={resolve('/admin/blog')}>All posts</a>
 </header>
 
-<PostEditor {form} />
+<PostEditor {form} images={data.images} imageError={data.imageError} />
