@@ -1,6 +1,15 @@
 import { fail, redirect } from '@sveltejs/kit';
-import { requireAdmin, savePostFromForm, uploadBlogImage } from '#lib/server/admin-posts.ts';
-import type { Actions } from './$types';
+import {
+  listBlogImages,
+  requireAdmin,
+  savePostFromForm,
+  uploadBlogImageFromForm
+} from '#lib/server/admin-posts.ts';
+import type { Actions, PageServerLoad } from './$types';
+
+export const load: PageServerLoad = async ({ locals }) => {
+  return listBlogImages(locals.supabase);
+};
 
 export const actions: Actions = {
   save: async ({ request, locals }) => {
@@ -15,22 +24,11 @@ export const actions: Actions = {
     redirect(303, `/admin/blog/${result.slug}?saved=1`);
   },
 
-  inline: async ({ request, locals }) => {
+  upload: async ({ request, locals }) => {
     await requireAdmin(locals.supabase);
     const form = await request.formData();
-    const file = form.get('inline');
-    const alt = String(form.get('alt') ?? '').trim() || 'image';
-
-    if (!(file instanceof File) || file.size === 0) {
-      return fail(400, { error: 'Choose an image to insert.' });
-    }
-
-    const uploaded = await uploadBlogImage(locals.supabase, file, 'inline');
-    if ('error' in uploaded) {
-      return fail(400, { error: uploaded.error });
-    }
-
-    const markdown = `\n![${alt.replaceAll(']', '')}](${uploaded.url})\n`;
-    return { markdown };
+    const uploaded = await uploadBlogImageFromForm(locals.supabase, form);
+    if ('error' in uploaded) return fail(400, { error: uploaded.error });
+    return { url: uploaded.url };
   }
 };

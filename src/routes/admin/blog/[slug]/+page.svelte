@@ -25,4 +25,4 @@
   </p>
 {/if}
 
-<PostEditor post={data.post} {form} />
+<PostEditor post={data.post} {form} images={data.images} imageError={data.imageError} />

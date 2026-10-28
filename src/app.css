@@ -735,6 +735,217 @@ html[data-theme-fade]::view-transition-old(root) {
   font-size: 1rem;
 }
 
+.studio .post-editor .field input,
+.studio .post-editor .field textarea,
+.studio .post-editor .field select {
+  border: 1px solid color-mix(in oklab, var(--ink) 42%, transparent);
+  background: color-mix(in oklab, var(--ground) 68%, var(--ink));
+  padding: 0.55rem 0.75rem;
+}
+
+.studio .post-editor .field input:focus-visible,
+.studio .post-editor .field textarea:focus-visible,
+.studio .post-editor .field select:focus-visible {
+  border-color: var(--ink-accent);
+  outline: 2px solid color-mix(in oklab, var(--ink-accent) 45%, transparent);
+  outline-offset: 1px;
+}
+
+.studio .post-editor .meta-row {
+  display: grid;
+  gap: 0 1rem;
+}
+
+.studio .post-editor .body-label {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+}
+
+.studio .post-editor .cover-card {
+  display: grid;
+  grid-template-columns: 10rem minmax(0, 1fr);
+  gap: 1rem;
+  align-items: center;
+  margin-top: 1.15rem;
+  padding: 0.85rem;
+  background: color-mix(in oklab, var(--ground) 82%, var(--ink));
+  border: 1px solid color-mix(in oklab, var(--ink) 42%, transparent);
+}
+
+.studio .post-editor .cover-card img,
+.studio .post-editor .cover-empty {
+  width: 10rem;
+  height: 7rem;
+  object-fit: cover;
+  background: color-mix(in oklab, var(--ground) 68%, var(--ink));
+  border: 1px solid color-mix(in oklab, var(--ink) 42%, transparent);
+}
+
+.studio .post-editor .cover-empty {
+  display: grid;
+  place-items: center;
+  color: var(--ink-muted);
+  font-size: 1.05rem;
+}
+
+.studio .post-editor .cover-card .bar {
+  margin-top: 0;
+}
+
+.studio .post-editor button.solid:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.studio .post-editor button.solid:disabled:hover,
+.studio .post-editor button.solid:disabled:focus-visible {
+  color: var(--ink);
+  border-color: var(--btn-border);
+}
+
+.studio .md-field {
+  position: relative;
+}
+
+.studio .md-field textarea,
+.studio .md-field pre {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 7rem;
+  margin: 0;
+  padding: 0.35rem 0;
+  border: 0;
+  border-bottom: 1px solid var(--input-border);
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 1.2rem;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  word-break: break-word;
+  tab-size: 2;
+  scrollbar-gutter: stable;
+}
+
+.studio .md-field textarea {
+  position: relative;
+  z-index: 1;
+  display: block;
+  resize: vertical;
+  overflow: auto;
+  color: transparent;
+  caret-color: var(--ink);
+  background: transparent;
+}
+
+.studio .md-field pre {
+  position: absolute;
+  z-index: 0;
+  inset: 0;
+  overflow: auto;
+  pointer-events: none;
+  scrollbar-color: transparent transparent;
+}
+
+.studio .md-field pre::-webkit-scrollbar {
+  background: transparent;
+}
+
+.studio .md-field pre::-webkit-scrollbar-thumb {
+  background: transparent;
+}
+
+.studio .post-editor .md-field textarea,
+.studio .post-editor .md-field pre {
+  min-height: 18rem;
+  padding: 0.55rem 0.75rem;
+  border: 1px solid color-mix(in oklab, var(--ink) 42%, transparent);
+  background: color-mix(in oklab, var(--ground) 68%, var(--ink));
+  font-family: 'IBM Plex Mono', monospace;
+  font-size: 1rem;
+  line-height: 1.5;
+}
+
+.studio .post-editor .md-field textarea {
+  height: min(32rem, 70vh);
+  color: transparent;
+  caret-color: var(--ink);
+  background: transparent;
+}
+
+.studio .post-editor .md-field textarea:focus-visible {
+  border-color: var(--ink-accent);
+  outline: 2px solid color-mix(in oklab, var(--ink-accent) 45%, transparent);
+  outline-offset: 1px;
+}
+
+.studio .md-field .md-mark {
+  color: var(--ink-muted);
+}
+
+.studio .md-field .md-h,
+.studio .md-field .md-img {
+  color: var(--ink-accent);
+}
+
+.studio .md-field .md-strong {
+  font-weight: 600;
+  color: var(--nord13);
+}
+
+.studio .md-field .md-em,
+.studio .md-field .md-quote {
+  font-style: italic;
+  color: var(--nord15);
+}
+
+.studio .md-field .md-code {
+  color: var(--nord8);
+}
+
+.studio .md-field .md-link,
+.studio .md-field .md-url {
+  color: var(--nord9);
+}
+
+html[data-theme='nord'] .studio .md-field .md-strong {
+  color: var(--nord12);
+}
+
+html[data-theme='nord'] .studio .md-field .md-code,
+html[data-theme='nord'] .studio .md-field .md-link,
+html[data-theme='nord'] .studio .md-field .md-url {
+  color: var(--nord10);
+}
+
+select option,
+select optgroup {
+  background-color: #eceff4;
+  color: #2e3440;
+}
+
+@media (min-width: 40rem) {
+  .studio .post-editor .meta-row {
+    grid-template-columns: minmax(0, 11rem) minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .studio .post-editor .cover-card {
+    grid-template-columns: 1fr;
+  }
+
+  .studio .post-editor .cover-card img,
+  .studio .post-editor .cover-empty {
+    width: 100%;
+    height: 9rem;
+  }
+}
+
 .studio .check {
   display: flex;
   gap: 0.6rem;

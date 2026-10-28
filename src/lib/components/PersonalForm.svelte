@@ -9,6 +9,7 @@
     PersonalContent
   } from '#lib/about.ts';
   import { openLinks } from '#lib/links.ts';
+  import MarkdownField from '#lib/components/MarkdownField.svelte';
   import MusicImagePicker from '#lib/components/MusicImagePicker.svelte';
   import PersonalAbout from '#lib/components/PersonalAbout.svelte';
 
@@ -95,7 +96,7 @@
     <h2>Who I am</h2>
     <label class="field">
       <span>Opening paragraph</span>
-      <textarea name="intro" rows="6" bind:value={intro}></textarea>
+      <MarkdownField name="intro" rows={6} bind:value={intro} />
     </label>
     <p class="note">This sits at the top of the personal page. Markdown links work.</p>
   </section>

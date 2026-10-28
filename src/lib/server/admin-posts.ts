@@ -3,6 +3,7 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import { isAdminEmail } from '#lib/admin.ts';
 import type { Database } from '#lib/database.types.ts';
 import { slugify } from '#lib/slug.ts';
+import type { BlogImage } from '#lib/types.ts';
 
 type Client = SupabaseClient<Database>;
 
@@ -81,6 +82,71 @@ export async function uploadBlogImage(
 
   const { data } = supabase.storage.from('blog-images').getPublicUrl(path);
   return { url: data.publicUrl };
+}
+
+const LIBRARY_FOLDERS = ['covers', 'inline'] as const;
+
+export async function listBlogImages(
+  supabase: Client
+): Promise<{ images: BlogImage[]; imageError: string | null }> {
+  const listed = await Promise.all(
+    LIBRARY_FOLDERS.map(async (folder) => {
+      const { data, error: listError } = await supabase.storage.from('blog-images').list(folder, {
+        limit: 100,
+        sortBy: { column: 'created_at', order: 'desc' }
+      });
+
+      if (listError) {
+        console.error(`Failed to list ${folder} images`, listError);
+        return { folder, failed: true, files: [] };
+      }
+
+      return {
+        folder,
+        failed: false,
+        files: (data ?? []).filter((file) => file.id && file.name && !file.name.startsWith('.'))
+      };
+    })
+  );
+
+  const images = listed
+    .flatMap((entry) =>
+      entry.files.map((file) => {
+        const { data } = supabase.storage
+          .from('blog-images')
+          .getPublicUrl(`${entry.folder}/${file.name}`);
+        return {
+          url: data.publicUrl,
+          name: file.name,
+          folder: entry.folder,
+          createdAt: file.created_at ?? ''
+        };
+      })
+    )
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+    .map(({ url, name, folder }) => ({ url, name, folder }));
+
+  return {
+    images,
+    imageError: listed.some((entry) => entry.failed) ? 'Could not load the image library.' : null
+  };
+}
+
+export async function uploadBlogImageFromForm(
+  supabase: Client,
+  form: FormData
+): Promise<{ url: string } | { error: string }> {
+  const folder = String(form.get('folder') ?? '');
+  if (folder !== 'covers' && folder !== 'inline') {
+    return { error: 'Choose a cover or a body image.' };
+  }
+
+  const file = form.get('file');
+  if (!(file instanceof File) || file.size === 0) {
+    return { error: 'Choose an image to upload.' };
+  }
+
+  return uploadBlogImage(supabase, file, folder);
 }
 
 export type PostFormValues = {

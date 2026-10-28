@@ -1,3 +1,9 @@
+export type BlogImage = {
+  url: string;
+  name: string;
+  folder: 'covers' | 'inline';
+};
+
 export type Post = {
   title: string;
   slug: string;

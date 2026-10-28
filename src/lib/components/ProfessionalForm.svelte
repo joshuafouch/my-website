@@ -3,6 +3,7 @@
   import { untrack } from 'svelte';
   import type { Portrait, ProfessionalContent, TechGroup } from '#lib/about.ts';
   import { openLinks } from '#lib/links.ts';
+  import MarkdownField from '#lib/components/MarkdownField.svelte';
   import ProfessionalAbout from '#lib/components/ProfessionalAbout.svelte';
 
   type JobDraft = {
@@ -134,7 +135,7 @@
     <h2>Introduction</h2>
     <label class="field">
       <span>Who you are professionally</span>
-      <textarea name="intro" rows="6" bind:value={intro}></textarea>
+      <MarkdownField name="intro" rows={6} bind:value={intro} />
     </label>
     <p class="note">
       Markdown links work, like [Alaska Railroad](https://www.alaskarailroad.com/).
