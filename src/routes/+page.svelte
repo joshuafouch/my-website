@@ -10,6 +10,7 @@
   import BackgroundSwitch from '#lib/components/BackgroundSwitch.svelte';
   import ThemeSwitch from '#lib/components/ThemeSwitch.svelte';
   import MotionToggle from '#lib/components/MotionToggle.svelte';
+  import AdminLogin from '#lib/components/AdminLogin.svelte';
   import { resolve } from '$app/paths';
 
   const heroImage = '/assets/hero-bg.webp';
@@ -132,7 +133,28 @@
       <li>
         <a class="social-link link-line" href={resolve('/resume')}>
           <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path d="M6 2h8.2L20 7.8V22H6V2z" />
+            <path
+              d="M14 3.25H7.4c-.9 0-1.65.75-1.65 1.65v14.2c0 .9.75 1.65 1.65 1.65h9.2c.9 0 1.65-.75 1.65-1.65V8.15L14 3.25z"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.6"
+              stroke-linejoin="round"
+            />
+            <path
+              d="M13.85 3.5V8.2H18.4"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.6"
+              stroke-linejoin="round"
+              stroke-linecap="round"
+            />
+            <path
+              d="M8.6 12.15h6.8M8.6 15.15h6.8M8.6 18.1h4.15"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.6"
+              stroke-linecap="round"
+            />
           </svg>
           Resume
         </a>
@@ -163,18 +185,7 @@
         </li>
       {/each}
     </ul>
-    <a class="icon-btn admin" href={resolve('/admin/login')} aria-label="Admin login">
-      <svg viewBox="0 0 24 24" aria-hidden="true">
-        <circle cx="12" cy="8" r="3.15" fill="none" stroke="currentColor" stroke-width="1.6" />
-        <path
-          d="M5.2 19.4c1.15-3.35 3.55-4.9 6.8-4.9s5.65 1.55 6.8 4.9"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="1.6"
-          stroke-linecap="round"
-        />
-      </svg>
-    </a>
+    <AdminLogin />
   </footer>
 </section>
 
@@ -192,34 +203,6 @@
     right: max(0.75rem, env(safe-area-inset-right));
     display: flex;
     gap: 0.5rem;
-  }
-
-  .icon-btn {
-    display: grid;
-    place-items: center;
-    width: 2.75rem;
-    height: 2.75rem;
-    border: 1px solid var(--btn-border);
-    border-radius: 9999px;
-    background: var(--btn-bg);
-    color: var(--ink-muted);
-    cursor: pointer;
-    transition:
-      color 200ms ease,
-      border-color 200ms ease,
-      background-color 200ms ease;
-  }
-
-  .icon-btn svg {
-    width: 1.05rem;
-    height: 1.05rem;
-  }
-
-  .icon-btn:hover,
-  .icon-btn:focus-visible {
-    color: var(--ink);
-    border-color: var(--border-strong);
-    outline: none;
   }
 
   .loader {
@@ -354,12 +337,9 @@
     padding-bottom: max(1rem, env(safe-area-inset-bottom));
   }
 
-  .admin {
+  .foot :global(.admin) {
     grid-column: 3;
     justify-self: end;
-    border: 0;
-    border-radius: 0;
-    background: none;
   }
 
   .socials {
@@ -432,7 +412,7 @@
       padding-inline: 0;
     }
 
-    .admin {
+    .foot :global(.admin) {
       position: static;
       flex: none;
       width: 1.7rem;
@@ -440,13 +420,13 @@
       opacity: 0.4;
     }
 
-    .admin svg {
+    .foot :global(.admin svg) {
       width: 0.72rem;
       height: 0.72rem;
     }
 
-    .admin:hover,
-    .admin:focus-visible {
+    .foot :global(.admin:hover),
+    .foot :global(.admin:focus-visible) {
       opacity: 1;
     }
   }
