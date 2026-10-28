@@ -6,6 +6,7 @@
 
   let picked = $state('');
   let pickedUrl = $state('');
+  let view = $state<'write' | 'preview'>('write');
 
   const shown = $derived(pickedUrl || data.resume.url);
 
@@ -14,6 +15,7 @@
     if (pickedUrl) URL.revokeObjectURL(pickedUrl);
     pickedUrl = file ? URL.createObjectURL(file) : '';
     picked = file?.name ?? '';
+    if (file) view = 'preview';
   }
 </script>
 
@@ -31,49 +33,76 @@
   <a class="quiet-link" href={resolve('/resume')}>View on site</a>
 </header>
 
-<p class="note">
-  {#if data.resume.uploaded && data.resume.updatedAt}
-    Current file: {data.resume.filename}, uploaded {formatDate(data.resume.updatedAt.slice(0, 10))}.
-  {:else}
-    The site still uses the PDF bundled with the code. Upload one to replace it.
-  {/if}
-</p>
+<div class="post-editor studio-editor">
+  <div class="split" data-view={view}>
+    <div class="split-tabs" role="group" aria-label="Editor view">
+      <button type="button" aria-pressed={view === 'write'} onclick={() => (view = 'write')}
+        >Write</button
+      >
+      <button type="button" aria-pressed={view === 'preview'} onclick={() => (view = 'preview')}
+        >Preview</button
+      >
+    </div>
 
-<form method="POST" enctype="multipart/form-data">
-  {#if form?.error}
-    <p class="error">{form.error}</p>
-  {/if}
+    <div class="split-write">
+      <p class="note">
+        {#if data.resume.uploaded && data.resume.updatedAt}
+          Current file: {data.resume.filename}, uploaded {formatDate(
+            data.resume.updatedAt.slice(0, 10)
+          )}.
+        {:else}
+          The site still uses the PDF bundled with the code. Upload one to replace it.
+        {/if}
+      </p>
 
-  <label class="field">
-    <span>New resume (PDF, up to 10 MB)</span>
-    <input type="file" name="resume" accept="application/pdf" required onchange={onPick} />
-  </label>
+      <form method="POST" enctype="multipart/form-data">
+        {#if form?.error}
+          <p class="error">{form.error}</p>
+        {/if}
 
-  <label class="field">
-    <span>Download name</span>
-    <input name="filename" value={form?.filename ?? data.resume.filename} />
-  </label>
+        <label class="field">
+          <span>New resume (PDF, up to 10 MB)</span>
+          <input type="file" name="resume" accept="application/pdf" required onchange={onPick} />
+        </label>
 
-  <div class="bar">
-    <button class="solid" type="submit">Replace resume</button>
+        <label class="field">
+          <span>Download name</span>
+          <input name="filename" value={form?.filename ?? data.resume.filename} />
+        </label>
+
+        <div class="bar">
+          <button class="solid" type="submit">Replace resume</button>
+        </div>
+      </form>
+    </div>
+
+    <aside class="split-preview" aria-label="Resume preview">
+      <h2 class="preview-label">{picked ? `Preview: ${picked}` : 'Current resume'}</h2>
+      {#if picked}
+        <p class="note">Not live yet. Replace resume to publish it.</p>
+      {/if}
+      {#if shown}
+        <iframe class="frame" src={shown} title="Resume preview"></iframe>
+      {:else}
+        <p class="note">No resume to preview yet.</p>
+      {/if}
+    </aside>
   </div>
-</form>
-
-<section class="editor">
-  <h2>{picked ? `Preview: ${picked}` : 'Current resume'}</h2>
-  {#if picked}
-    <p class="note">Not live yet. Replace resume to publish it.</p>
-  {/if}
-  <iframe class="frame" src={shown} title="Resume preview"></iframe>
-</section>
+</div>
 
 <style>
+  .preview-label {
+    margin: 0;
+    font-size: 1.4rem;
+    font-weight: 500;
+  }
+
   .frame {
     display: block;
     width: 100%;
-    height: 80svh;
-    margin-top: 1.2rem;
-    border: 1px solid color-mix(in oklab, var(--nord4) 28%, transparent);
-    background: var(--nord6);
+    height: min(70svh, 42rem);
+    margin-top: 1rem;
+    border: 1px solid color-mix(in oklab, var(--ink) 42%, transparent);
+    background: color-mix(in oklab, var(--ground) 68%, var(--ink));
   }
 </style>

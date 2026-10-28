@@ -1,7 +1,16 @@
 import { fail, redirect } from '@sveltejs/kit';
 import { saveProjectFromForm } from '#lib/server/admin-projects.ts';
-import { requireAdmin } from '#lib/server/admin-posts.ts';
-import type { Actions } from './$types';
+import {
+  listBlogImages,
+  requireAdmin,
+  uploadBlogImageFromForm
+} from '#lib/server/admin-posts.ts';
+import type { Actions, PageServerLoad } from './$types';
+
+export const load: PageServerLoad = async ({ locals }) => {
+  await requireAdmin(locals.supabase);
+  return listBlogImages(locals.supabase);
+};
 
 export const actions: Actions = {
   save: async ({ request, locals }) => {
@@ -14,5 +23,13 @@ export const actions: Actions = {
     }
 
     redirect(303, `/admin/projects/${result.slug}?saved=1`);
+  },
+
+  upload: async ({ request, locals }) => {
+    await requireAdmin(locals.supabase);
+    const form = await request.formData();
+    const uploaded = await uploadBlogImageFromForm(locals.supabase, form);
+    if ('error' in uploaded) return fail(400, { error: uploaded.error });
+    return { url: uploaded.url };
   }
 };

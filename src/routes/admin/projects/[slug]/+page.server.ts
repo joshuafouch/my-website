@@ -1,12 +1,18 @@
 import { error, fail, redirect } from '@sveltejs/kit';
 import { getAdminProjectBySlug, saveProjectFromForm } from '#lib/server/admin-projects.ts';
-import { requireAdmin } from '#lib/server/admin-posts.ts';
+import {
+  listBlogImages,
+  requireAdmin,
+  uploadBlogImageFromForm
+} from '#lib/server/admin-posts.ts';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ locals, params, url }) => {
+  await requireAdmin(locals.supabase);
   const project = await getAdminProjectBySlug(locals.supabase, params.slug);
   if (!project) error(404, `Could not find ${params.slug}`);
-  return { project, saved: url.searchParams.has('saved') };
+  const images = await listBlogImages(locals.supabase);
+  return { project, saved: url.searchParams.has('saved'), ...images };
 };
 
 export const actions: Actions = {
@@ -20,5 +26,13 @@ export const actions: Actions = {
     }
 
     redirect(303, `/admin/projects/${result.slug}?saved=1`);
+  },
+
+  upload: async ({ request, locals }) => {
+    await requireAdmin(locals.supabase);
+    const form = await request.formData();
+    const uploaded = await uploadBlogImageFromForm(locals.supabase, form);
+    if ('error' in uploaded) return fail(400, { error: uploaded.error });
+    return { url: uploaded.url };
   }
 };

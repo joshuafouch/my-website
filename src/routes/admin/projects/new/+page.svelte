@@ -2,7 +2,7 @@
   import { resolve } from '$app/paths';
   import ProjectEditor from '#lib/components/ProjectEditor.svelte';
 
-  let { form } = $props();
+  let { data, form } = $props();
 </script>
 
 <svelte:head>
@@ -14,4 +14,4 @@
   <a class="quiet-link" href={resolve('/admin/projects')}>All projects</a>
 </header>
 
-<ProjectEditor {form} />
+<ProjectEditor {form} images={data.images} imageError={data.imageError} />

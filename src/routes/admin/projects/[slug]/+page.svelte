@@ -19,4 +19,9 @@
   <a class="quiet-link" href={resolve('/admin/projects')}>All projects</a>
 </header>
 
-<ProjectEditor project={data.project} {form} />
+<ProjectEditor
+  project={data.project}
+  {form}
+  images={data.images}
+  imageError={data.imageError}
+/>

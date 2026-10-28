@@ -9,6 +9,7 @@ import {
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ locals, params, url }) => {
+  await requireAdmin(locals.supabase);
   const post = await getAdminPostBySlug(locals.supabase, params.slug);
   if (!post) error(404, `Could not find ${params.slug}`);
 
