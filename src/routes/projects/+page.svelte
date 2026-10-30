@@ -98,8 +98,8 @@
   title="My Projects"
   description="A collection of my professional, personal, and academic projects"
   url="/projects"
-  image="/assets/happy_snow.webp"
-  imageAlt="My Projects"
+  image="/assets/backgrounds/IMG_1797.webp"
+  imageAlt="Dog on a dock"
 />
 
 <div class="projects font-serif">
@@ -115,7 +115,7 @@
       {#each data.projects as project (project.slug)}
         <li>
           <button type="button" class="project-card" onclick={(event) => open(project, event)}>
-            <img src={project.image || '/previews/spencer-glacier.webp'} alt="" />
+            <img src={project.image || '/assets/backgrounds/IMG_1797.webp'} alt="" />
             <span class="title">{project.title}</span>
           </button>
         </li>
@@ -131,7 +131,7 @@
       title={selected.title}
       description={selected.description}
       details={selected.details ?? ''}
-      image={selected.image}
+      image={selected.image || '/assets/backgrounds/IMG_1797.webp'}
       images={selected.images ?? []}
       tags={selected.tags ?? []}
       sourceUrl={selected.sourceUrl ?? ''}

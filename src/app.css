@@ -362,8 +362,8 @@ html[data-theme-fade] *::after {
 html[data-fade='out'] .site-backdrop,
 html[data-fade='out'] .landing,
 html[data-fade='out'] .inner-shell {
-  opacity: 0;
-  transition: opacity 200ms ease;
+  animation: page-fade-out 200ms ease both;
+  pointer-events: none;
 }
 
 html[data-fade='in'] .site-backdrop,
@@ -382,9 +382,20 @@ html[data-fade] .inner-shell {
   pointer-events: none;
 }
 
+@keyframes page-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
 @keyframes page-fade-in {
   from {
     opacity: 0;
+    transform: translateY(0.35rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
   }
 }
 

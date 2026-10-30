@@ -1,10 +1,25 @@
 const STORAGE_KEY = 'site-backdrop';
 
 export const photos = [
-  '/assets/hero-bg.webp',
-  '/assets/valleybutte.webp',
-  '/assets/thunderbirdfalls.webp',
-  '/assets/happy_snow.webp'
+  '/assets/backgrounds/hero-bg.webp',
+  '/assets/backgrounds/valleybutte.webp',
+  '/assets/backgrounds/FullSizeRender.webp',
+  '/assets/backgrounds/IMG_0079.webp',
+  '/assets/backgrounds/IMG_1328.webp',
+  '/assets/backgrounds/IMG_1483.webp',
+  '/assets/backgrounds/IMG_1797.webp',
+  '/assets/backgrounds/IMG_3188.webp',
+  '/assets/backgrounds/IMG_3208.webp',
+  '/assets/backgrounds/IMG_6140.webp',
+  '/assets/backgrounds/IMG_6521.webp',
+  '/assets/backgrounds/IMG_6524.webp',
+  '/assets/backgrounds/IMG_6678.webp',
+  '/assets/backgrounds/IMG_6706.webp',
+  '/assets/backgrounds/IMG_6749.webp',
+  '/assets/backgrounds/IMG_6791.webp',
+  '/assets/backgrounds/IMG_6830.webp',
+  '/assets/backgrounds/IMG_8558.webp',
+  '/assets/backgrounds/IMG_9540.webp'
 ] as const;
 
 export const backdrop = $state({

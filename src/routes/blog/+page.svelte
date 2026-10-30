@@ -29,8 +29,8 @@
   title="My Blog"
   description="Welcome to my devblog where I post about my projects and ideas."
   url="/blog"
-  image="/assets/thunderbirdfalls.webp"
-  imageAlt="Thunderbird Falls - Alaska"
+  image="/assets/backgrounds/IMG_1797.webp"
+  imageAlt="Dog on a dock"
 />
 
 <div class="blog font-serif">
@@ -61,7 +61,7 @@
       {#each visible as post (post.slug)}
         <li>
           <a href={resolve('/[slug]', { slug: post.slug })}>
-            <img src={post.image || '/previews/spencer-glacier.webp'} alt="" />
+            <img src={post.image || '/assets/backgrounds/IMG_1797.webp'} alt="" />
             <div>
               <h2>{post.title}</h2>
               <p class="date">{formatDate(post.date)}</p>

@@ -10,7 +10,7 @@
   title={data.meta.title}
   description={data.meta.description}
   url={`/${data.meta.slug}`}
-  image={data.meta.image || '/previews/spencer-glacier.webp'}
+  image={data.meta.image || '/assets/backgrounds/IMG_1797.webp'}
   imageAlt={data.meta.title}
   type="article"
   date={data.meta.date}

@@ -73,7 +73,7 @@ insert into public.projects (
   'portfolio-website',
   'Personal portfolio and blog built with SvelteKit, featuring a modern design and dark theme',
   '2026-03-20',
-  '/assets/hero-bg.webp',
+  '/assets/backgrounds/IMG_1797.webp',
   'https://github.com/joshuafouch/my-website',
   array['sveltekit', 'tailwindcss', 'daisyui', 'mdsvex']::text[],
   '{}'::text[],

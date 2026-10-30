@@ -9,7 +9,7 @@
   title="Personal - Joshua Fouch"
   description={data.intro.trim() || 'A few personal notes from Joshua Fouch.'}
   url="/about/personal"
-  image="/assets/hero-bg.webp"
+  image="/assets/backgrounds/hero-bg.webp"
   imageAlt="Joshua Fouch"
 />
 

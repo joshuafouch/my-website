@@ -4,7 +4,7 @@
   let { data } = $props();
 
   const pdf = $derived(data.resume.url);
-  const heroImage = '/assets/hero-bg.webp';
+  const heroImage = '/assets/backgrounds/hero-bg.webp';
 </script>
 
 <Metadata
