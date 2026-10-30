@@ -13,7 +13,7 @@
     onuse,
     onclose
   }: {
-    mode: 'cover' | 'body';
+    mode: 'cover' | 'body' | 'gallery' | 'portrait';
     images: BlogImage[];
     imageError?: string | null;
     onuse: (url: string, alt: string) => void;
@@ -33,8 +33,37 @@
   let alive = true;
   let previewUrl = '';
 
-  const folder = $derived(mode === 'cover' ? 'covers' : 'inline');
-  const confirmLabel = $derived(mode === 'cover' ? 'Use as cover' : 'Insert');
+  const folder = $derived(
+    mode === 'cover' ? 'covers' : mode === 'portrait' ? 'portraits' : 'inline'
+  );
+  const needsAlt = $derived(mode === 'body' || mode === 'portrait');
+  const title = $derived(
+    mode === 'cover'
+      ? 'Cover image'
+      : mode === 'gallery'
+        ? 'Gallery image'
+        : mode === 'portrait'
+          ? 'Portrait image'
+          : 'Insert an image'
+  );
+  const confirmLabel = $derived(
+    mode === 'cover'
+      ? 'Use as cover'
+      : mode === 'gallery'
+        ? 'Use in gallery'
+        : mode === 'portrait'
+          ? 'Use portrait'
+          : 'Insert'
+  );
+  const uploadLabel = $derived(
+    mode === 'cover'
+      ? 'Upload and use as cover'
+      : mode === 'gallery'
+        ? 'Upload and use in gallery'
+        : mode === 'portrait'
+          ? 'Upload and use portrait'
+          : 'Upload and insert'
+  );
 
   onMount(() => {
     const el = dialog;
@@ -127,7 +156,7 @@
   }}
 >
   <header>
-    <h2 id="image-picker-title">{mode === 'cover' ? 'Cover image' : 'Insert an image'}</h2>
+    <h2 id="image-picker-title">{title}</h2>
     <button class="preview-close" type="button" onclick={requestClose}>Close</button>
   </header>
 
@@ -218,7 +247,7 @@
           />
         </label>
 
-        {#if mode === 'body'}
+        {#if needsAlt}
           <label class="field">
             <span>Alt text</span>
             <input bind:value={alt} placeholder="Describe the image" />
@@ -227,7 +256,7 @@
 
         <div class="bar">
           <button class="solid" type="submit" disabled={busy}>
-            {mode === 'cover' ? 'Upload and use as cover' : 'Upload and insert'}
+            {uploadLabel}
           </button>
         </div>
       </form>
@@ -253,7 +282,7 @@
         </div>
       {/if}
 
-      {#if mode === 'body'}
+      {#if needsAlt}
         <label class="field">
           <span>Alt text</span>
           <input bind:value={alt} placeholder="Describe the image" />

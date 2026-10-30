@@ -1,10 +1,12 @@
 <script lang="ts">
-  import { safeHref } from '#lib/links.ts';
+  import { openLinks, safeHref } from '#lib/links.ts';
+  import { renderMarkdown } from '#lib/markdown.ts';
 
   let {
     title,
     description = '',
     details = '',
+    detailsHtml = '',
     image = '',
     images = [],
     tags = [],
@@ -13,16 +15,36 @@
     title: string;
     description?: string;
     details?: string;
+    detailsHtml?: string;
     image?: string;
     images?: string[];
     tags?: string[];
     sourceUrl?: string;
   } = $props();
 
+  let rendered = $state('');
+
   const pictures = $derived(
     [image, ...images].filter((src, index, all) => src && all.indexOf(src) === index)
   );
   const code = $derived(safeHref(sourceUrl));
+  const html = $derived(detailsHtml || rendered);
+
+  $effect(() => {
+    if (detailsHtml) {
+      rendered = '';
+      return;
+    }
+    const source = details;
+    let stale = false;
+    void (async () => {
+      const next = source.trim() ? openLinks(await renderMarkdown(source)) : '';
+      if (!stale) rendered = next;
+    })();
+    return () => {
+      stale = true;
+    };
+  });
 </script>
 
 <article class="font-serif">
@@ -34,8 +56,8 @@
     {#if description.trim()}
       <p class="lede">{description}</p>
     {/if}
-    {#if details.trim()}
-      <p class="details">{details}</p>
+    {#if html}
+      <div class="details prose">{@html html}</div>
     {/if}
     {#if tags.length > 0}
       <p class="tags">{tags.join(' · ')}</p>
@@ -89,7 +111,25 @@
     margin: 1rem 0 0;
     font-size: 1.15rem;
     line-height: 1.6;
-    white-space: pre-wrap;
+  }
+
+  .details :global(p) {
+    margin: 0 0 0.85rem;
+  }
+
+  .details :global(p:last-child) {
+    margin-bottom: 0;
+  }
+
+  .details :global(img) {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: 0.85rem 0;
+  }
+
+  .details :global(a) {
+    color: var(--ink-accent);
   }
 
   .tags {

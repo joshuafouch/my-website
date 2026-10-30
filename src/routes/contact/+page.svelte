@@ -44,7 +44,7 @@
   title="Contact Me - Joshua Fouch"
   description="Get in touch with Joshua Fouch. Send a message about projects, opportunities, or just to say hello."
   url="/contact"
-  image="/assets/valleybutte.webp"
+  image="/assets/backgrounds/valleybutte.webp"
   imageAlt="Contact Joshua Fouch"
 />
 

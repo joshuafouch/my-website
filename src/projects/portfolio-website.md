@@ -2,7 +2,7 @@
 title: My Portfolio Website
 description: Personal portfolio and blog built with SvelteKit, featuring a modern design and dark theme
 date: '2026-03-20'
-image: '/assets/hero-bg.webp'
+image: '/assets/backgrounds/IMG_1797.webp'
 sourceUrl: 'https://github.com/joshuafouch/my-website'
 tags:
   - sveltekit

@@ -11,9 +11,10 @@
   import ThemeSwitch from '#lib/components/ThemeSwitch.svelte';
   import MotionToggle from '#lib/components/MotionToggle.svelte';
   import AdminLogin from '#lib/components/AdminLogin.svelte';
+  import { photos } from '#lib/backdrop.svelte.ts';
   import { resolve } from '$app/paths';
 
-  const heroImage = '/assets/hero-bg.webp';
+  const heroImage = photos[0];
 
   const pages = [
     { text: 'About', href: resolve('/about') },
@@ -194,6 +195,7 @@
     color: var(--ink);
     min-height: 100svh;
     min-height: 100dvh;
+    overflow: hidden;
   }
 
   .corner {

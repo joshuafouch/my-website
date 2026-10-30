@@ -362,8 +362,8 @@ html[data-theme-fade] *::after {
 html[data-fade='out'] .site-backdrop,
 html[data-fade='out'] .landing,
 html[data-fade='out'] .inner-shell {
-  opacity: 0;
-  transition: opacity 200ms ease;
+  animation: page-fade-out 200ms ease both;
+  pointer-events: none;
 }
 
 html[data-fade='in'] .site-backdrop,
@@ -382,9 +382,20 @@ html[data-fade] .inner-shell {
   pointer-events: none;
 }
 
+@keyframes page-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
 @keyframes page-fade-in {
   from {
     opacity: 0;
+    transform: translateY(0.35rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
   }
 }
 
@@ -737,7 +748,10 @@ html[data-theme-fade]::view-transition-old(root) {
 
 .studio .post-editor .field input,
 .studio .post-editor .field textarea,
-.studio .post-editor .field select {
+.studio .post-editor .field select,
+.studio .studio-editor .field input,
+.studio .studio-editor .field textarea,
+.studio .studio-editor .field select {
   border: 1px solid color-mix(in oklab, var(--ink) 42%, transparent);
   background: color-mix(in oklab, var(--ground) 68%, var(--ink));
   padding: 0.55rem 0.75rem;
@@ -745,18 +759,23 @@ html[data-theme-fade]::view-transition-old(root) {
 
 .studio .post-editor .field input:focus-visible,
 .studio .post-editor .field textarea:focus-visible,
-.studio .post-editor .field select:focus-visible {
+.studio .post-editor .field select:focus-visible,
+.studio .studio-editor .field input:focus-visible,
+.studio .studio-editor .field textarea:focus-visible,
+.studio .studio-editor .field select:focus-visible {
   border-color: var(--ink-accent);
   outline: 2px solid color-mix(in oklab, var(--ink-accent) 45%, transparent);
   outline-offset: 1px;
 }
 
-.studio .post-editor .meta-row {
+.studio .post-editor .meta-row,
+.studio .studio-editor .meta-row {
   display: grid;
   gap: 0 1rem;
 }
 
-.studio .post-editor .body-label {
+.studio .post-editor .body-label,
+.studio .studio-editor .body-label {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
@@ -764,7 +783,8 @@ html[data-theme-fade]::view-transition-old(root) {
   gap: 0.5rem 1rem;
 }
 
-.studio .post-editor .cover-card {
+.studio .post-editor .cover-card,
+.studio .studio-editor .cover-card {
   display: grid;
   grid-template-columns: 10rem minmax(0, 1fr);
   gap: 1rem;
@@ -776,7 +796,9 @@ html[data-theme-fade]::view-transition-old(root) {
 }
 
 .studio .post-editor .cover-card img,
-.studio .post-editor .cover-empty {
+.studio .post-editor .cover-empty,
+.studio .studio-editor .cover-card img,
+.studio .studio-editor .cover-empty {
   width: 10rem;
   height: 7rem;
   object-fit: cover;
@@ -784,24 +806,29 @@ html[data-theme-fade]::view-transition-old(root) {
   border: 1px solid color-mix(in oklab, var(--ink) 42%, transparent);
 }
 
-.studio .post-editor .cover-empty {
+.studio .post-editor .cover-empty,
+.studio .studio-editor .cover-empty {
   display: grid;
   place-items: center;
   color: var(--ink-muted);
   font-size: 1.05rem;
 }
 
-.studio .post-editor .cover-card .bar {
+.studio .post-editor .cover-card .bar,
+.studio .studio-editor .cover-card .bar {
   margin-top: 0;
 }
 
-.studio .post-editor button.solid:disabled {
+.studio .post-editor button.solid:disabled,
+.studio .studio-editor button.solid:disabled {
   opacity: 0.45;
   cursor: not-allowed;
 }
 
 .studio .post-editor button.solid:disabled:hover,
-.studio .post-editor button.solid:disabled:focus-visible {
+.studio .post-editor button.solid:disabled:focus-visible,
+.studio .studio-editor button.solid:disabled:hover,
+.studio .studio-editor button.solid:disabled:focus-visible {
   color: var(--ink);
   border-color: var(--btn-border);
 }
@@ -860,8 +887,10 @@ html[data-theme-fade]::view-transition-old(root) {
 }
 
 .studio .post-editor .md-field textarea,
-.studio .post-editor .md-field pre {
-  min-height: 18rem;
+.studio .post-editor .md-field pre,
+.studio .studio-editor .md-field textarea,
+.studio .studio-editor .md-field pre {
+  min-height: 8rem;
   padding: 0.55rem 0.75rem;
   border: 1px solid color-mix(in oklab, var(--ink) 42%, transparent);
   background: color-mix(in oklab, var(--ground) 68%, var(--ink));
@@ -870,14 +899,21 @@ html[data-theme-fade]::view-transition-old(root) {
   line-height: 1.5;
 }
 
-.studio .post-editor .md-field textarea {
-  height: min(32rem, 70vh);
+.studio .post-editor .md-field textarea,
+.studio .studio-editor .md-field textarea {
   color: transparent;
   caret-color: var(--ink);
   background: transparent;
 }
 
-.studio .post-editor .md-field textarea:focus-visible {
+.studio .post-editor .md-field textarea,
+.studio .studio-editor .body-field.tall .md-field textarea {
+  min-height: 18rem;
+  height: min(32rem, 70vh);
+}
+
+.studio .post-editor .md-field textarea:focus-visible,
+.studio .studio-editor .md-field textarea:focus-visible {
   border-color: var(--ink-accent);
   outline: 2px solid color-mix(in oklab, var(--ink-accent) 45%, transparent);
   outline-offset: 1px;
@@ -929,18 +965,22 @@ select optgroup {
 }
 
 @media (min-width: 40rem) {
-  .studio .post-editor .meta-row {
+  .studio .post-editor .meta-row,
+  .studio .studio-editor .meta-row {
     grid-template-columns: minmax(0, 11rem) minmax(0, 1fr);
   }
 }
 
 @media (max-width: 640px) {
-  .studio .post-editor .cover-card {
+  .studio .post-editor .cover-card,
+  .studio .studio-editor .cover-card {
     grid-template-columns: 1fr;
   }
 
   .studio .post-editor .cover-card img,
-  .studio .post-editor .cover-empty {
+  .studio .post-editor .cover-empty,
+  .studio .studio-editor .cover-card img,
+  .studio .studio-editor .cover-empty {
     width: 100%;
     height: 9rem;
   }

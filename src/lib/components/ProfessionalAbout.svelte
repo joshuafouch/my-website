@@ -44,75 +44,80 @@
     </header>
   {/if}
 
-  <section class="block">
-    <h2>Work</h2>
-    {#if workIntro}
-      <p class="lede">{workIntro}</p>
-    {/if}
-    {#if jobs.length > 0}
-      <ol>
-        {#each jobs as job (job.id)}
-          <li>
-            <div class="role">
-              <h3>{job.role}</h3>
-              {#if job.timeSpan}
-                <p class="when">{job.timeSpan}</p>
+  {#if workIntro || jobs.length > 0}
+    <section class="block">
+      <h2>Work</h2>
+      {#if workIntro}
+        <p class="lede">{workIntro}</p>
+      {/if}
+      {#if jobs.length > 0}
+        <ol>
+          {#each jobs as job (job.id)}
+            <li>
+              <div class="role">
+                <h3>{job.role}</h3>
+                {#if job.timeSpan}
+                  <p class="when">{job.timeSpan}</p>
+                {/if}
+              </div>
+              {#if job.orgs.length > 0}
+                <p class="orgs">
+                  {#each job.orgs as org, index (org.name + org.href)}
+                    {#if index > 0}<span aria-hidden="true"> · </span>{/if}
+                    {@const href = safeHref(org.href)}
+                    {#if href}
+                      <a class="quiet-link" {href} target="_blank" rel="noopener noreferrer"
+                        >{org.name}</a
+                      >
+                    {:else}
+                      {org.name}
+                    {/if}
+                  {/each}
+                </p>
               {/if}
-            </div>
-            {#if job.orgs.length > 0}
-              <p class="orgs">
-                {#each job.orgs as org, index (org.name + org.href)}
-                  {#if index > 0}<span aria-hidden="true"> · </span>{/if}
-                  {@const href = safeHref(org.href)}
-                  {#if href}
-                    <a class="quiet-link" {href} target="_blank" rel="noopener noreferrer"
-                      >{org.name}</a
-                    >
-                  {:else}
-                    {org.name}
-                  {/if}
-                {/each}
-              </p>
-            {/if}
-            {#if job.body}
-              <p>{job.body}</p>
-            {/if}
-            {#if job.skills.length > 0}
-              <p class="skills">{job.skills.join(' · ')}</p>
-            {/if}
-          </li>
-        {/each}
-      </ol>
-    {/if}
-  </section>
+              {#if job.body}
+                <!-- eslint-disable-next-line svelte/no-at-html-tags -- admin-authored markdown -->
+                <div class="job-body">{@html job.body}</div>
+              {/if}
+              {#if job.skills.length > 0}
+                <p class="skills">{job.skills.join(' · ')}</p>
+              {/if}
+            </li>
+          {/each}
+        </ol>
+      {/if}
+    </section>
+  {/if}
 
-  <section class="block">
-    <h2>Tech stack</h2>
-    {#if techIntro}
-      <p class="lede">{techIntro}</p>
-    {/if}
-    {#if groups.length > 0}
-      <div class="groups">
-        {#each groups as group (group.id)}
-          <div class="tool-row">
-            <h3>{group.title}</h3>
-            <ul>
-              {#each group.items as item (item.text + item.href)}
-                {@const href = safeHref(item.href)}
-                <li>
-                  {#if href}
-                    <a class="chip" {href} target="_blank" rel="noopener noreferrer">{item.text}</a>
-                  {:else}
-                    <span class="chip">{item.text}</span>
-                  {/if}
-                </li>
-              {/each}
-            </ul>
-          </div>
-        {/each}
-      </div>
-    {/if}
-  </section>
+  {#if techIntro || groups.length > 0}
+    <section class="block">
+      <h2>Tech stack</h2>
+      {#if techIntro}
+        <p class="lede">{techIntro}</p>
+      {/if}
+      {#if groups.length > 0}
+        <div class="groups">
+          {#each groups as group (group.id)}
+            <div class="tool-row">
+              <h3>{group.title}</h3>
+              <ul>
+                {#each group.items as item (item.text + item.href)}
+                  {@const href = safeHref(item.href)}
+                  <li>
+                    {#if href}
+                      <a class="chip" {href} target="_blank" rel="noopener noreferrer">{item.text}</a>
+                    {:else}
+                      <span class="chip">{item.text}</span>
+                    {/if}
+                  </li>
+                {/each}
+              </ul>
+            </div>
+          {/each}
+        </div>
+      {/if}
+    </section>
+  {/if}
 </div>
 
 <style>
@@ -144,14 +149,23 @@
 
   .copy :global(p),
   .lede,
-  li p {
+  .job-body :global(p) {
     color: var(--ink-muted);
     font-size: 1.25rem;
     line-height: 1.55;
   }
 
-  .copy :global(p) {
+  .copy :global(p),
+  .job-body :global(p) {
     margin: 0;
+  }
+
+  .job-body :global(p + p) {
+    margin-top: 0.75rem;
+  }
+
+  .job-body :global(a) {
+    color: var(--ink-accent);
   }
 
   .block {

@@ -8,6 +8,7 @@ import {
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ locals }) => {
+  await requireAdmin(locals.supabase);
   return listBlogImages(locals.supabase);
 };
 

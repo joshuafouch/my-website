@@ -51,10 +51,12 @@ export async function getAdminPostBySlug(supabase: Client, slug: string) {
   return data;
 }
 
+export type ImageFolder = 'covers' | 'inline' | 'portraits';
+
 export async function uploadBlogImage(
   supabase: Client,
   file: File,
-  folder: 'covers' | 'inline' | 'portraits'
+  folder: ImageFolder
 ): Promise<{ url: string } | { error: string }> {
   if (!IMAGE_TYPES.has(file.type)) {
     return { error: 'Use a JPEG, PNG, WebP, or GIF.' };
@@ -87,10 +89,11 @@ export async function uploadBlogImage(
 const LIBRARY_FOLDERS = ['covers', 'inline'] as const;
 
 export async function listBlogImages(
-  supabase: Client
+  supabase: Client,
+  folders: readonly ImageFolder[] = LIBRARY_FOLDERS
 ): Promise<{ images: BlogImage[]; imageError: string | null }> {
   const listed = await Promise.all(
-    LIBRARY_FOLDERS.map(async (folder) => {
+    folders.map(async (folder) => {
       const { data, error: listError } = await supabase.storage.from('blog-images').list(folder, {
         limit: 100,
         sortBy: { column: 'created_at', order: 'desc' }
@@ -137,8 +140,8 @@ export async function uploadBlogImageFromForm(
   form: FormData
 ): Promise<{ url: string } | { error: string }> {
   const folder = String(form.get('folder') ?? '');
-  if (folder !== 'covers' && folder !== 'inline') {
-    return { error: 'Choose a cover or a body image.' };
+  if (folder !== 'covers' && folder !== 'inline' && folder !== 'portraits') {
+    return { error: 'Choose a cover, body, or portrait image.' };
   }
 
   const file = form.get('file');

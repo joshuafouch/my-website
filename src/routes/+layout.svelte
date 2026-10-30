@@ -86,8 +86,8 @@
     // Landing includes the handwritten mark. Fade opacity instead of snapshotting it.
     if (from === '/' || to === '/') {
       const token = String(Date.now());
-      root.dataset.fade = 'out';
       root.dataset.fadeId = token;
+      if (root.dataset.fade !== 'out') root.dataset.fade = 'out';
 
       return new Promise((resolve) => {
         const outgoing = document.querySelector('.landing, .inner-shell');
@@ -113,18 +113,29 @@
           });
         };
 
-        if (
-          !(outgoing instanceof HTMLElement) ||
-          Number(getComputedStyle(outgoing).opacity) < 0.05
-        ) {
+        if (!(outgoing instanceof HTMLElement)) {
+          go();
+          return;
+        }
+
+        // Click may already have finished page-fade-out; don't wait on a dead animation.
+        const fading = outgoing
+          .getAnimations()
+          .some(
+            (anim) =>
+              anim instanceof CSSAnimation &&
+              anim.animationName === 'page-fade-out' &&
+              anim.playState !== 'finished'
+          );
+        if (!fading && Number(getComputedStyle(outgoing).opacity) < 0.05) {
           go();
           return;
         }
 
         const timer = window.setTimeout(go, 280);
-        outgoing.addEventListener('transitionend', function onEnd(event) {
-          if (event.target !== outgoing || event.propertyName !== 'opacity') return;
-          outgoing.removeEventListener('transitionend', onEnd);
+        outgoing.addEventListener('animationend', function onEnd(event) {
+          if (event.target !== outgoing || event.animationName !== 'page-fade-out') return;
+          outgoing.removeEventListener('animationend', onEnd);
           window.clearTimeout(timer);
           go();
         });
@@ -153,7 +164,7 @@
 </script>
 
 <svelte:head>
-  <link rel="preload" href="/assets/hero-bg.webp" as="image" type="image/webp" />
+  <link rel="preload" href={photos[0]} as="image" type="image/webp" />
 </svelte:head>
 
 <svelte:window bind:scrollY />

@@ -17,14 +17,18 @@
     return '';
   });
 
-  const wide = $derived(/^\/admin\/(blog|projects)\/[^/]+$/.test(page.url.pathname));
+  const wide = $derived(
+    /^\/admin\/(blog|projects)\/[^/]+$/.test(page.url.pathname) ||
+      /^\/admin\/about\/(professional(\/|$)|personal)/.test(page.url.pathname) ||
+      page.url.pathname.startsWith('/admin/resume')
+  );
 
   const links = $derived([
     { href: resolve('/admin'), label: 'Home', current: section === 'home' },
     { href: resolve('/admin/blog'), label: 'Blog', current: section === 'posts' },
     { href: resolve('/admin/projects'), label: 'Projects', current: section === 'projects' },
     {
-      href: resolve('/admin/about/professional'),
+      href: resolve('/admin/about/professional/intro'),
       label: 'Professional',
       current: section === 'professional'
     },

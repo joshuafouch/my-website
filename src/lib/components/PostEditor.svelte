@@ -1,6 +1,7 @@
 <script lang="ts">
   import { beforeNavigate } from '$app/navigation';
   import { tick, untrack } from 'svelte';
+  import ConfirmDialog from '#lib/components/ConfirmDialog.svelte';
   import ImagePicker from '#lib/components/ImagePicker.svelte';
   import PostPreview from '#lib/components/PostPreview.svelte';
   import MarkdownField from '#lib/components/MarkdownField.svelte';
@@ -66,6 +67,7 @@
   let leaving = $state(false);
   let pendingHref: string | null = null;
   let pendingForm: HTMLFormElement | null = null;
+  let confirmOpen = $state(false);
 
   const initial = untrack(() => ({
     title,
@@ -280,7 +282,9 @@
                 >Choose image</button
               >
               {#if image}
-                <button type="button" class="text" onclick={() => (image = '')}>Remove</button>
+                <button type="button" class="text" onclick={() => (confirmOpen = true)}
+                  >Remove</button
+                >
               {/if}
             </div>
           </div>
@@ -327,6 +331,15 @@
       onclose={() => (pickerOpen = false)}
     />
   {/if}
+
+  <ConfirmDialog
+    bind:open={confirmOpen}
+    title="Clear this image?"
+    message="The cover will be cleared until you choose another."
+    onconfirm={() => {
+      image = '';
+    }}
+  />
 
   <dialog class="leave" bind:this={leaveDialog} aria-labelledby="leave-title" onclose={stay}>
     <h2 id="leave-title">Leave without saving?</h2>

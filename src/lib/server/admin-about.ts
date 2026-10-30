@@ -352,41 +352,40 @@ async function deleteMissing(
   return deleteError?.message ?? null;
 }
 
-export async function saveProfessionalFromForm(
+async function touchProfessional(supabase: Client): Promise<string | null> {
+  const { error: profileError } = await supabase
+    .from('about_professional')
+    .update({ updated_at: new Date().toISOString() })
+    .eq('id', 1);
+  return profileError?.message ?? null;
+}
+
+export async function saveProfessionalIntro(
   supabase: Client,
   form: FormData
-): Promise<{ ok: true } | { error: string; content?: ProfessionalContent }> {
+): Promise<{ ok: true } | { error: string; intro?: string }> {
   await requireAdmin(supabase);
-
   const intro = text(form.get('intro'));
-  const workIntro = text(form.get('workIntro'));
-  const techIntro = text(form.get('techIntro'));
-  if (intro.length > 8000 || workIntro.length > 500 || techIntro.length > 500) {
-    return { error: 'One of the introductions is too long.' };
-  }
+  if (intro.length > 8000) return { error: 'The introduction is too long.', intro };
+
+  const { error: profileError } = await supabase
+    .from('about_professional')
+    .update({ intro, updated_at: new Date().toISOString() })
+    .eq('id', 1);
+  if (profileError) return { error: profileError.message, intro };
+  return { ok: true };
+}
+
+export async function saveProfessionalPortraits(
+  supabase: Client,
+  form: FormData
+): Promise<{ ok: true } | { error: string; portraits?: Portrait[] }> {
+  await requireAdmin(supabase);
 
   const portraitsJson = parseJson(String(form.get('portraits') ?? ''));
   if ('error' in portraitsJson) return portraitsJson;
-  const jobsJson = parseJson(String(form.get('jobs') ?? ''));
-  if ('error' in jobsJson) return jobsJson;
-  const groupsJson = parseJson(String(form.get('groups') ?? ''));
-  if ('error' in groupsJson) return groupsJson;
-
   const portraitsParsed = parsePortraits(portraitsJson.ok);
   if ('error' in portraitsParsed) return portraitsParsed;
-  const jobsParsed = parseJobs(jobsJson.ok);
-  if ('error' in jobsParsed) return jobsParsed;
-  const groupsParsed = parseGroups(groupsJson.ok);
-  if ('error' in groupsParsed) return groupsParsed;
-
-  const content: ProfessionalContent = {
-    intro,
-    workIntro,
-    techIntro,
-    portraits: portraitsParsed.ok.map((portrait) => ({ ...portrait })),
-    jobs: jobsFromWire(jobsParsed.ok),
-    groups: groupsParsed.ok
-  };
 
   const portraits: Portrait[] = [];
   for (const portrait of portraitsParsed.ok) {
@@ -396,58 +395,14 @@ export async function saveProfessionalFromForm(
     let src = portrait.src;
     if (file) {
       const uploaded = await uploadBlogImage(supabase, file, 'portraits');
-      if ('error' in uploaded) return { error: uploaded.error, content };
+      if ('error' in uploaded) return { error: uploaded.error, portraits: portraitsParsed.ok };
       src = uploaded.url;
     }
     const href = checkHref(src, 'A portrait image');
-    if ('error' in href) return { error: href.error, content };
-    if (!href.ok) return { error: 'Each portrait needs an image.', content };
+    if ('error' in href) return { error: href.error, portraits: portraitsParsed.ok };
+    if (!href.ok) return { error: 'Each portrait needs an image.', portraits: portraitsParsed.ok };
     portraits.push({ id: portrait.id, src: href.ok, alt: portrait.alt });
   }
-
-  const jobs: Job[] = [];
-  for (const job of content.jobs) {
-    if (emptyJob(job)) continue;
-    if (!job.role) return { error: 'Each role needs a title.', content };
-    if (job.skills.length > 12 || job.skills.some((skill) => skill.length > 80)) {
-      return { error: 'A skills list is too long.', content };
-    }
-    const orgs: Org[] = [];
-    for (const org of job.orgs) {
-      if (!org.name && !org.href) continue;
-      if (!org.name) return { error: 'Each organization needs a name.', content };
-      if (org.name.length > 120) return { error: 'An organization name is too long.', content };
-      const href = checkHref(org.href, 'An organization link');
-      if ('error' in href) return { error: href.error, content };
-      orgs.push({ name: org.name, href: href.ok });
-    }
-    jobs.push({ ...job, orgs });
-  }
-
-  const groups: TechGroup[] = [];
-  for (const group of content.groups) {
-    if (emptyGroup(group)) continue;
-    if (!group.title) return { error: 'Each tech group needs a title.', content };
-    const items: TechItem[] = [];
-    for (const item of group.items) {
-      if (!item.text && !item.href) continue;
-      if (!item.text) return { error: 'Each technology needs a name.', content };
-      const href = checkHref(item.href, 'A technology link');
-      if ('error' in href) return { error: href.error, content };
-      items.push({ text: item.text, href: href.ok });
-    }
-    groups.push({ ...group, items });
-  }
-
-  const savedAt = new Date().toISOString();
-  const { error: profileError } = await supabase.from('about_professional').upsert({
-    id: 1,
-    intro,
-    work_intro: workIntro,
-    tech_intro: techIntro,
-    updated_at: savedAt
-  });
-  if (profileError) return { error: profileError.message, content };
 
   for (const [index, portrait] of portraits.entries()) {
     const { error: upsertError } = await supabase.from('portraits').upsert({
@@ -456,14 +411,61 @@ export async function saveProfessionalFromForm(
       alt: portrait.alt,
       sort_order: index
     });
-    if (upsertError) return { error: upsertError.message, content };
+    if (upsertError) return { error: upsertError.message, portraits };
   }
   const portraitDelete = await deleteMissing(
     supabase,
     'portraits',
     portraits.map((portrait) => portrait.id)
   );
-  if (portraitDelete) return { error: portraitDelete, content };
+  if (portraitDelete) return { error: portraitDelete, portraits };
+
+  const touched = await touchProfessional(supabase);
+  if (touched) return { error: touched, portraits };
+  return { ok: true };
+}
+
+export async function saveProfessionalWork(
+  supabase: Client,
+  form: FormData
+): Promise<{ ok: true } | { error: string; workIntro?: string; jobs?: Job[] }> {
+  await requireAdmin(supabase);
+
+  const workIntro = text(form.get('workIntro'));
+  if (workIntro.length > 500) return { error: 'The work introduction is too long.' };
+
+  const jobsJson = parseJson(String(form.get('jobs') ?? ''));
+  if ('error' in jobsJson) return jobsJson;
+  const jobsParsed = parseJobs(jobsJson.ok);
+  if ('error' in jobsParsed) return jobsParsed;
+
+  const draftJobs = jobsFromWire(jobsParsed.ok);
+  const jobs: Job[] = [];
+  for (const job of draftJobs) {
+    if (emptyJob(job)) continue;
+    if (!job.role) return { error: 'Each role needs a title.', workIntro, jobs: draftJobs };
+    if (job.skills.length > 12 || job.skills.some((skill) => skill.length > 80)) {
+      return { error: 'A skills list is too long.', workIntro, jobs: draftJobs };
+    }
+    const orgs: Org[] = [];
+    for (const org of job.orgs) {
+      if (!org.name && !org.href) continue;
+      if (!org.name) return { error: 'Each organization needs a name.', workIntro, jobs: draftJobs };
+      if (org.name.length > 120) {
+        return { error: 'An organization name is too long.', workIntro, jobs: draftJobs };
+      }
+      const href = checkHref(org.href, 'An organization link');
+      if ('error' in href) return { error: href.error, workIntro, jobs: draftJobs };
+      orgs.push({ name: org.name, href: href.ok });
+    }
+    jobs.push({ ...job, orgs });
+  }
+
+  const { error: profileError } = await supabase
+    .from('about_professional')
+    .update({ work_intro: workIntro, updated_at: new Date().toISOString() })
+    .eq('id', 1);
+  if (profileError) return { error: profileError.message, workIntro, jobs };
 
   for (const [index, job] of jobs.entries()) {
     const { error: upsertError } = await supabase.from('work_experiences').upsert({
@@ -475,14 +477,56 @@ export async function saveProfessionalFromForm(
       orgs: job.orgs as Json,
       sort_order: index
     });
-    if (upsertError) return { error: upsertError.message, content };
+    if (upsertError) return { error: upsertError.message, workIntro, jobs };
   }
   const jobDelete = await deleteMissing(
     supabase,
     'work_experiences',
     jobs.map((job) => job.id)
   );
-  if (jobDelete) return { error: jobDelete, content };
+  if (jobDelete) return { error: jobDelete, workIntro, jobs };
+
+  return { ok: true };
+}
+
+export async function saveProfessionalTech(
+  supabase: Client,
+  form: FormData
+): Promise<{ ok: true } | { error: string; techIntro?: string; groups?: TechGroup[] }> {
+  await requireAdmin(supabase);
+
+  const techIntro = text(form.get('techIntro'));
+  if (techIntro.length > 500) return { error: 'The tech introduction is too long.' };
+
+  const groupsJson = parseJson(String(form.get('groups') ?? ''));
+  if ('error' in groupsJson) return groupsJson;
+  const groupsParsed = parseGroups(groupsJson.ok);
+  if ('error' in groupsParsed) return groupsParsed;
+
+  const groups: TechGroup[] = [];
+  for (const group of groupsParsed.ok) {
+    if (emptyGroup(group)) continue;
+    if (!group.title) {
+      return { error: 'Each tech group needs a title.', techIntro, groups: groupsParsed.ok };
+    }
+    const items: TechItem[] = [];
+    for (const item of group.items) {
+      if (!item.text && !item.href) continue;
+      if (!item.text) {
+        return { error: 'Each technology needs a name.', techIntro, groups: groupsParsed.ok };
+      }
+      const href = checkHref(item.href, 'A technology link');
+      if ('error' in href) return { error: href.error, techIntro, groups: groupsParsed.ok };
+      items.push({ text: item.text, href: href.ok });
+    }
+    groups.push({ ...group, items });
+  }
+
+  const { error: profileError } = await supabase
+    .from('about_professional')
+    .update({ tech_intro: techIntro, updated_at: new Date().toISOString() })
+    .eq('id', 1);
+  if (profileError) return { error: profileError.message, techIntro, groups };
 
   for (const [index, group] of groups.entries()) {
     const { error: upsertError } = await supabase.from('tech_groups').upsert({
@@ -491,14 +535,14 @@ export async function saveProfessionalFromForm(
       items: group.items as Json,
       sort_order: index
     });
-    if (upsertError) return { error: upsertError.message, content };
+    if (upsertError) return { error: upsertError.message, techIntro, groups };
   }
   const groupDelete = await deleteMissing(
     supabase,
     'tech_groups',
     groups.map((group) => group.id)
   );
-  if (groupDelete) return { error: groupDelete, content };
+  if (groupDelete) return { error: groupDelete, techIntro, groups };
 
   return { ok: true };
 }
@@ -667,15 +711,25 @@ export async function uploadMusicImage(
 ): Promise<{ image: MusicImage } | { error: string }> {
   await requireAdmin(supabase);
 
-  if (!COVER_TYPES.has(file.type)) return { error: 'Use a JPEG, PNG, or WebP.' };
+  const contentType = COVER_TYPES.has(file.type)
+    ? file.type
+    : file.name.toLowerCase().endsWith('.png')
+      ? 'image/png'
+      : file.name.toLowerCase().endsWith('.jpg') || file.name.toLowerCase().endsWith('.jpeg')
+        ? 'image/jpeg'
+        : file.name.toLowerCase().endsWith('.webp')
+          ? 'image/webp'
+          : '';
+  if (!COVER_TYPES.has(contentType)) return { error: 'Use a JPEG, PNG, or WebP.' };
   if (file.size === 0) return { error: 'Choose an image.' };
   if (file.size > MAX_COVER_BYTES) return { error: 'Image must be 2 MB or smaller.' };
 
-  const extension = file.type === 'image/png' ? 'png' : file.type === 'image/jpeg' ? 'jpg' : 'webp';
+  const extension =
+    contentType === 'image/png' ? 'png' : contentType === 'image/jpeg' ? 'jpg' : 'webp';
   const path = `${crypto.randomUUID()}.${extension}`;
   const alt = text(altText).slice(0, 160) || 'Album cover';
   const { error: uploadError } = await supabase.storage.from(ALBUMS_BUCKET).upload(path, file, {
-    contentType: file.type,
+    contentType,
     cacheControl: '86400',
     upsert: false
   });
