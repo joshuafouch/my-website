@@ -189,42 +189,43 @@ html[data-theme='nord-dark'] {
   --veil-outer: color-mix(in oklab, var(--ground) 74%, transparent);
 }
 
-/* Snow Storm: official Nord light ambiance from nordtheme.com */
+/* Snow Storm: Nord light, muted so the landing photo isn’t washed out */
 html[data-theme='nord'] {
   color-scheme: light;
 
-  --ground: #eceff4; /* nord6 */
-  --surface: #f4f6fa;
-  --surface-raised: #ffffff;
-  --surface-elevated: #e5e9f0; /* nord5 */
+  --ground: #e5e9f0; /* nord5 */
+  --surface: #eceff4; /* nord6 */
+  --surface-raised: #f2f4f8;
+  --surface-elevated: #d8dee9; /* nord4 */
 
   --ink: var(--nord0); /* #2e3440 */
   --ink-muted: var(--nord3); /* #4c566a */
   --ink-accent: var(--nord10); /* #5e81ac */
 
-  --card-bg: color-mix(in oklab, #ffffff 88%, transparent);
+  --card-bg: color-mix(in oklab, var(--nord6) 82%, transparent);
   --card-border: color-mix(in oklab, var(--nord3) 18%, transparent);
   --border-subtle: color-mix(in oklab, var(--nord3) 16%, transparent);
   --border-strong: color-mix(in oklab, var(--nord3) 38%, transparent);
 
-  --btn-bg: color-mix(in oklab, #ffffff 80%, transparent);
+  --btn-bg: color-mix(in oklab, var(--nord6) 72%, transparent);
   --btn-border: color-mix(in oklab, var(--nord3) 22%, transparent);
 
-  --dialog-bg: color-mix(in oklab, #ffffff 96%, transparent);
-  --dialog-bar: color-mix(in oklab, var(--nord5) 90%, transparent);
-  --dialog-backdrop: color-mix(in oklab, var(--nord0) 35%, transparent);
+  --dialog-bg: color-mix(in oklab, var(--nord6) 92%, transparent);
+  --dialog-bar: color-mix(in oklab, var(--nord5) 88%, transparent);
+  --dialog-backdrop: color-mix(in oklab, var(--nord0) 28%, transparent);
 
   --crest-color: var(--nord10);
   --watermark-color: var(--nord9);
   --watermark-opacity: 0.14;
   --logo-outline: #242933;
   --signature-rest: initial;
-  --sig-end-saturate: 0.25;
-  --sig-end-brightness: 1.15;
+  --sig-end-saturate: 0.35;
+  --sig-end-brightness: 1;
 
   --input-border: color-mix(in oklab, var(--nord3) 30%, transparent);
-  --veil-inner: color-mix(in oklab, var(--nord5) 48%, transparent);
-  --veil-outer: color-mix(in oklab, var(--nord4) 62%, transparent);
+  /* Soft cool haze: quieter than the old white wash, still readable for dark ink. */
+  --veil-inner: color-mix(in oklab, var(--nord5) 38%, transparent);
+  --veil-outer: color-mix(in oklab, var(--nord3) 52%, transparent);
 }
 
 /* Frost: dusk built from nord7–nord10, between Polar Night and Snow Storm */
@@ -359,27 +360,76 @@ html[data-theme-fade] *::after {
   transition: none !important;
 }
 
-html[data-fade='out'] .site-backdrop,
-html[data-fade='out'] .landing,
-html[data-fade='out'] .inner-shell {
-  animation: page-fade-out 200ms ease both;
-  pointer-events: none;
-}
-
-html[data-fade='in'] .site-backdrop,
-html[data-fade='in'] .landing,
-html[data-fade='in'] .inner-shell {
-  animation: page-fade-in 240ms ease both;
-}
-
-html[data-fade='in'] [data-fade-hold] {
+/* Settled inner pages: keep the shared photo mounted but out of the paint path. */
+html:has(.inner-shell):not([data-fade]) .site-backdrop {
   opacity: 0;
-  animation: none;
+  visibility: hidden;
 }
 
 html[data-fade] .landing,
 html[data-fade] .inner-shell {
   pointer-events: none;
+}
+
+/* Landing → inner: dissolve text only; photo stays put. */
+html[data-enter='inner'][data-fade='out'] .landing-chrome {
+  animation: page-fade-out 200ms ease both;
+}
+
+/* Landing → inner: surface + body rise while the photo yields. */
+html[data-enter='inner'][data-fade='in'] .site-backdrop {
+  visibility: visible;
+  animation: enter-backdrop-out 400ms ease both;
+}
+
+html[data-enter='inner'][data-fade='in'] .inner-shell {
+  animation: enter-surface 400ms var(--ease-out) both;
+}
+
+html[data-enter='inner'][data-fade='in'] .watermark,
+html[data-enter='inner'][data-fade='in'] .floor-crest,
+html[data-enter='inner'][data-fade='in'] .seam {
+  opacity: 0;
+}
+
+html[data-enter='inner'][data-fade='in'] .inner-shell .page-stack {
+  animation: enter-body 400ms var(--ease-out) both;
+}
+
+html[data-enter='inner'][data-fade='in'] .sidebar-open .page-stack {
+  animation: enter-body-open 460ms var(--ease-slide) both;
+}
+
+@media (min-width: 768px) {
+  html[data-enter='inner'][data-fade='in'] .rail:not(.closed) {
+    animation: enter-rail 460ms var(--ease-slide) both;
+  }
+}
+
+/* Mobile rail is an overlay menu — only fade the body, no slide. */
+@media (max-width: 767px) {
+  html[data-enter='inner'][data-fade='in'] .sidebar-open .page-stack {
+    animation: enter-body 400ms var(--ease-out) both;
+  }
+}
+
+/* Inner → landing: reveal the photo under the fading shell, then bring chrome back. */
+html[data-enter='landing'][data-fade='out'] .site-backdrop {
+  visibility: visible;
+  opacity: 1;
+}
+
+html[data-enter='landing'][data-fade='out'] .inner-shell {
+  animation: page-fade-out 200ms ease both;
+}
+
+html[data-enter='landing'][data-fade='in'] .site-backdrop {
+  visibility: visible;
+  opacity: 1;
+}
+
+html[data-enter='landing'][data-fade='in'] .landing-chrome {
+  animation: page-fade-in 240ms var(--ease-out) both;
 }
 
 @keyframes page-fade-out {
@@ -396,6 +446,55 @@ html[data-fade] .inner-shell {
   to {
     opacity: 1;
     transform: none;
+  }
+}
+
+@keyframes enter-backdrop-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes enter-surface {
+  from {
+    background-color: transparent;
+  }
+  to {
+    background-color: var(--surface);
+  }
+}
+
+@keyframes enter-body {
+  from {
+    opacity: 0;
+    translate: 0 0.45rem;
+  }
+  to {
+    opacity: 1;
+    translate: none;
+  }
+}
+
+@keyframes enter-body-open {
+  from {
+    opacity: 0;
+    translate: var(--rail-mini) 0.45rem;
+  }
+  to {
+    opacity: 1;
+    translate: var(--sidebar-width) 0;
+  }
+}
+
+@keyframes enter-rail {
+  from {
+    translate: calc(var(--rail-mini) - 100%) 0;
+  }
+  to {
+    translate: 0 0;
   }
 }
 
@@ -1299,6 +1398,17 @@ select optgroup {
   .site-backdrop .over.shown {
     animation: none;
     opacity: 1;
+  }
+
+  html[data-enter='inner'][data-fade='out'] .landing-chrome,
+  html[data-enter='inner'][data-fade='in'] .site-backdrop,
+  html[data-enter='inner'][data-fade='in'] .inner-shell,
+  html[data-enter='inner'][data-fade='in'] .inner-shell .page-stack,
+  html[data-enter='inner'][data-fade='in'] .sidebar-open .page-stack,
+  html[data-enter='inner'][data-fade='in'] .rail:not(.closed),
+  html[data-enter='landing'][data-fade='out'] .inner-shell,
+  html[data-enter='landing'][data-fade='in'] .landing-chrome {
+    animation: none !important;
   }
 }
 

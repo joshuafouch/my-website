@@ -1,7 +1,7 @@
 import { getPublishedProjects } from '#lib/projects.ts';
-import type { PageServerLoad } from './$types';
+import type { LayoutServerLoad } from './$types';
 
-export const load: PageServerLoad = async ({ locals }) => {
+export const load: LayoutServerLoad = async ({ locals }) => {
   const projects = await getPublishedProjects(locals.supabase);
   return { projects };
 };

@@ -140,13 +140,17 @@
 
   .gallery {
     display: grid;
-    gap: 0.75rem;
-    margin-top: 1.25rem;
+    gap: 0.85rem;
+    margin-top: 1.35rem;
   }
 
+  /* Keep natural aspect — these are usually page screenshots, not square crops. */
   .gallery img {
+    display: block;
     width: 100%;
-    height: 12rem;
-    object-fit: cover;
+    height: auto;
+    border: 1px solid var(--card-border);
+    border-radius: 0.75rem;
+    background: var(--surface-raised);
   }
 </style>
