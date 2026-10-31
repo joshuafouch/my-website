@@ -53,11 +53,26 @@
   }
 
   function playOpen() {
-    if (!dialog || motion.off) return;
-    resetSurface();
+    if (!dialog) return;
+    if (motion.off) {
+      dialog.style.opacity = '';
+      return;
+    }
+    clearAnims(dialog);
     const duration = reducedMotion() ? 140 : 240;
-    dialog.animate([{ opacity: 0 }, { opacity: 1 }], { duration, easing: ease });
-    // Solid backdrop immediately — otherwise the grid twin shows through the fade.
+    const animation = dialog.animate([{ opacity: 0 }, { opacity: 1 }], {
+      duration,
+      easing: ease,
+      fill: 'forwards'
+    });
+    animation.finished
+      .then(() => {
+        if (!dialog) return;
+        dialog.style.opacity = '';
+        clearAnims(dialog);
+      })
+      .catch(() => {});
+    // Solid backdrop immediately — page chrome must not show through the fade.
     dialog.animate([{ opacity: 1 }, { opacity: 1 }], {
       duration: 1,
       fill: 'forwards',
@@ -66,16 +81,18 @@
   }
 
   async function openFor(project: Project) {
+    display = project;
     await tick();
     if (!dialog || closing) return;
 
-    display = project;
     const same = lastOpenedSlug === project.slug && dialog.open;
+    if (same) return;
+
+    lastOpenedSlug = project.slug;
+    // Invisible on first paint, then fade in — avoids a full-opacity flash.
+    if (!motion.off && !reducedMotion()) dialog.style.opacity = '0';
     if (!dialog.open) dialog.showModal();
-    if (!same) {
-      lastOpenedSlug = project.slug;
-      requestAnimationFrame(playOpen);
-    }
+    requestAnimationFrame(playOpen);
   }
 
   $effect(() => {
@@ -157,7 +174,7 @@
 
 {@render children()}
 
-<div class="projects font-serif">
+<div class="projects font-serif" class:covered={!!display}>
   <header>
     <h1>Projects</h1>
     <p>Personal, research, and collaborative projects.</p>
@@ -207,6 +224,11 @@
     margin-inline: auto;
     padding: 2.25rem 1.5rem 2.5rem;
     color: var(--ink);
+  }
+
+  /* Hide title, blurb, and grid while a card is open so nothing flashes underneath. */
+  .projects.covered {
+    visibility: hidden;
   }
 
   header h1 {
