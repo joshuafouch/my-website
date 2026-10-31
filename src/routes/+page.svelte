@@ -93,101 +93,103 @@
     </div>
   {/if}
 
-  <div class="corner reveal" style="--step: 0">
-    <BackgroundSwitch />
-    <ThemeSwitch />
-    <MotionToggle />
-  </div>
-
-  <div class="relative flex flex-1 flex-col items-center justify-center px-6 text-center">
-    <div class="logo w-full max-w-md" class:quick={returning && replay === 0}>
-      <button
-        type="button"
-        class="signature-btn"
-        aria-label="Replay signature"
-        onclick={() => replay++}
-      >
-        {#key replay}
-          <SignatureLogo play={ready} instant={returning && replay === 0} drift />
-        {/key}
-      </button>
+  <div class="landing-chrome flex flex-1 flex-col">
+    <div class="corner reveal" style="--step: 0">
+      <BackgroundSwitch />
+      <ThemeSwitch />
+      <MotionToggle />
     </div>
 
-    <p class="hello reveal mt-4 max-w-md text-xl leading-relaxed sm:text-2xl" style="--step: 0">
-      Hello! My name is <em class="name">Joshua Fouch</em>. Welcome to my corner of the web.
-    </p>
+    <div class="relative flex flex-1 flex-col items-center justify-center px-6 text-center">
+      <div class="logo w-full max-w-md" class:quick={returning && replay === 0}>
+        <button
+          type="button"
+          class="signature-btn"
+          aria-label="Replay signature"
+          onclick={() => replay++}
+        >
+          {#key replay}
+            <SignatureLogo play={ready} instant={returning && replay === 0} drift />
+          {/key}
+        </button>
+      </div>
 
-    <nav aria-label="Pages" class="reveal mt-10" style="--step: 1">
-      <ul class="pages flex flex-wrap items-center justify-center gap-y-1 text-base sm:text-xl">
-        {#each pages as page, index (page.text)}
-          {#if index > 0}
-            <li aria-hidden="true" class="dot">·</li>
-          {/if}
-          <li><a class="link-line" href={page.href}>{page.text}</a></li>
-        {/each}
-      </ul>
-    </nav>
-  </div>
+      <p class="hello reveal mt-4 max-w-md text-xl leading-relaxed sm:text-2xl" style="--step: 0">
+        Hello! My name is <em class="name">Joshua Fouch</em>. Welcome to my corner of the web.
+      </p>
 
-  <footer class="foot reveal text-center" style="--step: 2">
-    <ul class="socials flex flex-wrap justify-center">
-      <li>
-        <a class="social-link link-line" href={resolve('/resume')}>
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <path
-              d="M14 3.25H7.4c-.9 0-1.65.75-1.65 1.65v14.2c0 .9.75 1.65 1.65 1.65h9.2c.9 0 1.65-.75 1.65-1.65V8.15L14 3.25z"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.6"
-              stroke-linejoin="round"
-            />
-            <path
-              d="M13.85 3.5V8.2H18.4"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.6"
-              stroke-linejoin="round"
-              stroke-linecap="round"
-            />
-            <path
-              d="M8.6 12.15h6.8M8.6 15.15h6.8M8.6 18.1h4.15"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.6"
-              stroke-linecap="round"
-            />
-          </svg>
-          Resume
-        </a>
-      </li>
-      {#each socials as social (social.text)}
-        <li>
-          <a
-            class="social-link link-line"
-            href={social.href}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            {#if social.text === 'GitHub'}
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path
-                  d="M12 0C5.37 0 0 5.37 0 12c0 5.302 3.438 9.8 8.205 11.387.6.113.82-.258.82-.577v-2.022c-3.338.724-4.033-1.61-4.033-1.61-.546-1.387-1.333-1.756-1.333-1.756-1.089-.744.083-.729.083-.729 1.205.084 1.84 1.238 1.84 1.238 1.07 1.835 2.807 1.305 3.492.998.108-.775.418-1.305.762-1.605-2.665-.305-5.467-1.334-5.467-5.931 0-1.31.468-2.381 1.236-3.221-.124-.303-.536-1.527.117-3.176 0 0 1.008-.322 3.301 1.23a11.52 11.52 0 013.003-.403c1.018.005 2.044.138 3.003.403 2.291-1.552 3.297-1.23 3.297-1.23.655 1.649.243 2.873.12 3.176.77.84 1.236 1.911 1.236 3.221 0 4.609-2.807 5.624-5.479 5.921.43.37.815 1.102.815 2.222v3.293c0 .321.218.694.825.576C20.565 21.796 24 17.298 24 12c0-6.63-5.37-12-12-12z"
-                />
-              </svg>
-            {:else}
-              <svg viewBox="0 0 24 24" aria-hidden="true">
-                <path
-                  d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.762 2.239 5 5 5h14c2.762 0 5-2.238 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-10h3v10zm-1.5-11.268c-.966 0-1.75-.784-1.75-1.75s.784-1.75 1.75-1.75 1.75.784 1.75 1.75-.784 1.75-1.75 1.75zm13.5 11.268h-3v-5.604c0-1.337-.026-3.063-1.867-3.063-1.867 0-2.154 1.459-2.154 2.969v5.698h-3v-10h2.881v1.367h.041c.401-.762 1.381-1.564 2.841-1.564 3.037 0 3.599 2.028 3.599 4.675v5.522z"
-                />
-              </svg>
+      <nav aria-label="Pages" class="reveal mt-10" style="--step: 1">
+        <ul class="pages flex flex-wrap items-center justify-center gap-y-1 text-base sm:text-xl">
+          {#each pages as page, index (page.text)}
+            {#if index > 0}
+              <li aria-hidden="true" class="dot">·</li>
             {/if}
-            {social.text}
+            <li><a class="link-line" href={page.href}>{page.text}</a></li>
+          {/each}
+        </ul>
+      </nav>
+    </div>
+
+    <footer class="foot reveal text-center" style="--step: 2">
+      <ul class="socials flex flex-wrap justify-center">
+        <li>
+          <a class="social-link link-line" href={resolve('/resume')}>
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M14 3.25H7.4c-.9 0-1.65.75-1.65 1.65v14.2c0 .9.75 1.65 1.65 1.65h9.2c.9 0 1.65-.75 1.65-1.65V8.15L14 3.25z"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linejoin="round"
+              />
+              <path
+                d="M13.85 3.5V8.2H18.4"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linejoin="round"
+                stroke-linecap="round"
+              />
+              <path
+                d="M8.6 12.15h6.8M8.6 15.15h6.8M8.6 18.1h4.15"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="1.6"
+                stroke-linecap="round"
+              />
+            </svg>
+            Resume
           </a>
         </li>
-      {/each}
-    </ul>
-    <AdminLogin />
-  </footer>
+        {#each socials as social (social.text)}
+          <li>
+            <a
+              class="social-link link-line"
+              href={social.href}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {#if social.text === 'GitHub'}
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="M12 0C5.37 0 0 5.37 0 12c0 5.302 3.438 9.8 8.205 11.387.6.113.82-.258.82-.577v-2.022c-3.338.724-4.033-1.61-4.033-1.61-.546-1.387-1.333-1.756-1.333-1.756-1.089-.744.083-.729.083-.729 1.205.084 1.84 1.238 1.84 1.238 1.07 1.835 2.807 1.305 3.492.998.108-.775.418-1.305.762-1.605-2.665-.305-5.467-1.334-5.467-5.931 0-1.31.468-2.381 1.236-3.221-.124-.303-.536-1.527.117-3.176 0 0 1.008-.322 3.301 1.23a11.52 11.52 0 013.003-.403c1.018.005 2.044.138 3.003.403 2.291-1.552 3.297-1.23 3.297-1.23.655 1.649.243 2.873.12 3.176.77.84 1.236 1.911 1.236 3.221 0 4.609-2.807 5.624-5.479 5.921.43.37.815 1.102.815 2.222v3.293c0 .321.218.694.825.576C20.565 21.796 24 17.298 24 12c0-6.63-5.37-12-12-12z"
+                  />
+                </svg>
+              {:else}
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                  <path
+                    d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.762 2.239 5 5 5h14c2.762 0 5-2.238 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-10h3v10zm-1.5-11.268c-.966 0-1.75-.784-1.75-1.75s.784-1.75 1.75-1.75 1.75.784 1.75 1.75-.784 1.75-1.75 1.75zm13.5 11.268h-3v-5.604c0-1.337-.026-3.063-1.867-3.063-1.867 0-2.154 1.459-2.154 2.969v5.698h-3v-10h2.881v1.367h.041c.401-.762 1.381-1.564 2.841-1.564 3.037 0 3.599 2.028 3.599 4.675v5.522z"
+                  />
+                </svg>
+              {/if}
+              {social.text}
+            </a>
+          </li>
+        {/each}
+      </ul>
+      <AdminLogin />
+    </footer>
+  </div>
 </section>
 
 <style>
@@ -196,6 +198,10 @@
     min-height: 100svh;
     min-height: 100dvh;
     overflow: hidden;
+  }
+
+  .landing-chrome {
+    min-height: 0;
   }
 
   .corner {
@@ -328,7 +334,7 @@
 
   .dot {
     padding-inline: 0.45rem;
-    color: color-mix(in oklab, var(--nord4) 45%, transparent);
+    color: color-mix(in oklab, var(--ink-muted) 55%, transparent);
   }
 
   .foot {

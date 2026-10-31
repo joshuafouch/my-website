@@ -10,15 +10,10 @@ export const photos = [
   '/assets/backgrounds/IMG_1797.webp',
   '/assets/backgrounds/IMG_3188.webp',
   '/assets/backgrounds/IMG_3208.webp',
-  '/assets/backgrounds/IMG_6140.webp',
-  '/assets/backgrounds/IMG_6521.webp',
-  '/assets/backgrounds/IMG_6524.webp',
   '/assets/backgrounds/IMG_6678.webp',
   '/assets/backgrounds/IMG_6706.webp',
   '/assets/backgrounds/IMG_6749.webp',
   '/assets/backgrounds/IMG_6791.webp',
-  '/assets/backgrounds/IMG_6830.webp',
-  '/assets/backgrounds/IMG_8558.webp',
   '/assets/backgrounds/IMG_9540.webp'
 ] as const;
 

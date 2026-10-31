@@ -61,9 +61,13 @@
 
       const root = document.documentElement;
       if (root.dataset.fade) return;
+      root.dataset.enter = from === '/' ? 'inner' : 'landing';
       root.dataset.fade = 'out';
       window.setTimeout(() => {
-        if (root.dataset.fade === 'out' && !root.dataset.fadeId) delete root.dataset.fade;
+        if (root.dataset.fade === 'out' && !root.dataset.fadeId) {
+          delete root.dataset.fade;
+          delete root.dataset.enter;
+        }
       }, 800);
     };
     document.addEventListener('click', startFade, true);
@@ -85,12 +89,17 @@
 
     // Landing includes the handwritten mark. Fade opacity instead of snapshotting it.
     if (from === '/' || to === '/') {
+      const entering = from === '/' ? 'inner' : 'landing';
       const token = String(Date.now());
       root.dataset.fadeId = token;
+      root.dataset.enter = entering;
       if (root.dataset.fade !== 'out') root.dataset.fade = 'out';
 
       return new Promise((resolve) => {
-        const outgoing = document.querySelector('.landing, .inner-shell');
+        const outgoing =
+          entering === 'inner'
+            ? document.querySelector('.landing-chrome')
+            : document.querySelector('.inner-shell');
         let started = false;
         const go = () => {
           if (started) return;
@@ -99,17 +108,16 @@
             resolve();
             return;
           }
-          document.querySelectorAll('.landing, .inner-shell, .site-backdrop').forEach((node) => {
-            if (node instanceof HTMLElement) node.dataset.fadeHold = '';
-          });
           root.dataset.fade = 'in';
           resolve();
+          const clearMs = entering === 'inner' ? 520 : 280;
           navigation.complete.finally(() => {
             window.setTimeout(() => {
               if (root.dataset.fadeId !== token) return;
               delete root.dataset.fade;
               delete root.dataset.fadeId;
-            }, 280);
+              delete root.dataset.enter;
+            }, clearMs);
           });
         };
 
@@ -169,8 +177,17 @@
 
 <svelte:window bind:scrollY />
 
+<!-- One photo layer for landing and the enter crossfade; dormant on settled inner pages. -->
+<SiteBackdrop />
+
 {#if isLanding}
-  <SiteBackdrop />
+  <div class="page-stack">
+    <main>
+      <Transition url={data.url}>
+        {@render children()}
+      </Transition>
+    </main>
+  </div>
 {:else}
   <div class="inner-shell" class:sidebar-open={sidebar.open}>
     <SiteSidebar />
@@ -209,16 +226,6 @@
       </main>
       <Footer />
     </div>
-  </div>
-{/if}
-
-{#if isLanding}
-  <div class="page-stack">
-    <main>
-      <Transition url={data.url}>
-        {@render children()}
-      </Transition>
-    </main>
   </div>
 {/if}
 

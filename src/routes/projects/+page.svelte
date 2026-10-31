@@ -9,79 +9,88 @@
 
   let dialog: HTMLDialogElement | undefined = $state();
   let selected: Project | null = $state(null);
-  let origin: DOMRect | null = null;
   let closing = false;
 
-  function shift(box: DOMRect) {
-    if (!origin) return null;
-    return {
-      x: origin.left + origin.width / 2 - (box.left + box.width / 2),
-      y: origin.top + origin.height / 2 - (box.top + box.height / 2),
-      sx: origin.width / box.width,
-      sy: origin.height / box.height
-    };
+  const ease = 'cubic-bezier(0.2, 0.7, 0.2, 1)';
+
+  function clearAnims(el: Element) {
+    for (const animation of el.getAnimations()) animation.cancel();
+  }
+
+  function resetSurface() {
+    if (!dialog) return;
+    clearAnims(dialog);
+    dialog.style.opacity = '';
+  }
+
+  function animateBackdrop(from: number, to: number, duration: number) {
+    if (!dialog) return;
+    dialog.animate([{ opacity: from }, { opacity: to }], {
+      duration,
+      easing: ease,
+      pseudoElement: '::backdrop'
+    });
+  }
+
+  async function waitAnim(animation: Animation, fallbackMs: number) {
+    try {
+      await Promise.race([
+        animation.finished,
+        new Promise<void>((resolve) => setTimeout(resolve, fallbackMs))
+      ]);
+    } catch {
+      /* Cancelled by a newer open/close. */
+    }
   }
 
   function playOpen() {
     if (!dialog || motion.off) return;
-    if (reducedMotion() || !origin) {
-      dialog.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 150, easing: 'ease' });
-      return;
-    }
-    const move = shift(dialog.getBoundingClientRect());
-    if (!move) return;
-    dialog.animate(
-      [
-        {
-          transform: `translate(${move.x}px, ${move.y}px) scale(${move.sx}, ${move.sy})`,
-          opacity: 0.9
-        },
-        { transform: 'none', opacity: 1 }
-      ],
-      { duration: 400, easing: 'cubic-bezier(0.2, 0.8, 0.2, 1)' }
-    );
+    resetSurface();
+    const duration = reducedMotion() ? 140 : 240;
+    dialog.animate([{ opacity: 0 }, { opacity: 1 }], { duration, easing: ease });
+    animateBackdrop(0, 1, duration);
   }
 
-  async function open(project: Project, event: MouseEvent) {
-    origin = (event.currentTarget as HTMLElement).getBoundingClientRect();
+  async function open(project: Project) {
+    if (closing) {
+      closing = false;
+      resetSurface();
+      dialog?.close();
+    }
     selected = project;
     await tick();
-    dialog?.showModal();
+    if (!dialog) return;
+    if (dialog.open) resetSurface();
+    else dialog.showModal();
     requestAnimationFrame(playOpen);
   }
 
   async function close() {
     if (!dialog?.open || closing) return;
-    if (reducedMotion() || !origin) {
+
+    if (motion.off || reducedMotion()) {
+      resetSurface();
       dialog.close();
       return;
     }
+
     closing = true;
-    const move = shift(dialog.getBoundingClientRect());
-    if (move) {
-      const animation = dialog.animate(
-        [
-          { transform: 'none', opacity: 1 },
-          {
-            transform: `translate(${move.x}px, ${move.y}px) scale(${move.sx}, ${move.sy})`,
-            opacity: 0.45
-          }
-        ],
-        { duration: 280, easing: 'cubic-bezier(0.4, 0, 0.2, 1)', fill: 'forwards' }
-      );
-      try {
-        await animation.finished;
-      } catch {
-        /* A second close can cancel the animation. */
-      }
-    }
+    clearAnims(dialog);
+    const animation = dialog.animate([{ opacity: 1 }, { opacity: 0 }], {
+      duration: 180,
+      easing: ease
+    });
+    animateBackdrop(1, 0, 180);
+    await waitAnim(animation, 240);
     closing = false;
-    dialog.close();
+    resetSurface();
+    if (dialog.open) dialog.close();
   }
 
   function onDialogClose() {
     selected = null;
-    origin = null;
+    closing = false;
+    resetSurface();
   }
 
   function onDialogClick(event: MouseEvent) {
@@ -114,7 +123,7 @@
     <ul>
       {#each data.projects as project (project.slug)}
         <li>
-          <button type="button" class="project-card" onclick={(event) => open(project, event)}>
+          <button type="button" class="project-card" onclick={() => open(project)}>
             <img src={project.image || '/assets/backgrounds/IMG_1797.webp'} alt="" />
             <span class="title">{project.title}</span>
           </button>
@@ -185,6 +194,15 @@
     font: inherit;
     text-align: left;
     cursor: pointer;
+    transition:
+      border-color 220ms var(--ease-out),
+      transform 220ms var(--ease-out);
+  }
+
+  .project-card:hover,
+  .project-card:focus-visible {
+    border-color: var(--border-strong);
+    transform: translateY(-2px);
   }
 
   .project-card img {
@@ -192,6 +210,12 @@
     width: 100%;
     height: 100%;
     object-fit: cover;
+    transition: transform 480ms var(--ease-out);
+  }
+
+  .project-card:hover img,
+  .project-card:focus-visible img {
+    transform: scale(1.03);
   }
 
   .title {
@@ -204,6 +228,7 @@
     font-size: 1.45rem;
     font-weight: 500;
     line-height: 1.15;
+    transition: color 180ms ease;
   }
 
   .project-card:hover .title,
@@ -231,7 +256,7 @@
     border-radius: 1rem;
     background: var(--dialog-bg);
     color: var(--ink);
-    transform-origin: center;
+    box-shadow: 0 18px 48px color-mix(in oklab, var(--nord0) 28%, transparent);
   }
 
   dialog::backdrop {
@@ -259,6 +284,21 @@
       width: 100%;
       height: auto;
       aspect-ratio: 1;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .project-card,
+    .project-card img,
+    .title {
+      transition: none;
+    }
+
+    .project-card:hover,
+    .project-card:focus-visible,
+    .project-card:hover img,
+    .project-card:focus-visible img {
+      transform: none;
     }
   }
 </style>
