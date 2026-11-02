@@ -8,6 +8,7 @@
   import SiteSidebar from '#lib/components/SiteSidebar.svelte';
   import SignatureLogo from '#lib/components/SignatureLogo.svelte';
   import JafCrest from '#lib/components/JafCrest.svelte';
+  import VercelObservability from '#lib/components/VercelObservability.svelte';
   import { backdrop, photos, restoreBackdrop } from '#lib/backdrop.svelte.ts';
   import { reducedMotion, restoreMotion } from '#lib/motion.svelte.ts';
   import { restoreSidebar, sidebar } from '#lib/sidebar.svelte.ts';
@@ -178,6 +179,7 @@
 <svelte:window bind:scrollY />
 
 <!-- One photo layer for landing and the enter crossfade; dormant on settled inner pages. -->
+<VercelObservability />
 <SiteBackdrop />
 
 {#if isLanding}

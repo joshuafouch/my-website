@@ -14,13 +14,21 @@
     if (path.startsWith('/admin/about/personal')) return 'personal';
     if (path.startsWith('/admin/about')) return 'professional';
     if (path.startsWith('/admin/resume')) return 'resume';
+    if (path.startsWith('/admin/analytics')) return 'analytics';
+    if (path.startsWith('/admin/vercel')) return 'vercel';
+    if (path.startsWith('/admin/supabase')) return 'supabase';
+    if (path.startsWith('/admin/storage')) return 'storage';
     return '';
   });
 
   const wide = $derived(
     /^\/admin\/(blog|projects)\/[^/]+$/.test(page.url.pathname) ||
       /^\/admin\/about\/(professional(\/|$)|personal)/.test(page.url.pathname) ||
-      page.url.pathname.startsWith('/admin/resume')
+      page.url.pathname.startsWith('/admin/resume') ||
+      page.url.pathname.startsWith('/admin/analytics') ||
+      page.url.pathname.startsWith('/admin/vercel') ||
+      page.url.pathname.startsWith('/admin/supabase') ||
+      page.url.pathname.startsWith('/admin/storage')
   );
 
   const links = $derived([
@@ -34,6 +42,10 @@
     },
     { href: resolve('/admin/about/personal'), label: 'Personal', current: section === 'personal' },
     { href: resolve('/admin/resume'), label: 'Resume', current: section === 'resume' },
+    { href: resolve('/admin/analytics'), label: 'Traffic', current: section === 'analytics' },
+    { href: resolve('/admin/vercel'), label: 'Vercel', current: section === 'vercel' },
+    { href: resolve('/admin/supabase'), label: 'Supabase', current: section === 'supabase' },
+    { href: resolve('/admin/storage'), label: 'Storage', current: section === 'storage' },
     {
       href: resolve('/admin/mfa'),
       label: 'Authenticator',

@@ -15,7 +15,9 @@ export const load: LayoutLoad = async ({ data, depends, fetch }) => {
 		: createServerClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
 				global: { fetch },
 				cookies: {
-					getAll: () => data.cookies
+					getAll: () => data.cookies,
+					// Cookie writes happen in hooks.server.ts; load only needs a no-op setter.
+					setAll: () => {}
 				}
 			});
 
