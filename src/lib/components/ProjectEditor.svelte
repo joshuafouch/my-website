@@ -172,12 +172,21 @@
     requestAnimationFrame(settle);
   }
 
+  function formFromEvent(event?: Event | null) {
+    const target = event?.target;
+    if (target instanceof HTMLFormElement) return target;
+    if (target instanceof Element) return target.closest('form');
+    return null;
+  }
+
   function keepsDraft(navigation: { type: string; event?: Event | null }) {
     if (navigation.type !== 'form') return false;
-    const formEl = navigation.event?.target;
-    if (!(formEl instanceof HTMLFormElement)) return false;
-    const action = formEl.getAttribute('action') ?? '';
+    const action = formFromEvent(navigation.event)?.getAttribute('action') ?? '';
     return action === '?/save' || action === '?/upload';
+  }
+
+  function allowSave() {
+    leaving = true;
   }
 
   function rememberLeave(navigation: {
@@ -185,8 +194,8 @@
     event?: Event | null;
     to: { url: URL } | null;
   }) {
-    const formEl = navigation.event?.target;
-    if (navigation.type === 'form' && formEl instanceof HTMLFormElement) {
+    const formEl = formFromEvent(navigation.event);
+    if (navigation.type === 'form' && formEl) {
       pendingForm = formEl;
       pendingHref = null;
       return;
@@ -271,7 +280,7 @@
     </div>
 
     <div class="split-write">
-      <form method="POST" action="?/save">
+      <form method="POST" action="?/save" onsubmit={allowSave}>
         {#if project}
           <input type="hidden" name="id" value={project.id} />
         {/if}

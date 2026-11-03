@@ -181,6 +181,9 @@ importers:
       '@fontsource/ibm-plex-sans':
         specifier: ^5.2.8
         version: 5.2.8
+      '@fontsource/source-serif-4':
+        specifier: ^5.3.1
+        version: 5.3.1
       '@supabase/ssr':
         specifier: ^0.12.7
         version: 0.12.7(@supabase/supabase-js@2.118.0)
@@ -344,6 +347,9 @@ packages:
 
   '@fontsource/ibm-plex-sans@5.2.8':
     resolution: {integrity: sha512-eztSXjDhPhcpxNIiGTgMebdLP9qS4rWkysuE1V7c+DjOR0qiezaiDaTwQE7bTnG5HxAY/8M43XKDvs3cYq6ZYQ==}
+
+  '@fontsource/source-serif-4@5.3.1':
+    resolution: {integrity: sha512-cWcTCXjYYrgF9A67fThVir1VSc0lPEYmwQ6jA4pPt01s2MSCi/maINUcZoCzaqnU8fyUReDO97eGcBUkHgOeug==}
 
   '@humanfs/core@0.19.1':
     resolution: {integrity: sha512-5DyQ4+1JEUzejeK1JGICcideyfUbGixgS9jNgex5nqkW+cY7WZhxBigmieN5Qnw9ZosSNVC9KQKyb+GUaGyKUA==}
@@ -2092,6 +2098,8 @@ snapshots:
   '@fontsource/ibm-plex-mono@5.2.7': {}
 
   '@fontsource/ibm-plex-sans@5.2.8': {}
+
+  '@fontsource/source-serif-4@5.3.1': {}
 
   '@humanfs/core@0.19.1': {}
 

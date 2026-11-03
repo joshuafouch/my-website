@@ -20,6 +20,8 @@
   let scrollY = $state(0);
   let signatureRun = $state(0);
   let ridgePx = $state(176);
+  /** In-flight landing↔inner fade direction; used to detect quick reverses. */
+  let activeLandingFade: 'inner' | 'landing' | null = null;
   const showTop = $derived(scrollY > 280);
   const sigReveal = $derived(Math.min(1, Math.max(0, scrollY / (ridgePx || 1))));
 
@@ -61,8 +63,9 @@
       if (!from || from === to || (from !== '/' && to !== '/')) return;
 
       const root = document.documentElement;
-      if (root.dataset.fade) return;
-      root.dataset.enter = from === '/' ? 'inner' : 'landing';
+      const nextEnter = from === '/' ? 'inner' : 'landing';
+      // Allow reversing mid-transition (landing → inner → landing immediately).
+      root.dataset.enter = nextEnter;
       root.dataset.fade = 'out';
       window.setTimeout(() => {
         if (root.dataset.fade === 'out' && !root.dataset.fadeId) {
@@ -92,15 +95,14 @@
     if (from === '/' || to === '/') {
       const entering = from === '/' ? 'inner' : 'landing';
       const token = String(Date.now());
+      const reversing = activeLandingFade !== null && activeLandingFade !== entering;
+      activeLandingFade = entering;
+
       root.dataset.fadeId = token;
       root.dataset.enter = entering;
       if (root.dataset.fade !== 'out') root.dataset.fade = 'out';
 
       return new Promise((resolve) => {
-        const outgoing =
-          entering === 'inner'
-            ? document.querySelector('.landing-chrome')
-            : document.querySelector('.inner-shell');
         let started = false;
         const go = () => {
           if (started) return;
@@ -109,18 +111,34 @@
             resolve();
             return;
           }
+          // Landing is a fixed viewport — reset scroll before the shell/landing DOM swap
+          // so the ridge/sidebar geometry does not flash at a stale offset.
+          if (entering === 'landing') window.scrollTo(0, 0);
           root.dataset.fade = 'in';
           resolve();
-          const clearMs = entering === 'inner' ? 520 : 280;
+          const clearMs = entering === 'inner' ? 420 : 260;
           navigation.complete.finally(() => {
             window.setTimeout(() => {
               if (root.dataset.fadeId !== token) return;
               delete root.dataset.fade;
               delete root.dataset.fadeId;
               delete root.dataset.enter;
+              if (activeLandingFade === entering) activeLandingFade = null;
             }, clearMs);
           });
         };
+
+        // Quick reverse (into a page, then immediately back): skip waiting on the
+        // interrupted enter animation so the shell never paints mid-translate.
+        if (reversing) {
+          requestAnimationFrame(go);
+          return;
+        }
+
+        const outgoing =
+          entering === 'inner'
+            ? document.querySelector('.landing-chrome')
+            : document.querySelector('.inner-shell');
 
         if (!(outgoing instanceof HTMLElement)) {
           go();
@@ -141,7 +159,7 @@
           return;
         }
 
-        const timer = window.setTimeout(go, 280);
+        const timer = window.setTimeout(go, 220);
         outgoing.addEventListener('animationend', function onEnd(event) {
           if (event.target !== outgoing || event.animationName !== 'page-fade-out') return;
           outgoing.removeEventListener('animationend', onEnd);

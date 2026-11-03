@@ -40,7 +40,7 @@
     <img src={image} alt="" />
   {/if}
   {#if html}
-    <div class="body prose prose-invert max-w-none">
+    <div class="body prose prose-invert font-reading max-w-none">
       <!-- eslint-disable-next-line svelte/no-at-html-tags -- admin-authored markdown -->
       {@html html}
     </div>
@@ -101,7 +101,9 @@
 
   .body {
     margin-top: 1.75rem;
-    font-family: 'IBM Plex Sans', sans-serif;
+    font-family: 'Source Serif 4', 'EB Garamond', Georgia, serif;
+    font-size: 1.12rem;
+    line-height: 1.75;
     --tw-prose-body: var(--ink-muted);
     --tw-prose-headings: var(--ink);
     --tw-prose-bold: var(--ink);
@@ -110,5 +112,17 @@
     --tw-prose-code: var(--nord8);
     --tw-prose-counters: var(--ink-muted);
     --tw-prose-bullets: var(--ink-muted);
+  }
+
+  .body :global(h1),
+  .body :global(h2),
+  .body :global(h3),
+  .body :global(h4) {
+    font-family: 'DM Serif Text', serif;
+  }
+
+  .body :global(code),
+  .body :global(pre) {
+    font-family: 'IBM Plex Mono', monospace;
   }
 </style>

@@ -35,15 +35,16 @@
   onMount(() => {
     if (landingSeen) return;
 
+    // Wait for the hero photo only. Do not block on document.fonts.ready — that
+    // waits for every face on the site and made the loader feel stuck.
     const image = new Image();
     image.src = heroImage;
     const imageReady = image.decode().catch(() => undefined);
-    const fontsReady = document.fonts.ready.then(() => undefined);
-    const hold = new Promise<void>((resolve) => setTimeout(resolve, 900));
-    const giveUp = new Promise<void>((resolve) => setTimeout(resolve, 3000));
+    const hold = new Promise<void>((resolve) => setTimeout(resolve, 220));
+    const giveUp = new Promise<void>((resolve) => setTimeout(resolve, 1200));
 
     let cancelled = false;
-    Promise.race([Promise.all([imageReady, fontsReady, hold]), giveUp]).then(() => {
+    Promise.race([Promise.all([imageReady, hold]), giveUp]).then(() => {
       if (cancelled) return;
       landingSeen = true;
       ready = true;
