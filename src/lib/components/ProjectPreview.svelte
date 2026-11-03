@@ -57,6 +57,7 @@
       <p class="lede">{description}</p>
     {/if}
     {#if html}
+      <!-- eslint-disable-next-line svelte/no-at-html-tags -- sanitized by renderMarkdown -->
       <div class="details prose">{@html html}</div>
     {/if}
     {#if tags.length > 0}

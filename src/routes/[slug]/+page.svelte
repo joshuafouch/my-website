@@ -38,7 +38,7 @@
       <img class="mb-8 w-full" src={data.meta.image} alt={data.meta.title} />
     {/if}
     {#if data.html}
-      <!-- eslint-disable-next-line svelte/no-at-html-tags -- admin-authored markdown -->
+      <!-- eslint-disable-next-line svelte/no-at-html-tags -- sanitized by renderMarkdown -->
       {@html data.html}
     {:else if data.content}
       <data.content />

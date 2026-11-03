@@ -55,7 +55,7 @@
                 </p>
               {/if}
               {#if job.body}
-                <!-- eslint-disable-next-line svelte/no-at-html-tags -- admin-authored markdown -->
+                <!-- eslint-disable-next-line svelte/no-at-html-tags -- sanitized by renderMarkdown -->
                 <div class="job-body">{@html job.body}</div>
               {/if}
               {#if job.skills.length > 0}
