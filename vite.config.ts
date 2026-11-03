@@ -60,7 +60,7 @@ export default defineConfig(({ mode }) => {
             'style-src': ['self', 'unsafe-inline'],
             'img-src': ['self', 'data:', 'blob:', supabaseSource],
             'font-src': ['self'],
-            'connect-src': ['self', 'https://api.emailjs.com'],
+            'connect-src': ['self'],
             'frame-src': ['https://www.youtube-nocookie.com', supabaseSource, 'blob:'],
             'media-src': ['self', supabaseSource],
             'worker-src': ['self'],
