@@ -57,6 +57,7 @@
       <p class="lede">{description}</p>
     {/if}
     {#if html}
+      <!-- eslint-disable-next-line svelte/no-at-html-tags -- sanitized by renderMarkdown -->
       <div class="details prose">{@html html}</div>
     {/if}
     {#if tags.length > 0}
@@ -64,6 +65,7 @@
     {/if}
     {#if code}
       <p>
+        <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- external URL -->
         <a class="quiet-link" href={code} target="_blank" rel="noopener noreferrer">Code</a>
       </p>
     {/if}

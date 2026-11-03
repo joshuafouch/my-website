@@ -41,7 +41,7 @@
   {/if}
   {#if html}
     <div class="body prose prose-invert font-reading max-w-none">
-      <!-- eslint-disable-next-line svelte/no-at-html-tags -- admin-authored markdown -->
+      <!-- eslint-disable-next-line svelte/no-at-html-tags -- sanitized by renderMarkdown -->
       {@html html}
     </div>
   {/if}

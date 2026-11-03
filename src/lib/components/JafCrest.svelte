@@ -1,5 +1,5 @@
 <script lang="ts">
-  import raw from '../../../static/assets/jaf.svg?raw';
+  import raw from '#lib/assets/jaf.svg?raw';
 
   // Ink takes currentColor so it can drift; the clip is dropped so a hidden copy can't break the other.
   const crest = raw

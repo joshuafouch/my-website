@@ -5,7 +5,7 @@ import type { Actions } from './$types';
 
 export const actions: Actions = {
   default: async ({ request, locals }) => {
-    await requireAdmin(locals.supabase);
+    await requireAdmin(locals.supabase, { allowPendingMfa: true });
     const form = await request.formData();
     const code = String(form.get('code') ?? '');
 

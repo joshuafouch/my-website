@@ -9,17 +9,20 @@ export const actions: Actions = {
     const email = String(form.get('email') ?? '').trim();
     const password = String(form.get('password') ?? '');
 
-    if (!isAdminEmail(email)) {
-      return fail(403, { email, error: 'This account cannot access admin.' });
-    }
+    // Same status, message and code path for every failure (unknown email, non-admin account,
+    // wrong password), so responses don't reveal which address is the admin's. The sign-in is
+    // always attempted so a non-admin email doesn't return measurably faster.
+    const invalid = () => fail(400, { email, error: 'Email or password is incorrect.' });
 
-    const { error: signInError } = await locals.supabase.auth.signInWithPassword({
+    const { data, error: signInError } = await locals.supabase.auth.signInWithPassword({
       email,
       password
     });
 
-    if (signInError) {
-      return fail(400, { email, error: 'Email or password is incorrect.' });
+    if (signInError || !isAdminEmail(data.user?.email)) {
+      // Valid credentials for a non-admin account: don't leave that session behind.
+      if (!signInError) await locals.supabase.auth.signOut({ scope: 'local' });
+      return invalid();
     }
 
     const mfa = await getMfaState(locals.supabase);

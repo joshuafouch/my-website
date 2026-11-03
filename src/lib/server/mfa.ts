@@ -3,17 +3,37 @@ import type { Database } from '#lib/database.types.ts';
 
 type Client = SupabaseClient<Database>;
 
+/**
+ * MFA state from server-verified sources only: the `aal` claim from a verified JWT
+ * (getClaims) and the factor list from the Auth server (getUser). The session cookie is
+ * client-controlled, so its cached user.factors must not decide whether MFA is required.
+ * Fails closed: if either lookup errors, MFA is treated as still required.
+ */
 export async function getMfaState(supabase: Client) {
-  const { data, error } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+  const [claimsResult, userResult] = await Promise.all([
+    supabase.auth.getClaims(),
+    supabase.auth.getUser()
+  ]);
 
-  if (error || !data) {
-    return { needsMfa: false, currentLevel: null, nextLevel: null };
+  if (
+    claimsResult.error ||
+    !claimsResult.data?.claims ||
+    userResult.error ||
+    !userResult.data.user
+  ) {
+    return { needsMfa: true, currentLevel: null, nextLevel: 'aal2' as const };
   }
 
+  const currentLevel = claimsResult.data.claims.aal === 'aal2' ? 'aal2' : 'aal1';
+  const hasVerifiedFactor = (userResult.data.user.factors ?? []).some(
+    (factor) => factor.status === 'verified'
+  );
+  const nextLevel = hasVerifiedFactor ? 'aal2' : 'aal1';
+
   return {
-    needsMfa: data.nextLevel === 'aal2' && data.currentLevel !== 'aal2',
-    currentLevel: data.currentLevel,
-    nextLevel: data.nextLevel
+    needsMfa: nextLevel === 'aal2' && currentLevel !== 'aal2',
+    currentLevel,
+    nextLevel
   };
 }
 

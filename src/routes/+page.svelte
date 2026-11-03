@@ -162,6 +162,7 @@
             Resume
           </a>
         </li>
+        <!-- eslint-disable svelte/no-navigation-without-resolve -- external URL (socials are GitHub/LinkedIn) -->
         {#each socials as social (social.text)}
           <li>
             <a
@@ -187,6 +188,7 @@
             </a>
           </li>
         {/each}
+        <!-- eslint-enable svelte/no-navigation-without-resolve -->
       </ul>
       <AdminLogin />
     </footer>

@@ -24,7 +24,7 @@
       </div>
     {/if}
     {#if introHtml}
-      <!-- eslint-disable-next-line svelte/no-at-html-tags -- admin-authored markdown -->
+      <!-- eslint-disable-next-line svelte/no-at-html-tags -- sanitized by renderMarkdown -->
       <div class="copy">{@html introHtml}</div>
     {/if}
   </header>

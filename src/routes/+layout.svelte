@@ -1,6 +1,7 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { onNavigate } from '$app/navigation';
+  import { page } from '$app/state';
   import '../app.css';
   import Footer from '#lib/components/Footer.svelte';
   import Transition from '#lib/components/Transition.svelte';
@@ -14,9 +15,9 @@
   import { restoreSidebar, sidebar } from '#lib/sidebar.svelte.ts';
   import { restoreTheme } from '#lib/theme.svelte.ts';
 
-  let { children, data } = $props();
+  let { children } = $props();
 
-  const isLanding = $derived(data.url === '/');
+  const isLanding = $derived(page.url.pathname === '/');
   let scrollY = $state(0);
   let signatureRun = $state(0);
   let ridgePx = $state(176);
@@ -203,7 +204,7 @@
 {#if isLanding}
   <div class="page-stack">
     <main>
-      <Transition url={data.url}>
+      <Transition url={page.url.pathname}>
         {@render children()}
       </Transition>
     </main>
@@ -240,7 +241,7 @@
             ></div>
           {/key}
         </div>
-        <Transition url={data.url}>
+        <Transition url={page.url.pathname}>
           {@render children()}
         </Transition>
       </main>

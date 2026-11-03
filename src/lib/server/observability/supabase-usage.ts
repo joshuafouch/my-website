@@ -61,31 +61,22 @@ async function managementGet(path: string, query: Record<string, string> = {}) {
 	return body;
 }
 
-async function managementQuery(sql: string) {
-	const response = await fetch(`${MGMT}/projects/${SUPABASE_PROJECT_REF}/database/query`, {
-		method: 'POST',
-		headers: {
-			Authorization: `Bearer ${SUPABASE_ACCESS_TOKEN}`,
-			'Content-Type': 'application/json',
-			Accept: 'application/json'
-		},
-		body: JSON.stringify({ query: sql })
-	});
-	const text = await response.text();
-	let body: unknown;
-	try {
-		body = text ? JSON.parse(text) : null;
-	} catch {
-		body = { message: text };
-	}
-	if (!response.ok) {
-		const message =
-			typeof body === 'object' && body && 'message' in body
-				? String((body as { message: unknown }).message)
-				: `Database query failed (${response.status})`;
-		throw new Error(message);
-	}
-	return body;
+/**
+ * Database size + exact per-bucket totals via the admin-only `admin_storage_usage` RPC, called
+ * with the admin's own session. Replaces raw SQL through the Management API, which needed a
+ * database-capable access token. Returns null if the RPC fails (listing sizes are kept).
+ */
+async function loadStorageStats(supabase: Client, bucketIds: string[]) {
+	const { data, error } = await supabase.rpc('admin_storage_usage', { bucket_ids: bucketIds });
+	if (error || !data || typeof data !== 'object' || Array.isArray(data)) return null;
+	const raw = data as { database_bytes?: unknown; buckets?: unknown };
+	const buckets = Array.isArray(raw.buckets)
+		? raw.buckets.map((row) => {
+				const r = row as { bucket: string; bytes: number; objects: number };
+				return { bucket: String(r.bucket), bytes: Number(r.bytes), objects: Number(r.objects) };
+			})
+		: [];
+	return { databaseBytes: Number(raw.database_bytes ?? 0), buckets };
 }
 
 async function listFolderBytes(
@@ -129,11 +120,11 @@ async function countTable(supabase: Client, table: keyof Database['public']['Tab
 
 export async function loadSupabaseUsage(supabase: Client): Promise<SupabaseUsageReport> {
 	const note =
-		'Bucket sizes come from Storage listings (free). Disk / DB size / API counts need a free Supabase personal access token — no paid add-on.';
+		'Bucket and database sizes come from an admin-only database function. Disk and API counts need a Supabase access token scoped to Usage Analytics: Read and Disk Config: Read.';
 
-	return cached('supabase-usage:v1', TTL, async () => {
+	return cached('supabase-usage:v2', TTL, async () => {
 		const bucketsWanted = [BLOG_BUCKET, PORTRAITS_BUCKET, ALBUMS_BUCKET, RESUME_BUCKET];
-		const [blog, aboutPortraits, albums, resumes, posts, projects, portraits, musicImages] =
+		const [blog, aboutPortraits, albums, resumes, posts, projects, portraits, musicImages, stats] =
 			await Promise.all([
 				listFolderBytes(supabase, BLOG_BUCKET),
 				listFolderBytes(supabase, PORTRAITS_BUCKET),
@@ -142,7 +133,8 @@ export async function loadSupabaseUsage(supabase: Client): Promise<SupabaseUsage
 				countTable(supabase, 'posts'),
 				countTable(supabase, 'projects'),
 				countTable(supabase, 'portraits'),
-				countTable(supabase, 'music_images')
+				countTable(supabase, 'music_images'),
+				loadStorageStats(supabase, bucketsWanted)
 			]);
 
 		const buckets: BucketSize[] = [
@@ -151,6 +143,15 @@ export async function loadSupabaseUsage(supabase: Client): Promise<SupabaseUsage
 			{ bucket: ALBUMS_BUCKET, ...albums },
 			{ bucket: RESUME_BUCKET, ...resumes }
 		];
+
+		// Prefer exact storage.objects totals from the RPC over listing-based sizes.
+		const databaseBytes = stats?.databaseBytes ?? null;
+		if (stats) {
+			const byName = new Map(stats.buckets.map((row) => [row.bucket, row]));
+			for (let i = 0; i < buckets.length; i++) {
+				buckets[i] = byName.get(buckets[i].bucket) ?? { ...buckets[i], bytes: 0, objects: 0 };
+			}
+		}
 
 		const tableCounts = [
 			{ table: 'posts', count: posts },
@@ -163,9 +164,9 @@ export async function loadSupabaseUsage(supabase: Client): Promise<SupabaseUsage
 			return {
 				configured: false,
 				error:
-					'Storage + row counts loaded. Set SUPABASE_ACCESS_TOKEN and SUPABASE_PROJECT_REF for disk, database size, and API request charts.',
+					'Storage, database size and row counts loaded. Set SUPABASE_ACCESS_TOKEN and SUPABASE_PROJECT_REF for disk and API request charts.',
 				disk: null,
-				databaseBytes: null,
+				databaseBytes,
 				buckets,
 				apiCounts: [],
 				tableCounts,
@@ -174,12 +175,8 @@ export async function loadSupabaseUsage(supabase: Client): Promise<SupabaseUsage
 		}
 
 		try {
-			const [diskRes, dbRes, apiRes] = await Promise.all([
+			const [diskRes, apiRes] = await Promise.all([
 				managementGet(`/projects/${SUPABASE_PROJECT_REF}/config/disk/util`).then(
-					(data) => ({ data, error: null as string | null }),
-					(err) => ({ data: null, error: err instanceof Error ? err.message : String(err) })
-				),
-				managementQuery('select pg_database_size(current_database()) as bytes;').then(
 					(data) => ({ data, error: null as string | null }),
 					(err) => ({ data: null, error: err instanceof Error ? err.message : String(err) })
 				),
@@ -191,9 +188,8 @@ export async function loadSupabaseUsage(supabase: Client): Promise<SupabaseUsage
 				)
 			]);
 
-			const problems = [diskRes.error, dbRes.error, apiRes.error].filter(Boolean) as string[];
+			const problems = [diskRes.error, apiRes.error].filter(Boolean) as string[];
 			const diskRaw = diskRes.data;
-			const dbRaw = dbRes.data;
 			const apiRaw = apiRes.data;
 
 			let disk: SupabaseUsageReport['disk'] = null;
@@ -204,11 +200,6 @@ export async function loadSupabaseUsage(supabase: Client): Promise<SupabaseUsage
 					sizeBytes: Number(metrics.fs_size_bytes ?? 0),
 					availBytes: Number(metrics.fs_avail_bytes ?? 0)
 				};
-			}
-
-			let databaseBytes: number | null = null;
-			if (Array.isArray(dbRaw) && dbRaw[0] && typeof dbRaw[0] === 'object') {
-				databaseBytes = Number((dbRaw[0] as { bytes?: number }).bytes ?? 0);
 			}
 
 			const apiCounts: ApiCountPoint[] = [];
@@ -223,33 +214,6 @@ export async function loadSupabaseUsage(supabase: Client): Promise<SupabaseUsage
 						realtime: Number(row.total_realtime_requests ?? 0)
 					});
 				}
-			}
-
-			// Prefer exact storage.objects sizes when the Management SQL works
-			try {
-				const exact = await managementQuery(`
-					select bucket_id as bucket,
-					  coalesce(sum((metadata->>'size')::bigint), 0) as bytes,
-					  count(*)::int as objects
-					from storage.objects
-					where bucket_id in ('${bucketsWanted.join("','")}')
-					group by bucket_id
-					order by bytes desc;
-				`);
-				if (Array.isArray(exact)) {
-					const byName = new Map(
-						exact.map((row) => {
-							const r = row as { bucket: string; bytes: number; objects: number };
-							return [r.bucket, { bucket: r.bucket, bytes: Number(r.bytes), objects: Number(r.objects) }];
-						})
-					);
-					for (let i = 0; i < buckets.length; i++) {
-						const hit = byName.get(buckets[i].bucket);
-						if (hit) buckets[i] = hit;
-					}
-				}
-			} catch {
-				// Keep listing-based sizes
 			}
 
 			return {
@@ -267,7 +231,7 @@ export async function loadSupabaseUsage(supabase: Client): Promise<SupabaseUsage
 				configured: true,
 				error: err instanceof Error ? err.message : 'Failed to load Supabase usage',
 				disk: null,
-				databaseBytes: null,
+				databaseBytes,
 				buckets,
 				apiCounts: [],
 				tableCounts,

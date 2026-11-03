@@ -41,6 +41,7 @@
         ></iframe>
       {:else if videoHref}
         <p>
+          <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- external URL -->
           <a class="quiet-link" href={videoHref} target="_blank" rel="noopener noreferrer">Watch</a>
         </p>
       {/if}

@@ -1,5 +1,5 @@
 <script lang="ts">
-  import raw from '../../../static/assets/jaf.svg?raw';
+  import raw from '#lib/assets/jaf.svg?raw';
 
   // Outline takes currentColor; the red fill stays. Clip is dropped so a second copy can't steal it.
   const mark = raw
