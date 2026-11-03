@@ -79,10 +79,20 @@
     };
   };
 
-  const schemaHtml =
-    `<script type="application/ld+json">${JSON.stringify(getSchemaData(), null, 2)}` +
-    '</' +
-    'script>';
+  // Title/description/tags come from the DB, so a value containing a closing script tag must not
+  // be able to end this element and inject markup. Escaping <, >, & (and the JS line separators)
+  // as \uXXXX keeps the JSON identical once parsed but leaves no raw markup inside the element.
+  const jsonForScript = (value: unknown) =>
+    JSON.stringify(value, null, 2)
+      .replace(/</g, '\\u003c')
+      .replace(/>/g, '\\u003e')
+      .replace(/&/g, '\\u0026')
+      .replace(/\u2028/g, '\\u2028')
+      .replace(/\u2029/g, '\\u2029');
+
+  const schemaHtml = $derived(
+    `<script type="application/ld+json">${jsonForScript(getSchemaData())}` + '</' + 'script>'
+  );
 </script>
 
 <svelte:head>
@@ -121,6 +131,6 @@
   <link rel="canonical" href={fullUrl} />
 
   <!-- Schema.org JSON-LD -->
-  <!-- eslint-disable-next-line svelte/no-at-html-tags -->
+  <!-- eslint-disable-next-line svelte/no-at-html-tags -- JSON escaped by jsonForScript -->
   {@html schemaHtml}
 </svelte:head>
