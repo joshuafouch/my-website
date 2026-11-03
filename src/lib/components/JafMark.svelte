@@ -1,23 +1,22 @@
 <script lang="ts">
-  import raw from '#lib/assets/jaf.svg?raw';
-
-  // Outline takes currentColor; the red fill stays. Clip is dropped so a second copy can't steal it.
-  const mark = raw
-    .replaceAll('fill="#242933"', 'fill="currentColor"')
-    .replace(/ clip-path="url\(#[^)]+\)"/, '');
+  import jafUrl from '#lib/assets/jaf.svg?url';
 </script>
 
+<!-- References the cached jaf.svg instead of inlining it. The outline follows currentColor via
+     --jaf-outline; the red fill keeps its color. -->
 <div class="jaf-mark" aria-hidden="true">
-  <!-- eslint-disable-next-line svelte/no-at-html-tags -- bundled SVG asset, not user input -->
-  {@html mark}
+  <svg width="500" height="500" viewBox="0 0 375 374.999991" preserveAspectRatio="xMidYMid meet">
+    <use href="{jafUrl}#jaf" />
+  </svg>
 </div>
 
 <style>
   .jaf-mark {
+    --jaf-outline: currentColor;
     color: inherit;
   }
 
-  .jaf-mark :global(svg) {
+  .jaf-mark svg {
     display: block;
     width: 100%;
     height: 100%;

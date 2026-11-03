@@ -1,6 +1,13 @@
+<script module lang="ts">
+  // Path data + gsap for the write animation, fetched once and shared by every instance.
+  let writer:
+    Promise<[{ default: string }, { default: typeof import('gsap').default }]> | undefined;
+  const loadWriter = () =>
+    (writer ??= Promise.all([import('#lib/assets/jaf-logo.svg?raw'), import('gsap')]));
+</script>
+
 <script lang="ts">
-  import gsap from 'gsap';
-  import logo from '#lib/assets/jaf-logo.svg?raw';
+  import { tick } from 'svelte';
   import { reducedMotion } from '#lib/motion.svelte.ts';
 
   type Props = {
@@ -25,62 +32,86 @@
   }: Props = $props();
 
   let host: HTMLDivElement | undefined = $state();
+  /** The 3,167-path inline SVG, loaded only while the write animation runs. */
+  let markup: string | null = $state(null);
+  /** The signature has been written; show the static (masked) copy. */
+  let written = $state(false);
+
+  // Start fetching as soon as a write is coming (e.g. during the landing loader), so the
+  // animation starts on time even before `play` turns true.
+  $effect(() => {
+    if (!instant && !erase && !written && !reducedMotion()) void loadWriter();
+  });
 
   $effect(() => {
     if (!play) return;
-    const svg = host?.querySelector('svg');
-    if (!svg) return;
-
-    const paths = [...svg.querySelectorAll('path')];
     const reduce = reducedMotion();
-    const showFinished =
-      (instant && !erase) ||
-      (reduce && !erase) ||
-      (!erase && paths.every((path) => path.style.opacity === '1'));
-
-    if (showFinished) {
-      for (const path of paths) path.style.opacity = '1';
-      return;
-    }
 
     if (erase) {
+      const target = host?.firstElementChild as HTMLElement | null | undefined;
+      if (!target) return;
       if (reduce) {
-        svg.style.opacity = '0';
+        target.style.opacity = '0';
         return;
       }
       const duration = 100;
       const started = performance.now();
-      svg.style.opacity = '1';
+      target.style.opacity = '1';
       let timer = window.setTimeout(function step() {
         const t = Math.min(1, (performance.now() - started) / duration);
-        svg.style.opacity = String(1 - t);
+        target.style.opacity = String(1 - t);
         if (t < 1) timer = window.setTimeout(step, 16);
       }, 16);
       return () => {
         window.clearTimeout(timer);
-        svg.style.opacity = '';
+        target.style.opacity = '';
       };
     }
 
-    for (const path of paths) path.style.opacity = '0';
+    if (instant || reduce || written) {
+      if (!written) written = true;
+      return;
+    }
 
-    let cursor = 0;
-    const progress = { count: cursor };
-    const tween = gsap.to(progress, {
-      count: paths.length,
-      duration: 1.35,
-      ease: 'none',
-      onUpdate() {
-        const next = Math.floor(progress.count);
-        for (let index = cursor; index < next; index++) paths[index].style.opacity = '1';
-        cursor = next;
-      },
-      onComplete() {
-        for (const path of paths) path.style.opacity = '1';
-      }
-    });
+    // Write the signature stroke by stroke. The path data and gsap are fetched only now, so
+    // pages that just show the finished signature never download or parse them.
+    let cancelled = false;
+    let stop: (() => void) | undefined;
+    void (async () => {
+      const [{ default: raw }, { default: gsap }] = await loadWriter();
+      if (cancelled) return;
+      markup = raw;
+      await tick();
+      const svg = host?.querySelector('svg');
+      if (cancelled || !svg) return;
 
-    return () => tween.kill();
+      const paths = [...svg.querySelectorAll('path')];
+      for (const path of paths) path.style.opacity = '0';
+
+      let cursor = 0;
+      const progress = { count: cursor };
+      const tween = gsap.to(progress, {
+        count: paths.length,
+        duration: 1.35,
+        ease: 'none',
+        onUpdate() {
+          const next = Math.floor(progress.count);
+          for (let index = cursor; index < next; index++) paths[index].style.opacity = '1';
+          cursor = next;
+        },
+        onComplete() {
+          // Finished: swap back to the static copy, which renders identically.
+          written = true;
+          markup = null;
+        }
+      });
+      stop = () => tween.kill();
+    })();
+
+    return () => {
+      cancelled = true;
+      stop?.();
+    };
   });
 </script>
 
@@ -89,10 +120,14 @@
   class="signature"
   class:drift
   class:pb-2={!compact}
-  class:shown={instant && !erase}
+  class:shown={written || erase || (instant && !erase)}
 >
-  <!-- eslint-disable-next-line svelte/no-at-html-tags -- bundled SVG asset, not user input -->
-  {@html logo}
+  {#if markup}
+    <!-- eslint-disable-next-line svelte/no-at-html-tags -- bundled SVG asset, not user input -->
+    {@html markup}
+  {:else}
+    <div class="static" role="img" aria-label="Joshua Fouch"></div>
+  {/if}
 </div>
 
 <style>
@@ -101,7 +136,19 @@
     stroke: currentColor;
   }
 
-  .shown :global(path) {
+  /* The finished signature: jaf-logo.svg as a mask over currentColor. Same box as the inline
+     SVG (width 100%, the viewBox's aspect ratio), so color, filters and layout are unchanged. */
+  .static {
+    display: block;
+    width: 100%;
+    aspect-ratio: 2857.14 / 850.3;
+    background-color: currentColor;
+    -webkit-mask: url('../assets/jaf-logo.svg') center / 100% 100% no-repeat;
+    mask: url('../assets/jaf-logo.svg') center / 100% 100% no-repeat;
+    opacity: 0;
+  }
+
+  .shown .static {
     opacity: 1;
   }
 
@@ -138,7 +185,8 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .signature :global(path) {
+    .signature :global(path),
+    .static {
       opacity: 1;
     }
 
@@ -149,7 +197,8 @@
     }
   }
 
-  :global(html[data-motion='off']) .signature :global(path) {
+  :global(html[data-motion='off']) .signature :global(path),
+  :global(html[data-motion='off']) .static {
     opacity: 1;
   }
 
