@@ -12,13 +12,14 @@ import {
   type Org,
   type PersonalContent,
   type Portrait,
+  type PortraitKind,
   type ProfessionalContent,
   type TechGroup,
   type TechItem
 } from '#lib/about.ts';
 import type { Database, Json } from '#lib/database.types.ts';
 import { safeHref } from '#lib/links.ts';
-import { requireAdmin, uploadBlogImage } from '#lib/server/admin-posts.ts';
+import { requireAdmin, uploadPortraitImage } from '#lib/server/admin-posts.ts';
 
 type Client = SupabaseClient<Database>;
 
@@ -376,9 +377,28 @@ export async function saveProfessionalIntro(
   return { ok: true };
 }
 
-export async function saveProfessionalPortraits(
+async function deleteMissingPortraits(
   supabase: Client,
-  form: FormData
+  kind: PortraitKind,
+  ids: string[]
+): Promise<string | null> {
+  if (ids.length === 0) {
+    const { error: deleteError } = await supabase.from('portraits').delete().eq('kind', kind);
+    return deleteError?.message ?? null;
+  }
+
+  const { error: deleteError } = await supabase
+    .from('portraits')
+    .delete()
+    .eq('kind', kind)
+    .not('id', 'in', `(${ids.join(',')})`);
+  return deleteError?.message ?? null;
+}
+
+export async function savePortraits(
+  supabase: Client,
+  form: FormData,
+  kind: PortraitKind
 ): Promise<{ ok: true } | { error: string; portraits?: Portrait[] }> {
   await requireAdmin(supabase);
 
@@ -394,7 +414,7 @@ export async function saveProfessionalPortraits(
     if (blank) continue;
     let src = portrait.src;
     if (file) {
-      const uploaded = await uploadBlogImage(supabase, file, 'portraits');
+      const uploaded = await uploadPortraitImage(supabase, file, kind);
       if ('error' in uploaded) return { error: uploaded.error, portraits: portraitsParsed.ok };
       src = uploaded.url;
     }
@@ -409,20 +429,37 @@ export async function saveProfessionalPortraits(
       id: portrait.id,
       src: portrait.src,
       alt: portrait.alt,
+      kind,
       sort_order: index
     });
     if (upsertError) return { error: upsertError.message, portraits };
   }
-  const portraitDelete = await deleteMissing(
+  const portraitDelete = await deleteMissingPortraits(
     supabase,
-    'portraits',
+    kind,
     portraits.map((portrait) => portrait.id)
   );
   if (portraitDelete) return { error: portraitDelete, portraits };
 
-  const touched = await touchProfessional(supabase);
-  if (touched) return { error: touched, portraits };
+  if (kind === 'professional') {
+    const touched = await touchProfessional(supabase);
+    if (touched) return { error: touched, portraits };
+  } else {
+    const { error: profileError } = await supabase
+      .from('about_personal')
+      .update({ updated_at: new Date().toISOString() })
+      .eq('id', 1);
+    if (profileError) return { error: profileError.message, portraits };
+  }
   return { ok: true };
+}
+
+/** @deprecated Prefer savePortraits(..., 'professional') */
+export async function saveProfessionalPortraits(
+  supabase: Client,
+  form: FormData
+): Promise<{ ok: true } | { error: string; portraits?: Portrait[] }> {
+  return savePortraits(supabase, form, 'professional');
 }
 
 export async function saveProfessionalWork(
@@ -550,9 +587,10 @@ export async function saveProfessionalTech(
 function personalContent(
   intro: string,
   youtubeUrl: string,
-  library: MusicLibrary
+  library: MusicLibrary,
+  portraits: Portrait[] = []
 ): PersonalContent {
-  return { intro, youtubeUrl, library };
+  return { intro, youtubeUrl, portraits, library };
 }
 
 export async function savePersonalFromForm(

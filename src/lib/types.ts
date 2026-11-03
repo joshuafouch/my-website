@@ -1,7 +1,7 @@
 export type BlogImage = {
   url: string;
   name: string;
-  folder: 'covers' | 'inline' | 'portraits';
+  folder: 'covers' | 'inline' | 'portraits' | 'professional' | 'personal';
 };
 
 export type Post = {

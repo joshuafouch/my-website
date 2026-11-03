@@ -1,6 +1,7 @@
 import { error } from '@sveltejs/kit';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { isAdminEmail } from '#lib/admin.ts';
+import { PORTRAITS_BUCKET, type PortraitKind } from '#lib/about.ts';
 import type { Database } from '#lib/database.types.ts';
 import { slugify } from '#lib/slug.ts';
 import type { BlogImage } from '#lib/types.ts';
@@ -53,6 +54,16 @@ export async function getAdminPostBySlug(supabase: Client, slug: string) {
 
 export type ImageFolder = 'covers' | 'inline' | 'portraits';
 
+function imageExtension(file: File) {
+  return (
+    file.name
+      .split('.')
+      .pop()
+      ?.toLowerCase()
+      .replace(/[^a-z0-9]/g, '') || 'img'
+  );
+}
+
 export async function uploadBlogImage(
   supabase: Client,
   file: File,
@@ -66,13 +77,7 @@ export async function uploadBlogImage(
     return { error: 'Image must be 5 MB or smaller.' };
   }
 
-  const extension =
-    file.name
-      .split('.')
-      .pop()
-      ?.toLowerCase()
-      .replace(/[^a-z0-9]/g, '') || 'img';
-  const path = `${folder}/${crypto.randomUUID()}.${extension}`;
+  const path = `${folder}/${crypto.randomUUID()}.${imageExtension(file)}`;
   const { error: uploadError } = await supabase.storage.from('blog-images').upload(path, file, {
     contentType: file.type,
     upsert: false
@@ -84,6 +89,83 @@ export async function uploadBlogImage(
 
   const { data } = supabase.storage.from('blog-images').getPublicUrl(path);
   return { url: data.publicUrl };
+}
+
+export async function uploadPortraitImage(
+  supabase: Client,
+  file: File,
+  kind: PortraitKind
+): Promise<{ url: string } | { error: string }> {
+  if (!IMAGE_TYPES.has(file.type)) {
+    return { error: 'Use a JPEG, PNG, WebP, or GIF.' };
+  }
+
+  if (file.size > MAX_IMAGE_BYTES) {
+    return { error: 'Image must be 5 MB or smaller.' };
+  }
+
+  const path = `${kind}/${crypto.randomUUID()}.${imageExtension(file)}`;
+  const { error: uploadError } = await supabase.storage.from(PORTRAITS_BUCKET).upload(path, file, {
+    contentType: file.type,
+    upsert: false
+  });
+
+  if (uploadError) {
+    return { error: uploadError.message };
+  }
+
+  const { data } = supabase.storage.from(PORTRAITS_BUCKET).getPublicUrl(path);
+  return { url: data.publicUrl };
+}
+
+export async function listPortraitImages(
+  supabase: Client,
+  kind: PortraitKind
+): Promise<{ images: BlogImage[]; imageError: string | null }> {
+  const { data, error: listError } = await supabase.storage.from(PORTRAITS_BUCKET).list(kind, {
+    limit: 100,
+    sortBy: { column: 'created_at', order: 'desc' }
+  });
+
+  if (listError) {
+    console.error(`Failed to list ${kind} portraits`, listError);
+    return { images: [], imageError: 'Could not load the image library.' };
+  }
+
+  const images = (data ?? [])
+    .filter((file) => file.id && file.name && !file.name.startsWith('.'))
+    .map((file) => {
+      const { data: pub } = supabase.storage
+        .from(PORTRAITS_BUCKET)
+        .getPublicUrl(`${kind}/${file.name}`);
+      return {
+        url: pub.publicUrl,
+        name: file.name,
+        folder: kind,
+        createdAt: file.created_at ?? ''
+      };
+    })
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+    .map(({ url, name, folder }) => ({ url, name, folder }));
+
+  return { images, imageError: null };
+}
+
+export async function uploadPortraitImageFromForm(
+  supabase: Client,
+  form: FormData
+): Promise<{ url: string } | { error: string }> {
+  const kind = String(form.get('kind') ?? form.get('folder') ?? '');
+  if (kind !== 'professional' && kind !== 'personal') {
+    return { error: 'Choose a professional or personal portrait folder.' };
+  }
+
+  const file = form.get('file');
+  if (!(file instanceof File) || file.size === 0) {
+    return { error: 'Choose an image to upload.' };
+  }
+
+  return uploadPortraitImage(supabase, file, kind);
 }
 
 const LIBRARY_FOLDERS = ['covers', 'inline'] as const;

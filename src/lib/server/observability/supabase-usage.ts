@@ -1,7 +1,7 @@
 import { SUPABASE_ACCESS_TOKEN, SUPABASE_PROJECT_REF } from '$app/env/private';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '#lib/database.types.ts';
-import { ALBUMS_BUCKET } from '#lib/about.ts';
+import { ALBUMS_BUCKET, PORTRAITS_BUCKET } from '#lib/about.ts';
 import { RESUME_BUCKET } from '#lib/resume.ts';
 import { cached } from '#lib/server/observability/cache.ts';
 
@@ -132,19 +132,22 @@ export async function loadSupabaseUsage(supabase: Client): Promise<SupabaseUsage
 		'Bucket sizes come from Storage listings (free). Disk / DB size / API counts need a free Supabase personal access token — no paid add-on.';
 
 	return cached('supabase-usage:v1', TTL, async () => {
-		const bucketsWanted = [BLOG_BUCKET, ALBUMS_BUCKET, RESUME_BUCKET];
-		const [blog, albums, resumes, posts, projects, portraits, musicImages] = await Promise.all([
-			listFolderBytes(supabase, BLOG_BUCKET),
-			listFolderBytes(supabase, ALBUMS_BUCKET),
-			listFolderBytes(supabase, RESUME_BUCKET),
-			countTable(supabase, 'posts'),
-			countTable(supabase, 'projects'),
-			countTable(supabase, 'portraits'),
-			countTable(supabase, 'music_images')
-		]);
+		const bucketsWanted = [BLOG_BUCKET, PORTRAITS_BUCKET, ALBUMS_BUCKET, RESUME_BUCKET];
+		const [blog, aboutPortraits, albums, resumes, posts, projects, portraits, musicImages] =
+			await Promise.all([
+				listFolderBytes(supabase, BLOG_BUCKET),
+				listFolderBytes(supabase, PORTRAITS_BUCKET),
+				listFolderBytes(supabase, ALBUMS_BUCKET),
+				listFolderBytes(supabase, RESUME_BUCKET),
+				countTable(supabase, 'posts'),
+				countTable(supabase, 'projects'),
+				countTable(supabase, 'portraits'),
+				countTable(supabase, 'music_images')
+			]);
 
 		const buckets: BucketSize[] = [
 			{ bucket: BLOG_BUCKET, ...blog },
+			{ bucket: PORTRAITS_BUCKET, ...aboutPortraits },
 			{ bucket: ALBUMS_BUCKET, ...albums },
 			{ bucket: RESUME_BUCKET, ...resumes }
 		];

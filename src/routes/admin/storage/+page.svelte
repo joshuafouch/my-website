@@ -19,7 +19,9 @@
     { id: 'all', label: 'All Files' },
     { id: 'blog-covers', label: 'Covers' },
     { id: 'blog-inline', label: 'Inline' },
-    { id: 'blog-portraits', label: 'Portraits' },
+    { id: 'about-portraits-professional', label: 'Pro Portraits' },
+    { id: 'about-portraits-personal', label: 'Personal Portraits' },
+    { id: 'blog-portraits', label: 'Legacy Portraits' },
     { id: 'music', label: 'Music' },
     { id: 'resume', label: 'Resume' },
     { id: 'background', label: 'Backgrounds' }
