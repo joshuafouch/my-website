@@ -45,6 +45,7 @@
                     {#if index > 0}<span aria-hidden="true"> · </span>{/if}
                     {@const href = safeHref(org.href)}
                     {#if href}
+                      <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- external URL -->
                       <a class="quiet-link" {href} target="_blank" rel="noopener noreferrer"
                         >{org.name}</a
                       >
@@ -84,6 +85,7 @@
                   {@const href = safeHref(item.href)}
                   <li>
                     {#if href}
+                      <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- external URL -->
                       <a class="chip" {href} target="_blank" rel="noopener noreferrer">{item.text}</a>
                     {:else}
                       <span class="chip">{item.text}</span>

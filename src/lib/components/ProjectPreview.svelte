@@ -65,6 +65,7 @@
     {/if}
     {#if code}
       <p>
+        <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- external URL -->
         <a class="quiet-link" href={code} target="_blank" rel="noopener noreferrer">Code</a>
       </p>
     {/if}
