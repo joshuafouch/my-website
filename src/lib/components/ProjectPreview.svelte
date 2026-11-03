@@ -95,7 +95,6 @@
     font-weight: 500;
   }
 
-  .lede,
   .details,
   .tags {
     color: var(--ink-muted);
@@ -103,14 +102,16 @@
 
   .lede {
     margin: 0.8rem 0 0;
-    font-size: 1.25rem;
-    line-height: 1.5;
+    font-size: 1.3rem;
+    font-weight: 500;
+    line-height: 1.45;
+    color: var(--ink);
   }
 
   .details {
-    margin: 1rem 0 0;
-    font-size: 1.15rem;
-    line-height: 1.6;
+    margin: 1.15rem 0 0;
+    font-size: 1.12rem;
+    line-height: 1.65;
   }
 
   .details :global(p) {

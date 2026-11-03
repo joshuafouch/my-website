@@ -122,18 +122,21 @@ export type Database = {
           id: string;
           src: string;
           alt: string;
+          kind: string;
           sort_order: number;
         };
         Insert: {
           id?: string;
           src: string;
           alt?: string;
+          kind?: string;
           sort_order?: number;
         };
         Update: {
           id?: string;
           src?: string;
           alt?: string;
+          kind?: string;
           sort_order?: number;
         };
         Relationships: [];

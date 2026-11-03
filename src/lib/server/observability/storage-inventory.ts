@@ -1,6 +1,6 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { photos } from '#lib/backdrop.svelte.ts';
-import { ALBUMS_BUCKET, musicImageUrl } from '#lib/about.ts';
+import { ALBUMS_BUCKET, PORTRAITS_BUCKET, musicImageUrl } from '#lib/about.ts';
 import type { Database } from '#lib/database.types.ts';
 import { RESUME_BUCKET } from '#lib/resume.ts';
 import {
@@ -10,7 +10,11 @@ import {
 	type StorageReference,
 	type UploadTarget
 } from '#lib/observability-types.ts';
-import { uploadBlogImage, type ImageFolder } from '#lib/server/admin-posts.ts';
+import {
+	uploadBlogImage,
+	uploadPortraitImage,
+	type ImageFolder
+} from '#lib/server/admin-posts.ts';
 import { uploadMusicImage, deleteMusicImage } from '#lib/server/admin-about.ts';
 import { uploadResume } from '#lib/server/admin-resume.ts';
 import { bustCache } from '#lib/server/observability/cache.ts';
@@ -74,7 +78,7 @@ async function buildReferenceIndex(supabase: Client) {
 		await Promise.all([
 			supabase.from('posts').select('slug, title, image, body'),
 			supabase.from('projects').select('slug, title, image, images'),
-			supabase.from('portraits').select('id, alt, src'),
+			supabase.from('portraits').select('id, alt, src, kind'),
 			supabase.from('music_images').select('id, path, alt'),
 			supabase.from('music_artists').select('id, name, image_id'),
 			supabase.from('music_albums').select('id, title, image_id'),
@@ -117,10 +121,13 @@ async function buildReferenceIndex(supabase: Client) {
 	}
 
 	for (const portrait of portraits.data ?? []) {
+		const personal = portrait.kind === 'personal';
 		addRef(refs, portrait.src, {
 			kind: 'portrait',
-			label: `Portrait: ${portrait.alt || portrait.id}`,
-			detail: '/admin/about/professional/portraits'
+			label: `${personal ? 'Personal' : 'Professional'} portrait: ${portrait.alt || portrait.id}`,
+			detail: personal
+				? '/admin/about/personal/portraits'
+				: '/admin/about/professional/portraits'
 		});
 	}
 
@@ -268,23 +275,30 @@ export async function loadStorageInventory(supabase: Client): Promise<{
 }> {
 	const { refs, musicByPath } = await buildReferenceIndex(supabase);
 
-	const [covers, inline, portraits, albums, resumes] = await Promise.all([
-		listBucketFolder(supabase, BLOG_BUCKET, 'covers'),
-		listBucketFolder(supabase, BLOG_BUCKET, 'inline'),
-		listBucketFolder(supabase, BLOG_BUCKET, 'portraits'),
-		listBucketFolder(supabase, ALBUMS_BUCKET, ''),
-		listBucketFolder(supabase, RESUME_BUCKET, '')
-	]);
+	const [covers, inline, legacyPortraits, proPortraits, personalPortraits, albums, resumes] =
+		await Promise.all([
+			listBucketFolder(supabase, BLOG_BUCKET, 'covers'),
+			listBucketFolder(supabase, BLOG_BUCKET, 'inline'),
+			listBucketFolder(supabase, BLOG_BUCKET, 'portraits'),
+			listBucketFolder(supabase, PORTRAITS_BUCKET, 'professional'),
+			listBucketFolder(supabase, PORTRAITS_BUCKET, 'personal'),
+			listBucketFolder(supabase, ALBUMS_BUCKET, ''),
+			listBucketFolder(supabase, RESUME_BUCKET, '')
+		]);
 
 	const items: StorageItem[] = [];
 
-	const pushBlog = (kind: StorageKind, files: Awaited<ReturnType<typeof listBucketFolder>>) => {
+	const pushFiles = (
+		bucket: string,
+		kind: StorageKind,
+		files: Awaited<ReturnType<typeof listBucketFolder>>
+	) => {
 		for (const file of files) {
 			const references = refsFor(refs, file.url, file.path);
 			items.push({
-				id: `${BLOG_BUCKET}:${file.path}`,
+				id: `${bucket}:${file.path}`,
 				kind,
-				bucket: BLOG_BUCKET,
+				bucket,
 				path: file.path,
 				name: file.name,
 				url: file.url,
@@ -300,9 +314,11 @@ export async function loadStorageInventory(supabase: Client): Promise<{
 		}
 	};
 
-	pushBlog('blog-covers', covers);
-	pushBlog('blog-inline', inline);
-	pushBlog('blog-portraits', portraits);
+	pushFiles(BLOG_BUCKET, 'blog-covers', covers);
+	pushFiles(BLOG_BUCKET, 'blog-inline', inline);
+	pushFiles(BLOG_BUCKET, 'blog-portraits', legacyPortraits);
+	pushFiles(PORTRAITS_BUCKET, 'about-portraits-professional', proPortraits);
+	pushFiles(PORTRAITS_BUCKET, 'about-portraits-personal', personalPortraits);
 
 	for (const file of albums) {
 		const musicImageId = musicByPath.get(file.path) ?? null;
@@ -387,13 +403,20 @@ export async function uploadStorageAsset(
 		return { error: 'Choose a file to upload.' };
 	}
 
-	if (target === 'blog-covers' || target === 'blog-inline' || target === 'blog-portraits') {
-		const folder: ImageFolder =
-			target === 'blog-covers' ? 'covers' : target === 'blog-inline' ? 'inline' : 'portraits';
+	if (target === 'blog-covers' || target === 'blog-inline') {
+		const folder: ImageFolder = target === 'blog-covers' ? 'covers' : 'inline';
 		const result = await uploadBlogImage(supabase, file, folder);
 		if ('error' in result) return result;
 		bustCache('supabase-usage');
 		return { ok: true, message: `Uploaded to blog-images/${folder}.` };
+	}
+
+	if (target === 'about-portraits-professional' || target === 'about-portraits-personal') {
+		const kind = target === 'about-portraits-professional' ? 'professional' : 'personal';
+		const result = await uploadPortraitImage(supabase, file, kind);
+		if ('error' in result) return result;
+		bustCache('supabase-usage');
+		return { ok: true, message: `Uploaded to portraits/${kind}.` };
 	}
 
 	if (target === 'music') {

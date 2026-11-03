@@ -82,8 +82,21 @@
     selectedId = id;
   }
 
+  function formFromEvent(event?: Event | null) {
+    const target = event?.target;
+    if (target instanceof HTMLFormElement) return target;
+    if (target instanceof Element) return target.closest('form');
+    return null;
+  }
+
   function keepsDraft(navigation: { type: string; event?: Event | null }) {
-    return navigation.type === 'form';
+    if (navigation.type !== 'form') return false;
+    const action = formFromEvent(navigation.event)?.getAttribute('action') ?? '';
+    return action === '?/save' || action === '?/upload';
+  }
+
+  function allowSave() {
+    leaving = true;
   }
 
   function stay() {
@@ -112,8 +125,8 @@
     event?: Event | null;
     to: { url: URL } | null;
   }) {
-    const formEl = navigation.event?.target;
-    if (navigation.type === 'form' && formEl instanceof HTMLFormElement) {
+    const formEl = formFromEvent(navigation.event);
+    if (navigation.type === 'form' && formEl) {
       pendingForm = formEl;
       pendingHref = null;
       return;
@@ -136,7 +149,7 @@
     <p class="ok">Saved. The about page is updated.</p>
   {/if}
 
-  <form method="POST" action="?/save">
+  <form method="POST" action="?/save" onsubmit={allowSave}>
     {#if error}
       <p class="error">{error}</p>
     {/if}

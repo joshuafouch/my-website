@@ -2,6 +2,8 @@ export type StorageKind =
 	| 'blog-covers'
 	| 'blog-inline'
 	| 'blog-portraits'
+	| 'about-portraits-professional'
+	| 'about-portraits-personal'
 	| 'music'
 	| 'resume'
 	| 'background';
@@ -30,7 +32,8 @@ export type StorageItem = {
 export type UploadTarget =
 	| 'blog-covers'
 	| 'blog-inline'
-	| 'blog-portraits'
+	| 'about-portraits-professional'
+	| 'about-portraits-personal'
 	| 'music'
 	| 'resume';
 
@@ -48,10 +51,16 @@ export const UPLOAD_TARGETS: { id: UploadTarget; label: string; accept: string; 
 		hint: 'Uploads to blog-images/inline'
 	},
 	{
-		id: 'blog-portraits',
-		label: 'Portrait',
+		id: 'about-portraits-professional',
+		label: 'Professional portrait',
 		accept: 'image/jpeg,image/png,image/webp,image/gif',
-		hint: 'Uploads to blog-images/portraits'
+		hint: 'Uploads to portraits/professional'
+	},
+	{
+		id: 'about-portraits-personal',
+		label: 'Personal portrait',
+		accept: 'image/jpeg,image/png,image/webp,image/gif',
+		hint: 'Uploads to portraits/personal'
 	},
 	{
 		id: 'music',

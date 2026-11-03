@@ -140,12 +140,21 @@
     requestAnimationFrame(settle);
   }
 
+  function formFromEvent(event?: Event | null) {
+    const target = event?.target;
+    if (target instanceof HTMLFormElement) return target;
+    if (target instanceof Element) return target.closest('form');
+    return null;
+  }
+
   function keepsDraft(navigation: { type: string; event?: Event | null }) {
     if (navigation.type !== 'form') return false;
-    const form = navigation.event?.target;
-    if (!(form instanceof HTMLFormElement)) return false;
-    const action = form.getAttribute('action') ?? '';
+    const action = formFromEvent(navigation.event)?.getAttribute('action') ?? '';
     return action === '?/save' || action === '?/upload';
+  }
+
+  function allowSave() {
+    leaving = true;
   }
 
   function rememberLeave(navigation: {
@@ -153,8 +162,8 @@
     event?: Event | null;
     to: { url: URL } | null;
   }) {
-    const form = navigation.event?.target;
-    if (navigation.type === 'form' && form instanceof HTMLFormElement) {
+    const form = formFromEvent(navigation.event);
+    if (navigation.type === 'form' && form) {
       pendingForm = form;
       pendingHref = null;
       return;
@@ -229,7 +238,7 @@
     </div>
 
     <div class="split-write">
-      <form method="POST" action="?/save">
+      <form method="POST" action="?/save" onsubmit={allowSave}>
         {#if form?.error}
           <p class="error">{form.error}</p>
         {/if}

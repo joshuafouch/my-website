@@ -5,7 +5,9 @@ import type { Database, Json } from '#lib/database.types.ts';
 type Client = SupabaseClient<Database>;
 
 export type Org = { name: string; href: string };
+export type PortraitKind = 'professional' | 'personal';
 export type Portrait = { id: string; src: string; alt: string };
+export const PORTRAITS_BUCKET = 'portraits';
 export type Job = {
   id: string;
   role: string;
@@ -75,6 +77,7 @@ export type ProfessionalContent = {
 export type PersonalContent = {
   intro: string;
   youtubeUrl: string;
+  portraits: Portrait[];
   library: MusicLibrary;
 };
 
@@ -100,6 +103,25 @@ function readItems(value: Json): TechItem[] {
   });
 }
 
+async function loadPortraits(supabase: Client, kind: PortraitKind): Promise<Portrait[]> {
+  const { data, error: portraitsError } = await supabase
+    .from('portraits')
+    .select('id, src, alt, sort_order')
+    .eq('kind', kind)
+    .order('sort_order');
+
+  if (portraitsError) {
+    console.error(`Failed to load ${kind} portraits`, portraitsError);
+    error(500, 'Failed to load the about page');
+  }
+
+  return (data ?? []).map((portrait) => ({
+    id: portrait.id,
+    src: portrait.src,
+    alt: portrait.alt
+  }));
+}
+
 export async function loadProfessional(supabase: Client): Promise<ProfessionalContent> {
   const [profile, portraits, work, groups] = await Promise.all([
     supabase
@@ -107,7 +129,7 @@ export async function loadProfessional(supabase: Client): Promise<ProfessionalCo
       .select('intro, work_intro, tech_intro')
       .eq('id', 1)
       .maybeSingle(),
-    supabase.from('portraits').select('id, src, alt, sort_order').order('sort_order'),
+    loadPortraits(supabase, 'professional'),
     supabase
       .from('work_experiences')
       .select('id, role, time_span, body, skills, orgs, sort_order')
@@ -115,11 +137,10 @@ export async function loadProfessional(supabase: Client): Promise<ProfessionalCo
     supabase.from('tech_groups').select('id, title, items, sort_order').order('sort_order')
   ]);
 
-  if (profile.error || portraits.error || work.error || groups.error) {
+  if (profile.error || work.error || groups.error) {
     console.error(
       'Failed to load professional about',
       profile.error,
-      portraits.error,
       work.error,
       groups.error
     );
@@ -130,11 +151,7 @@ export async function loadProfessional(supabase: Client): Promise<ProfessionalCo
     intro: profile.data?.intro ?? '',
     workIntro: profile.data?.work_intro ?? '',
     techIntro: profile.data?.tech_intro ?? '',
-    portraits: (portraits.data ?? []).map((portrait) => ({
-      id: portrait.id,
-      src: portrait.src,
-      alt: portrait.alt
-    })),
+    portraits,
     jobs: (work.data ?? []).map((job) => ({
       id: job.id,
       role: job.role,
@@ -215,8 +232,9 @@ export async function loadMusicLibrary(supabase: Client): Promise<MusicLibrary |
 }
 
 export async function loadPersonal(supabase: Client): Promise<PersonalContent> {
-  const [profile, library] = await Promise.all([
+  const [profile, portraits, library] = await Promise.all([
     supabase.from('about_personal').select('intro, youtube_url').eq('id', 1).maybeSingle(),
+    loadPortraits(supabase, 'personal'),
     loadMusicLibrary(supabase)
   ]);
 
@@ -228,6 +246,7 @@ export async function loadPersonal(supabase: Client): Promise<PersonalContent> {
   return {
     intro: profile.data?.intro ?? '',
     youtubeUrl: profile.data?.youtube_url ?? '',
+    portraits,
     library
   };
 }

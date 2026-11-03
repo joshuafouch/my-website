@@ -10,12 +10,14 @@
     mode,
     images,
     imageError = null,
+    portraitKind = 'professional',
     onuse,
     onclose
   }: {
     mode: 'cover' | 'body' | 'gallery' | 'portrait';
     images: BlogImage[];
     imageError?: string | null;
+    portraitKind?: 'professional' | 'personal';
     onuse: (url: string, alt: string) => void;
     onclose: () => void;
   } = $props();
@@ -34,7 +36,7 @@
   let previewUrl = '';
 
   const folder = $derived(
-    mode === 'cover' ? 'covers' : mode === 'portrait' ? 'portraits' : 'inline'
+    mode === 'cover' ? 'covers' : mode === 'portrait' ? portraitKind : 'inline'
   );
   const needsAlt = $derived(mode === 'body' || mode === 'portrait');
   const title = $derived(
@@ -225,6 +227,9 @@
         }}
       >
         <input type="hidden" name="folder" value={folder} />
+        {#if mode === 'portrait'}
+          <input type="hidden" name="kind" value={portraitKind} />
+        {/if}
         <label
           class="drop"
           class:over={dragOver}

@@ -125,15 +125,15 @@
       await waitAnim(animation, 240);
     }
 
-    // Close while still faded out — do not reset opacity first (that was the flash).
+    // Stay faded/open through the route update so the grid never paints mid-teardown.
+    if (page.params.slug) {
+      await goto(resolve('/projects'), { replace: true, reset: false });
+    }
+
     if (dialog?.open) dialog.close();
     resetSurface();
     display = null;
     lastOpenedSlug = null;
-
-    if (page.params.slug) {
-      await goto(resolve('/projects'), { replace: true, reset: false });
-    }
     closing = false;
   }
 
