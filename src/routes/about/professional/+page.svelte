@@ -9,7 +9,7 @@
   title="Professional - Joshua Fouch"
   description="Work experience and the technologies Joshua Fouch uses, from the Alaska Railroad to Franciscan University."
   url="/about/professional"
-  image={data.portraits[0]?.src || '/assets/joshportraits/joshpfp1.jpg'}
+  image={data.portraits[0]?.src || '/assets/backgrounds/hero-bg.webp'}
   imageAlt="Joshua Fouch"
 />
 

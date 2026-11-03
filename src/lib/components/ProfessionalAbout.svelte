@@ -1,5 +1,6 @@
 <script lang="ts">
   import type { Job, Portrait, TechGroup } from '#lib/about.ts';
+  import AboutIntro from '#lib/components/AboutIntro.svelte';
   import { safeHref } from '#lib/links.ts';
 
   let {
@@ -17,32 +18,10 @@
     jobs?: Job[];
     groups?: TechGroup[];
   } = $props();
-
-  function imageSrc(src: string): string | null {
-    if (src.startsWith('blob:')) return src;
-    return safeHref(src);
-  }
 </script>
 
 <div class="about-copy">
-  {#if portraits.length > 0 || introHtml}
-    <header class="intro">
-      {#if portraits.length > 0}
-        <div class="portraits">
-          {#each portraits as portrait (portrait.id)}
-            {@const src = imageSrc(portrait.src)}
-            {#if src}
-              <img {src} alt={portrait.alt || 'Joshua Fouch'} />
-            {/if}
-          {/each}
-        </div>
-      {/if}
-      {#if introHtml}
-        <!-- eslint-disable-next-line svelte/no-at-html-tags -- admin-authored markdown -->
-        <div class="copy">{@html introHtml}</div>
-      {/if}
-    </header>
-  {/if}
+  <AboutIntro {introHtml} {portraits} side="start" label="Professional portraits" />
 
   {#if workIntro || jobs.length > 0}
     <section class="block">
@@ -121,33 +100,6 @@
 </div>
 
 <style>
-  .intro {
-    display: grid;
-    gap: 1.5rem;
-    justify-items: center;
-    text-align: center;
-  }
-
-  .portraits {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-    justify-content: center;
-  }
-
-  img {
-    width: 7.5rem;
-    height: 7.5rem;
-    border-radius: 9999px;
-    object-fit: cover;
-  }
-
-  .portraits img:first-child {
-    width: 11rem;
-    height: 11rem;
-  }
-
-  .copy :global(p),
   .lede,
   .job-body :global(p) {
     color: var(--ink-muted);
@@ -155,7 +107,6 @@
     line-height: 1.55;
   }
 
-  .copy :global(p),
   .job-body :global(p) {
     margin: 0;
   }
@@ -266,23 +217,6 @@
   }
 
   @media (min-width: 640px) {
-    .intro {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      justify-content: flex-start;
-      text-align: left;
-    }
-
-    .portraits {
-      flex: 0 0 auto;
-      justify-content: flex-start;
-    }
-
-    .copy {
-      flex: 1;
-    }
-
     .role {
       flex-direction: row;
       align-items: baseline;

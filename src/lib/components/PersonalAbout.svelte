@@ -1,15 +1,18 @@
 <script lang="ts">
-  import { emptyLibrary, type MusicLibrary } from '#lib/about.ts';
+  import { emptyLibrary, type MusicLibrary, type Portrait } from '#lib/about.ts';
+  import AboutIntro from '#lib/components/AboutIntro.svelte';
   import MusicLibraryView from '#lib/components/MusicLibrary.svelte';
   import { safeHref, youtubeId } from '#lib/links.ts';
 
   let {
     introHtml = '',
     youtubeUrl = '',
+    portraits = [],
     library = emptyLibrary()
   }: {
     introHtml?: string;
     youtubeUrl?: string;
+    portraits?: Portrait[];
     library?: MusicLibrary;
   } = $props();
 
@@ -18,12 +21,9 @@
 </script>
 
 <div class="about-copy">
-  {#if introHtml}
-    <!-- eslint-disable-next-line svelte/no-at-html-tags -- admin-authored markdown -->
-    <div class="copy">{@html introHtml}</div>
-  {/if}
+  <AboutIntro {introHtml} {portraits} side="end" label="Personal portraits" />
 
-  <section class="block">
+  <section class="block" class:after-intro={Boolean(introHtml || portraits.length)}>
     <h2>Favorite music</h2>
     <MusicLibraryView {library} />
   </section>
@@ -49,22 +49,11 @@
 </div>
 
 <style>
-  .copy :global(p) {
-    margin: 0;
-    color: var(--ink-muted);
-    font-size: 1.25rem;
-    line-height: 1.55;
-  }
-
-  .copy :global(p) + :global(p) {
-    margin-top: 0.8rem;
-  }
-
   .block {
     margin-top: 4.5rem;
   }
 
-  .copy + .block {
+  .block.after-intro {
     margin-top: 3rem;
   }
 
@@ -79,7 +68,6 @@
     width: 100%;
     aspect-ratio: 16 / 9;
     margin-top: 1.25rem;
-    border: 1px solid var(--card-border);
-    background: var(--card-bg);
+    border: 0;
   }
 </style>
