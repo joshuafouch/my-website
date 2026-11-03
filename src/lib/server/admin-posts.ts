@@ -1,6 +1,7 @@
 import { error } from '@sveltejs/kit';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import { isAdminEmail } from '#lib/admin.ts';
+import { getMfaState } from '#lib/server/mfa.ts';
 import { PORTRAITS_BUCKET, type PortraitKind } from '#lib/about.ts';
 import type { Database } from '#lib/database.types.ts';
 import { slugify } from '#lib/slug.ts';
@@ -13,13 +14,28 @@ const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 
 export type AdminPost = Database['public']['Tables']['posts']['Row'];
 
-export async function requireAdmin(supabase: Client) {
+/**
+ * Gate for admin loads and form actions. Form actions and +server.ts handlers do not run
+ * admin/+layout.server.ts, so the MFA step must be enforced here, not only in the layout.
+ * Pass `allowPendingMfa` only for the MFA challenge itself, where the session is still aal1.
+ */
+export async function requireAdmin(
+  supabase: Client,
+  { allowPendingMfa = false }: { allowPendingMfa?: boolean } = {}
+) {
   const { data, error: authError } = await supabase.auth.getClaims();
   const email =
     !authError && data?.claims && typeof data.claims.email === 'string' ? data.claims.email : null;
 
   if (!isAdminEmail(email)) {
     error(401, 'Unauthorized');
+  }
+
+  if (allowPendingMfa) return;
+
+  const mfa = await getMfaState(supabase);
+  if (mfa.needsMfa) {
+    error(401, 'Complete two-factor verification first.');
   }
 }
 

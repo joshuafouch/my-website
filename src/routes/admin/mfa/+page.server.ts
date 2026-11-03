@@ -4,6 +4,7 @@ import { getMfaState, verifyTotpCode } from '#lib/server/mfa.ts';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ locals }) => {
+  await requireAdmin(locals.supabase);
   const mfa = await getMfaState(locals.supabase);
   return { enrolled: mfa.nextLevel === 'aal2' };
 };
