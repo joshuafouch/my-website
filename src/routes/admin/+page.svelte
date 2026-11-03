@@ -22,9 +22,9 @@
           meta: 'Intro, portraits, work, and tech'
         },
         {
-          href: resolve('/admin/about/personal'),
+          href: resolve('/admin/about/personal/intro'),
           name: 'Personal',
-          meta: 'Personal about page and music'
+          meta: 'Personal about page, portraits, and music'
         },
         {
           href: resolve('/admin/resume'),

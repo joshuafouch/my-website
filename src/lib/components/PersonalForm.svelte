@@ -162,7 +162,12 @@
   function keepsDraft(navigation: { type: string; event?: Event | null }) {
     if (navigation.type !== 'form') return false;
     const action = formFromEvent(navigation.event)?.getAttribute('action') ?? '';
-    return action === '?/save' || action === '?/upload';
+    return (
+      action === '?/save' ||
+      action === '?/upload' ||
+      action === '?/uploadImage' ||
+      action === '?/deleteImage'
+    );
   }
 
   function allowSave() {
@@ -496,7 +501,12 @@
 
     <aside class="split-preview" aria-label="Live preview">
       <div class="preview-copy font-serif">
-        <PersonalAbout {introHtml} {youtubeUrl} library={previewLibrary} />
+        <PersonalAbout
+          {introHtml}
+          {youtubeUrl}
+          portraits={content.portraits}
+          library={previewLibrary}
+        />
       </div>
     </aside>
   </div>
