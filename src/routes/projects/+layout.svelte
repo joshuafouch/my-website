@@ -5,6 +5,7 @@
   import { resolve } from '$app/paths';
   import ProjectPreview from '#lib/components/ProjectPreview.svelte';
   import { motion, reducedMotion } from '#lib/motion.svelte.ts';
+  import { FALLBACK_COVER, FALLBACK_COVER_SRCSET } from '#lib/fallback-cover.ts';
   let { data, children } = $props();
 
   type ListedProject = (typeof data.projects)[number];
@@ -194,7 +195,13 @@
             data-sveltekit-reset="false"
             onclick={(event) => onCardClick(event, project)}
           >
-            <img src={project.image || '/assets/backgrounds/IMG_1797.webp'} alt="" />
+            <!-- Card is 16rem square, full width at 420px and below. -->
+            <img
+              src={project.image || FALLBACK_COVER}
+              srcset={project.image ? undefined : FALLBACK_COVER_SRCSET}
+              sizes={project.image ? undefined : '(max-width: 420px) 100vw, 16rem'}
+              alt=""
+            />
             <span class="title">{project.title}</span>
           </a>
         </li>

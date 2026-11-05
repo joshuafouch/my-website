@@ -2,6 +2,7 @@
   import { formatDate } from '#lib/utils.ts';
   import Metadata from '#lib/components/Metadata.svelte';
   import { resolve } from '$app/paths';
+  import { FALLBACK_COVER, FALLBACK_COVER_SRCSET } from '#lib/fallback-cover.ts';
 
   let { data } = $props();
 
@@ -61,7 +62,13 @@
       {#each visible as post (post.slug)}
         <li>
           <a href={resolve('/[slug]', { slug: post.slug })}>
-            <img src={post.image || '/assets/backgrounds/IMG_1797.webp'} alt="" />
+            <!-- Card is full width on phones, an 11rem column from 640px. -->
+            <img
+              src={post.image || FALLBACK_COVER}
+              srcset={post.image ? undefined : FALLBACK_COVER_SRCSET}
+              sizes={post.image ? undefined : '(min-width: 640px) 11rem, 100vw'}
+              alt=""
+            />
             <div>
               <h2>{post.title}</h2>
               <p class="date">{formatDate(post.date)}</p>

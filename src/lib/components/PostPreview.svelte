@@ -37,7 +37,8 @@
     {/if}
   </header>
   {#if image}
-    <img src={image} alt="" />
+    <!-- The largest thing on a post page: fetch it ahead of scripts and other images. -->
+    <img src={image} alt="" fetchpriority="high" />
   {/if}
   {#if html}
     <div class="body prose prose-invert font-reading max-w-none">
