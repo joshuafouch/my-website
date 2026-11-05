@@ -234,16 +234,24 @@
     gap: 0.5rem;
   }
 
+  /* Visible in the first paint (a fade-in animation can't start until hydration frees the main
+     thread, which held it invisible for ~0.5s), then fades out as the content rises in. */
   .loader {
     z-index: 3;
-    transition:
-      opacity 400ms ease,
-      visibility 0s linear 400ms;
   }
 
   .is-ready .loader {
-    opacity: 0;
-    visibility: hidden;
+    animation: loader-out 400ms ease both;
+  }
+
+  @keyframes loader-out {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+      visibility: hidden;
+    }
   }
 
   .ellipsis {
@@ -495,8 +503,8 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .loader {
-      transition: none;
+    .is-ready .loader {
+      animation-duration: 1ms;
     }
 
     .ellipsis span {
@@ -511,8 +519,8 @@
     }
   }
 
-  :global(html[data-motion='off']) .loader {
-    transition: none;
+  :global(html[data-motion='off']) .is-ready .loader {
+    animation-duration: 1ms;
   }
 
   :global(html[data-motion='off']) .ellipsis span {
