@@ -6,7 +6,21 @@ import { mdsvex, escapeSvelte } from 'mdsvex';
 import { createHighlighter } from 'shiki';
 import remarkToc from 'remark-toc';
 import rehypeSlug from 'rehype-slug';
+import { createHash } from 'node:crypto';
+import { readFileSync } from 'node:fs';
 import { defineConfig, loadEnv } from 'vite';
+
+/**
+ * CSP hashes for the inline scripts in src/app.html (the pre-paint theme/motion script). Kit only
+ * hashes the scripts it injects itself, so these are computed from the file at build time and
+ * always match its current contents.
+ */
+function appHtmlScriptHashes() {
+  const html = readFileSync(new URL('./src/app.html', import.meta.url), 'utf8');
+  return [...html.matchAll(/<script>([\s\S]*?)<\/script>/g)].map(
+    ([, body]) => `sha256-${createHash('sha256').update(body, 'utf8').digest('base64')}` as const
+  );
+}
 
 /** @type {import('mdsvex').MdsvexOptions} */
 const mdsvexOptions = {
@@ -49,13 +63,14 @@ export default defineConfig(({ mode }) => {
         adapter: adapter({
           runtime: 'nodejs24.x'
         }),
-        // Pages are rendered per request, so 'auto' uses a fresh nonce on Kit's scripts and on
-        // the app.html theme script (nonce="%sveltekit.nonce%").
+        // Hashes, not nonces: public pages are cached at the CDN, and a cached nonce would be the
+        // same for every visitor. Kit hashes its own inline scripts per response; app.html's are
+        // hashed above.
         csp: {
-          mode: 'auto',
+          mode: 'hash',
           directives: {
             'default-src': ['self'],
-            'script-src': ['self'],
+            'script-src': ['self', ...appHtmlScriptHashes()],
             // Svelte SSR emits style="" attributes (style: directives, app.html wrapper).
             'style-src': ['self', 'unsafe-inline'],
             'img-src': ['self', 'data:', 'blob:', supabaseSource],

@@ -14,6 +14,11 @@
   let index = $state(0);
   let paused = $state(false);
   let root: HTMLDivElement | undefined = $state();
+  /** All slides get their src; until then only the shown one does (see the effect below). */
+  let loadAll = $state(false);
+  /** On screen and in a visible tab: no point cycling (and repainting) when nobody can see it. */
+  let inView = $state(true);
+  let tabVisible = $state(true);
 
   const slides = $derived(
     portraits
@@ -29,7 +34,9 @@
 
   const current = $derived(slides[index] ?? slides[0] ?? null);
   const canCycle = $derived(slides.length > 1);
-  const autoplay = $derived(canCycle && !paused && !motion.off && !reducedMotion());
+  const autoplay = $derived(
+    canCycle && !paused && inView && tabVisible && !motion.off && !reducedMotion()
+  );
 
   function clampIndex(next: number) {
     if (slides.length === 0) return 0;
@@ -37,6 +44,7 @@
   }
 
   function go(next: number) {
+    loadAll = true;
     index = clampIndex(next);
   }
 
@@ -47,6 +55,32 @@
   $effect(() => {
     // Keep index valid when the set changes length.
     if (index >= slides.length) index = 0;
+  });
+
+  // The stacked slides would otherwise all download at once with the page. Fetch the rest when
+  // the browser is idle, well before autoplay (5.5s) or a click needs them.
+  $effect(() => {
+    if (loadAll || !canCycle) return;
+    const load = () => (loadAll = true);
+    if (typeof requestIdleCallback === 'function') {
+      const id = requestIdleCallback(load, { timeout: 2000 });
+      return () => cancelIdleCallback(id);
+    }
+    const timer = setTimeout(load, 1000);
+    return () => clearTimeout(timer);
+  });
+
+  $effect(() => {
+    if (!root) return;
+    const observer = new IntersectionObserver(([entry]) => (inView = entry.isIntersecting));
+    observer.observe(root);
+    const onVisibility = () => (tabVisible = document.visibilityState === 'visible');
+    onVisibility();
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => {
+      observer.disconnect();
+      document.removeEventListener('visibilitychange', onVisibility);
+    };
   });
 
   $effect(() => {
@@ -96,7 +130,7 @@
             else go(slideIndex);
           }}
         >
-          <img src={slide.src} alt={slide.alt} />
+          <img src={loadAll || slideIndex === index ? slide.src : undefined} alt={slide.alt} />
         </button>
       {/each}
     </div>

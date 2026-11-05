@@ -13,7 +13,7 @@
   function fallbackFade(node: Element) {
     const native = 'startViewTransition' in document;
     const reduce = reducedMotion();
-    return fade(node, { duration: native || reduce ? 0 : 250 });
+    return fade(node, { duration: native || reduce ? 0 : 200 });
   }
 </script>
 

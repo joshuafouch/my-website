@@ -1,5 +1,5 @@
 import { error } from '@sveltejs/kit';
-import { renderMarkdown } from '#lib/markdown.ts';
+import { renderMarkdown } from '#lib/server/markdown.ts';
 import { getPublishedPostBySlug } from '#lib/posts.ts';
 import type { PageServerLoad } from './$types';
 

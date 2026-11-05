@@ -5,13 +5,14 @@
   import { resolve } from '$app/paths';
   import ProjectPreview from '#lib/components/ProjectPreview.svelte';
   import { motion, reducedMotion } from '#lib/motion.svelte.ts';
-  import type { Project } from '#lib/types.ts';
-
+  import { FALLBACK_COVER, FALLBACK_COVER_SRCSET } from '#lib/fallback-cover.ts';
   let { data, children } = $props();
+
+  type ListedProject = (typeof data.projects)[number];
 
   let dialog: HTMLDialogElement | undefined = $state();
   /** Project shown inside the dialog — kept through the close fade so content doesn’t vanish early. */
-  let display: Project | null = $state(null);
+  let display: ListedProject | null = $state(null);
   let closing = false;
   let lastOpenedSlug: string | null = null;
 
@@ -80,7 +81,7 @@
     });
   }
 
-  async function openFor(project: Project) {
+  async function openFor(project: ListedProject) {
     display = project;
     await tick();
     if (!dialog || closing) return;
@@ -158,7 +159,7 @@
   }
 
   /** Open the dialog before the route paint so the grid card never flashes underneath. */
-  function onCardClick(event: MouseEvent, project: Project) {
+  function onCardClick(event: MouseEvent, project: ListedProject) {
     if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
       return;
     }
@@ -194,7 +195,13 @@
             data-sveltekit-reset="false"
             onclick={(event) => onCardClick(event, project)}
           >
-            <img src={project.image || '/assets/backgrounds/IMG_1797.webp'} alt="" />
+            <!-- Card is 16rem square, full width at 420px and below. -->
+            <img
+              src={project.image || FALLBACK_COVER}
+              srcset={project.image ? undefined : FALLBACK_COVER_SRCSET}
+              sizes={project.image ? undefined : '(max-width: 420px) 100vw, 16rem'}
+              alt=""
+            />
             <span class="title">{project.title}</span>
           </a>
         </li>
@@ -209,7 +216,7 @@
     <ProjectPreview
       title={display.title}
       description={display.description}
-      details={display.details ?? ''}
+      detailsHtml={display.detailsHtml}
       image={display.image || '/assets/backgrounds/IMG_1797.webp'}
       images={display.images ?? []}
       tags={display.tags ?? []}

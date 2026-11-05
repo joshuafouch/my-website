@@ -1,6 +1,6 @@
 import { fail, redirect } from '@sveltejs/kit';
 import { isAdminEmail } from '#lib/admin.ts';
-import { getMfaState } from '#lib/server/mfa.ts';
+import { forgetMfaState, getMfaState } from '#lib/server/mfa.ts';
 import type { Actions } from './$types';
 
 export const actions: Actions = {
@@ -25,6 +25,8 @@ export const actions: Actions = {
       return invalid();
     }
 
+    // Signed in just now: read the new session, not anything cached earlier in this request.
+    forgetMfaState(locals.supabase);
     const mfa = await getMfaState(locals.supabase);
     redirect(303, mfa.needsMfa ? '/admin/login/mfa' : '/admin');
   }

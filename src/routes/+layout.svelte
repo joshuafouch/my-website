@@ -3,6 +3,8 @@
   import { onNavigate } from '$app/navigation';
   import { page } from '$app/state';
   import '../app.css';
+  // Same file app.css's @font-face uses, so this resolves to the identical hashed URL.
+  import garamondRegular from '@fontsource/eb-garamond/files/eb-garamond-latin-400-normal.woff2?url';
   import Footer from '#lib/components/Footer.svelte';
   import Transition from '#lib/components/Transition.svelte';
   import SiteBackdrop from '#lib/components/SiteBackdrop.svelte';
@@ -10,7 +12,7 @@
   import SignatureLogo from '#lib/components/SignatureLogo.svelte';
   import JafCrest from '#lib/components/JafCrest.svelte';
   import VercelObservability from '#lib/components/VercelObservability.svelte';
-  import { backdrop, photos, restoreBackdrop } from '#lib/backdrop.svelte.ts';
+  import { backdrop, photoBackground, restoreBackdrop } from '#lib/backdrop.svelte.ts';
   import { reducedMotion, restoreMotion } from '#lib/motion.svelte.ts';
   import { restoreSidebar, sidebar } from '#lib/sidebar.svelte.ts';
   import { restoreTheme } from '#lib/theme.svelte.ts';
@@ -18,6 +20,15 @@
   let { children } = $props();
 
   const isLanding = $derived(page.url.pathname === '/');
+
+  /**
+   * /projects and /projects/<slug> are one page: the slug only opens the project dialog, which
+   * animates itself. Same key → the page (grid + dialog) isn't torn down and rebuilt on open/close,
+   * which made the dialog fade in twice.
+   */
+  const pageKey = (pathname: string) =>
+    pathname === '/projects' || pathname.startsWith('/projects/') ? '/projects' : pathname;
+  const transitionKey = $derived(pageKey(page.url.pathname));
   let scrollY = $state(0);
   let signatureRun = $state(0);
   let ridgePx = $state(176);
@@ -89,6 +100,8 @@
     const from = navigation.from?.url.pathname;
     const to = navigation.to?.url.pathname;
     if (!from || !to || from === to) return;
+    // Opening/closing a project dialog: no page transition (the dialog has its own fade).
+    if (pageKey(from) === pageKey(to)) return;
 
     const root = document.documentElement;
 
@@ -117,7 +130,7 @@
           if (entering === 'landing') window.scrollTo(0, 0);
           root.dataset.fade = 'in';
           resolve();
-          const clearMs = entering === 'inner' ? 420 : 260;
+          const clearMs = entering === 'inner' ? 280 : 220;
           navigation.complete.finally(() => {
             window.setTimeout(() => {
               if (root.dataset.fadeId !== token) return;
@@ -160,7 +173,7 @@
           return;
         }
 
-        const timer = window.setTimeout(go, 220);
+        const timer = window.setTimeout(go, 140);
         outgoing.addEventListener('animationend', function onEnd(event) {
           if (event.target !== outgoing || event.animationName !== 'page-fade-out') return;
           outgoing.removeEventListener('animationend', onEnd);
@@ -192,7 +205,9 @@
 </script>
 
 <svelte:head>
-  <link rel="preload" href={photos[0]} as="image" type="image/webp" />
+  <!-- The serif body face on every page. Found only after app.css is parsed otherwise, so the
+       text renders in the fallback first and then swaps (layout shift). -->
+  <link rel="preload" href={garamondRegular} as="font" type="font/woff2" crossorigin="anonymous" />
 </svelte:head>
 
 <svelte:window bind:scrollY />
@@ -204,7 +219,7 @@
 {#if isLanding}
   <div class="page-stack">
     <main>
-      <Transition url={page.url.pathname}>
+      <Transition url={transitionKey}>
         {@render children()}
       </Transition>
     </main>
@@ -232,16 +247,16 @@
     <div class="page-stack">
       <main>
         <div class="ridge" aria-hidden="true">
-          <div class="photo" style:background-image="url('{photos[backdrop.previous]}')"></div>
+          <div class="photo" style:background-image={photoBackground(backdrop.previous)}></div>
           {#key backdrop.index}
             <div
               class="photo"
               class:fade={backdrop.previous !== backdrop.index}
-              style:background-image="url('{photos[backdrop.index]}')"
+              style:background-image={photoBackground(backdrop.index)}
             ></div>
           {/key}
         </div>
-        <Transition url={page.url.pathname}>
+        <Transition url={transitionKey}>
           {@render children()}
         </Transition>
       </main>

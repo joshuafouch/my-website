@@ -1,6 +1,6 @@
 import { loadProfessional } from '#lib/about.ts';
 import { openLinks } from '#lib/links.ts';
-import { renderMarkdown } from '#lib/markdown.ts';
+import { renderMarkdown } from '#lib/server/markdown.ts';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ locals }) => {

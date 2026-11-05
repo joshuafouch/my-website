@@ -1,11 +1,12 @@
 <script lang="ts">
-  import { openLinks, safeHref } from '#lib/links.ts';
-  import { renderMarkdown } from '#lib/markdown.ts';
+  import { safeHref } from '#lib/links.ts';
 
+  // Takes finished, sanitized HTML: the public page renders it on the server
+  // (projects/+layout.server.ts), the admin editor in the browser (#lib/markdown.ts). Rendering
+  // here would ship marked and a sanitizer to every visitor.
   let {
     title,
     description = '',
-    details = '',
     detailsHtml = '',
     image = '',
     images = [],
@@ -14,7 +15,6 @@
   }: {
     title: string;
     description?: string;
-    details?: string;
     detailsHtml?: string;
     image?: string;
     images?: string[];
@@ -22,29 +22,11 @@
     sourceUrl?: string;
   } = $props();
 
-  let rendered = $state('');
-
   const pictures = $derived(
     [image, ...images].filter((src, index, all) => src && all.indexOf(src) === index)
   );
   const code = $derived(safeHref(sourceUrl));
-  const html = $derived(detailsHtml || rendered);
-
-  $effect(() => {
-    if (detailsHtml) {
-      rendered = '';
-      return;
-    }
-    const source = details;
-    let stale = false;
-    void (async () => {
-      const next = source.trim() ? openLinks(await renderMarkdown(source)) : '';
-      if (!stale) rendered = next;
-    })();
-    return () => {
-      stale = true;
-    };
-  });
+  const html = $derived(detailsHtml);
 </script>
 
 <article class="font-serif">

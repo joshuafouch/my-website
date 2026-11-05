@@ -11,8 +11,10 @@
   import ThemeSwitch from '#lib/components/ThemeSwitch.svelte';
   import MotionToggle from '#lib/components/MotionToggle.svelte';
   import AdminLogin from '#lib/components/AdminLogin.svelte';
-  import { photos } from '#lib/backdrop.svelte.ts';
+  import { backdrop, photos } from '#lib/backdrop.svelte.ts';
   import { resolve } from '$app/paths';
+  // The italic for the name in the greeting (the regular face is preloaded by the root layout).
+  import garamondItalic from '@fontsource/eb-garamond/files/eb-garamond-latin-400-italic.woff2?url';
 
   const heroImage = photos[0];
 
@@ -32,25 +34,42 @@
   let ready = $state(landingSeen);
   let replay = $state(0);
 
+  /** The layout's landing↔inner page fade is running (html[data-fade]); client-only. */
+  const pageFading = () =>
+    typeof document !== 'undefined' && document.documentElement.dataset.fade !== undefined;
+
+  // When the page fade is what brings the content in, skip the rise animation. Decided once,
+  // when the content is shown, and kept: tying it to html[data-fade] in CSS restarted the rise
+  // (a visible jump) the moment the layout removed that attribute after the fade.
+  let fadedIn = $state(returning && pageFading());
+
+  function finishLoading() {
+    if (ready) return;
+    landingSeen = true;
+    if (pageFading()) fadedIn = true;
+    ready = true;
+  }
+
+  /** The JAF loader stays up at least this long after mount, so it reads as a beat, not a flash. */
+  const LOADER_MIN_MS = 350;
+  /** Never hold the page longer than this for the photo; the text doesn't need it. */
+  const LOADER_MAX_MS = 900;
+  let loaderShown = $state(false);
+
+  // Wait for the backdrop photo (the root layout decodes the visitor's saved one, preloaded by
+  // app.html, and sets backdrop.revealed) and the loader's minimum time. Do not block on
+  // document.fonts.ready — that waits for every face on the site and made the loader feel stuck.
+  $effect(() => {
+    if (backdrop.revealed && loaderShown) finishLoading();
+  });
+
   onMount(() => {
     if (landingSeen) return;
-
-    // Wait for the hero photo only. Do not block on document.fonts.ready — that
-    // waits for every face on the site and made the loader feel stuck.
-    const image = new Image();
-    image.src = heroImage;
-    const imageReady = image.decode().catch(() => undefined);
-    const hold = new Promise<void>((resolve) => setTimeout(resolve, 220));
-    const giveUp = new Promise<void>((resolve) => setTimeout(resolve, 1200));
-
-    let cancelled = false;
-    Promise.race([Promise.all([imageReady, hold]), giveUp]).then(() => {
-      if (cancelled) return;
-      landingSeen = true;
-      ready = true;
-    });
+    const minimum = setTimeout(() => (loaderShown = true), LOADER_MIN_MS);
+    const giveUp = setTimeout(finishLoading, LOADER_MAX_MS);
     return () => {
-      cancelled = true;
+      clearTimeout(minimum);
+      clearTimeout(giveUp);
     };
   });
 </script>
@@ -64,6 +83,7 @@
 />
 
 <svelte:head>
+  <link rel="preload" href={garamondItalic} as="font" type="font/woff2" crossorigin="anonymous" />
   <noscript>
     <style>
       .landing .reveal {
@@ -80,6 +100,7 @@
   class="landing relative flex flex-col font-serif"
   class:is-ready={ready}
   class:is-return={returning}
+  class:faded-in={fadedIn}
 >
   {#if !returning}
     <div class="loader absolute inset-0 flex items-center justify-center" aria-hidden="true">
@@ -216,16 +237,24 @@
     gap: 0.5rem;
   }
 
+  /* Visible in the first paint (a fade-in animation can't start until hydration frees the main
+     thread, which held it invisible for ~0.5s), then fades out as the content rises in. */
   .loader {
     z-index: 3;
-    transition:
-      opacity 400ms ease,
-      visibility 0s linear 400ms;
   }
 
   .is-ready .loader {
-    opacity: 0;
-    visibility: hidden;
+    animation: loader-out 400ms ease both;
+  }
+
+  @keyframes loader-out {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+      visibility: hidden;
+    }
   }
 
   .ellipsis {
@@ -289,8 +318,8 @@
   }
 
   .is-ready .reveal {
-    animation: rise 700ms ease both;
-    animation-delay: calc(200ms + var(--step) * 220ms);
+    animation: rise 600ms ease both;
+    animation-delay: calc(120ms + var(--step) * 160ms);
   }
 
   .is-return .reveal {
@@ -317,9 +346,9 @@
     color: var(--ink);
   }
 
-  /* The page fade is the motion when arriving from another page. */
-  :global(html[data-fade]) .is-ready .reveal,
-  :global(html[data-fade]) .is-ready .logo.quick {
+  /* The page fade is the motion when arriving from another page (see fadedIn). */
+  .faded-in.is-ready .reveal,
+  .faded-in.is-ready .logo.quick {
     animation: none;
     opacity: 1;
   }
@@ -477,8 +506,8 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .loader {
-      transition: none;
+    .is-ready .loader {
+      animation-duration: 1ms;
     }
 
     .ellipsis span {
@@ -493,8 +522,8 @@
     }
   }
 
-  :global(html[data-motion='off']) .loader {
-    transition: none;
+  :global(html[data-motion='off']) .is-ready .loader {
+    animation-duration: 1ms;
   }
 
   :global(html[data-motion='off']) .ellipsis span {

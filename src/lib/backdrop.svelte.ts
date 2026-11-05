@@ -20,8 +20,20 @@ export const photos = [
 export const backdrop = $state({
   index: 0,
   previous: 0,
-  revealed: false
+  revealed: false,
+  /** The saved choice has been read on the client (see restoreBackdrop). */
+  restored: false
 });
+
+/**
+ * CSS background for a photo layer. Until the client has restored the saved choice (SSR and
+ * hydration), layers use --site-backdrop, which the app.html inline script points at the saved
+ * photo before first paint (default in app.css). An explicit url here would make every visitor
+ * download the default photo even when they picked another one.
+ */
+export function photoBackground(index: number) {
+  return backdrop.restored ? `url('${photos[index]}')` : 'var(--site-backdrop)';
+}
 
 function remember(index: number) {
   try {
@@ -31,14 +43,43 @@ function remember(index: number) {
   }
 }
 
+/** Photos already requested in the background (not reactive state). */
+const prefetched: string[] = [];
+
+/** Slow or data-saving connections skip prefetching; the photo loads when it's picked. */
+function canPrefetch() {
+  const connection = (
+    navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }
+  ).connection;
+  if (!connection) return true;
+  return !connection.saveData && !/(^|-)2g$/.test(connection.effectiveType ?? '');
+}
+
+/** Warm the cache for the photo the switch shows next, once the browser is idle. */
+function prefetchNext() {
+  const src = photos[(backdrop.index + 1) % photos.length];
+  if (prefetched.includes(src) || !canPrefetch()) return;
+  prefetched.push(src);
+  const load = () => {
+    const image = new Image();
+    image.src = src;
+  };
+  if (typeof requestIdleCallback === 'function') requestIdleCallback(load, { timeout: 3000 });
+  else setTimeout(load, 1000);
+}
+
 export function cycleBackdrop() {
   const next = (backdrop.index + 1) % photos.length;
   backdrop.previous = backdrop.index;
   backdrop.index = next;
   remember(next);
+  prefetchNext();
 }
 
+/** Called once, from the root layout. */
 export function restoreBackdrop() {
+  if (backdrop.restored) return;
+
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
     const found = photos.findIndex((src) => src === saved);
@@ -49,10 +90,11 @@ export function restoreBackdrop() {
   } catch {
     // Use the glacier until storage is available.
   }
+  backdrop.restored = true;
 
-  const current = photos[backdrop.index];
+  // Same URL the inline script preloaded, so this decode reuses that download.
   const image = new Image();
-  image.src = current;
+  image.src = photos[backdrop.index];
   let cancelled = false;
 
   image
@@ -61,11 +103,7 @@ export function restoreBackdrop() {
     .then(() => {
       if (cancelled) return;
       backdrop.revealed = true;
-      for (const src of photos) {
-        if (src === current) continue;
-        const next = new Image();
-        next.src = src;
-      }
+      prefetchNext();
     });
 
   return () => {
