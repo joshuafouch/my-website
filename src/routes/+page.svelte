@@ -13,6 +13,8 @@
   import AdminLogin from '#lib/components/AdminLogin.svelte';
   import { backdrop, photos } from '#lib/backdrop.svelte.ts';
   import { resolve } from '$app/paths';
+  // The italic for the name in the greeting (the regular face is preloaded by the root layout).
+  import garamondItalic from '@fontsource/eb-garamond/files/eb-garamond-latin-400-italic.woff2?url';
 
   const heroImage = photos[0];
 
@@ -81,6 +83,7 @@
 />
 
 <svelte:head>
+  <link rel="preload" href={garamondItalic} as="font" type="font/woff2" crossorigin="anonymous" />
   <noscript>
     <style>
       .landing .reveal {
