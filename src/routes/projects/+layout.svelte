@@ -5,13 +5,13 @@
   import { resolve } from '$app/paths';
   import ProjectPreview from '#lib/components/ProjectPreview.svelte';
   import { motion, reducedMotion } from '#lib/motion.svelte.ts';
-  import type { Project } from '#lib/types.ts';
-
   let { data, children } = $props();
+
+  type ListedProject = (typeof data.projects)[number];
 
   let dialog: HTMLDialogElement | undefined = $state();
   /** Project shown inside the dialog — kept through the close fade so content doesn’t vanish early. */
-  let display: Project | null = $state(null);
+  let display: ListedProject | null = $state(null);
   let closing = false;
   let lastOpenedSlug: string | null = null;
 
@@ -80,7 +80,7 @@
     });
   }
 
-  async function openFor(project: Project) {
+  async function openFor(project: ListedProject) {
     display = project;
     await tick();
     if (!dialog || closing) return;
@@ -158,7 +158,7 @@
   }
 
   /** Open the dialog before the route paint so the grid card never flashes underneath. */
-  function onCardClick(event: MouseEvent, project: Project) {
+  function onCardClick(event: MouseEvent, project: ListedProject) {
     if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
       return;
     }
@@ -209,7 +209,7 @@
     <ProjectPreview
       title={display.title}
       description={display.description}
-      details={display.details ?? ''}
+      detailsHtml={display.detailsHtml}
       image={display.image || '/assets/backgrounds/IMG_1797.webp'}
       images={display.images ?? []}
       tags={display.tags ?? []}
