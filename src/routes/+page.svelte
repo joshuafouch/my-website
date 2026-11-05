@@ -11,7 +11,7 @@
   import ThemeSwitch from '#lib/components/ThemeSwitch.svelte';
   import MotionToggle from '#lib/components/MotionToggle.svelte';
   import AdminLogin from '#lib/components/AdminLogin.svelte';
-  import { photos } from '#lib/backdrop.svelte.ts';
+  import { backdrop, photos } from '#lib/backdrop.svelte.ts';
   import { resolve } from '$app/paths';
 
   const heroImage = photos[0];
@@ -41,26 +41,33 @@
   // (a visible jump) the moment the layout removed that attribute after the fade.
   let fadedIn = $state(returning && pageFading());
 
+  function finishLoading() {
+    if (ready) return;
+    landingSeen = true;
+    if (pageFading()) fadedIn = true;
+    ready = true;
+  }
+
+  /** The JAF loader stays up at least this long after mount, so it reads as a beat, not a flash. */
+  const LOADER_MIN_MS = 350;
+  /** Never hold the page longer than this for the photo; the text doesn't need it. */
+  const LOADER_MAX_MS = 900;
+  let loaderShown = $state(false);
+
+  // Wait for the backdrop photo (the root layout decodes the visitor's saved one, preloaded by
+  // app.html, and sets backdrop.revealed) and the loader's minimum time. Do not block on
+  // document.fonts.ready — that waits for every face on the site and made the loader feel stuck.
+  $effect(() => {
+    if (backdrop.revealed && loaderShown) finishLoading();
+  });
+
   onMount(() => {
     if (landingSeen) return;
-
-    // Wait for the hero photo only. Do not block on document.fonts.ready — that
-    // waits for every face on the site and made the loader feel stuck.
-    const image = new Image();
-    image.src = heroImage;
-    const imageReady = image.decode().catch(() => undefined);
-    const hold = new Promise<void>((resolve) => setTimeout(resolve, 220));
-    const giveUp = new Promise<void>((resolve) => setTimeout(resolve, 1200));
-
-    let cancelled = false;
-    Promise.race([Promise.all([imageReady, hold]), giveUp]).then(() => {
-      if (cancelled) return;
-      landingSeen = true;
-      if (pageFading()) fadedIn = true;
-      ready = true;
-    });
+    const minimum = setTimeout(() => (loaderShown = true), LOADER_MIN_MS);
+    const giveUp = setTimeout(finishLoading, LOADER_MAX_MS);
     return () => {
-      cancelled = true;
+      clearTimeout(minimum);
+      clearTimeout(giveUp);
     };
   });
 </script>
