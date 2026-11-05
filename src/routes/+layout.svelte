@@ -130,7 +130,7 @@
           if (entering === 'landing') window.scrollTo(0, 0);
           root.dataset.fade = 'in';
           resolve();
-          const clearMs = entering === 'inner' ? 420 : 260;
+          const clearMs = entering === 'inner' ? 280 : 220;
           navigation.complete.finally(() => {
             window.setTimeout(() => {
               if (root.dataset.fadeId !== token) return;
@@ -173,7 +173,7 @@
           return;
         }
 
-        const timer = window.setTimeout(go, 220);
+        const timer = window.setTimeout(go, 140);
         outgoing.addEventListener('animationend', function onEnd(event) {
           if (event.target !== outgoing || event.animationName !== 'page-fade-out') return;
           outgoing.removeEventListener('animationend', onEnd);

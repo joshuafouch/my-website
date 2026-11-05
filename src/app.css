@@ -386,17 +386,17 @@ html[data-fade] .inner-shell {
 
 /* Landing → inner: dissolve text only; photo stays put. */
 html[data-enter='inner'][data-fade='out'] .landing-chrome {
-  animation: page-fade-out 200ms ease both;
+  animation: page-fade-out 120ms ease both;
 }
 
 /* Landing → inner: surface + body rise while the photo yields. */
 html[data-enter='inner'][data-fade='in'] .site-backdrop {
   visibility: visible;
-  animation: enter-backdrop-out 400ms ease both;
+  animation: enter-backdrop-out 260ms ease both;
 }
 
 html[data-enter='inner'][data-fade='in'] .inner-shell {
-  animation: enter-surface 400ms var(--ease-out) both;
+  animation: enter-surface 260ms var(--ease-out) both;
 }
 
 html[data-enter='inner'][data-fade='in'] .watermark,
@@ -406,23 +406,23 @@ html[data-enter='inner'][data-fade='in'] .seam {
 }
 
 html[data-enter='inner'][data-fade='in'] .inner-shell .page-stack {
-  animation: enter-body 400ms var(--ease-out) both;
+  animation: enter-body 260ms var(--ease-out) both;
 }
 
 html[data-enter='inner'][data-fade='in'] .sidebar-open .page-stack {
-  animation: enter-body-open 460ms var(--ease-slide) both;
+  animation: enter-body-open 320ms var(--ease-slide) both;
 }
 
 @media (min-width: 768px) {
   html[data-enter='inner'][data-fade='in'] .rail:not(.closed) {
-    animation: enter-rail 460ms var(--ease-slide) both;
+    animation: enter-rail 320ms var(--ease-slide) both;
   }
 }
 
 /* Mobile rail is an overlay menu — only fade the body, no slide. */
 @media (max-width: 767px) {
   html[data-enter='inner'][data-fade='in'] .sidebar-open .page-stack {
-    animation: enter-body 400ms var(--ease-out) both;
+    animation: enter-body 260ms var(--ease-out) both;
   }
 }
 
@@ -433,7 +433,7 @@ html[data-enter='landing'][data-fade='out'] .site-backdrop {
 }
 
 html[data-enter='landing'][data-fade='out'] .inner-shell {
-  animation: page-fade-out 200ms ease both;
+  animation: page-fade-out 120ms ease both;
 }
 
 /* Kill mid-enter body/rail motion so a quick reverse does not snap translate. */
@@ -451,7 +451,7 @@ html[data-enter='landing'][data-fade='in'] .site-backdrop {
 }
 
 html[data-enter='landing'][data-fade='in'] .landing-chrome {
-  animation: page-fade-in 240ms var(--ease-out) both;
+  animation: page-fade-in 200ms var(--ease-out) both;
 }
 
 @keyframes page-fade-out {
@@ -569,7 +569,7 @@ html[data-vt='leave']:not([data-vt-phase]) .rail {
 
 /* Inner pages only move the page column. Theme changes crossfade the whole screen once. */
 ::view-transition-group(*) {
-  animation-duration: 280ms;
+  animation-duration: 200ms;
   animation-timing-function: var(--ease-out);
 }
 
@@ -595,11 +595,11 @@ html[data-theme-fade]::view-transition-old(root) {
 }
 
 ::view-transition-old(page) {
-  animation: vt-fade-out 180ms ease both;
+  animation: vt-fade-out 120ms ease both;
 }
 
 ::view-transition-new(page) {
-  animation: vt-rise 280ms var(--ease-out) both;
+  animation: vt-rise 200ms var(--ease-out) both;
 }
 
 ::view-transition-old(about-tabs),
