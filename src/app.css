@@ -279,6 +279,11 @@ body {
   color: var(--ink);
 }
 
+/* First-paint backdrop photo; app.html's inline script swaps in the visitor's saved choice. */
+:root {
+  --site-backdrop: url('/assets/backgrounds/hero-bg.webp');
+}
+
 .site-backdrop {
   position: fixed;
   inset: 0;

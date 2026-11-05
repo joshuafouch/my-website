@@ -10,7 +10,7 @@
   import SignatureLogo from '#lib/components/SignatureLogo.svelte';
   import JafCrest from '#lib/components/JafCrest.svelte';
   import VercelObservability from '#lib/components/VercelObservability.svelte';
-  import { backdrop, photos, restoreBackdrop } from '#lib/backdrop.svelte.ts';
+  import { backdrop, photoBackground, restoreBackdrop } from '#lib/backdrop.svelte.ts';
   import { reducedMotion, restoreMotion } from '#lib/motion.svelte.ts';
   import { restoreSidebar, sidebar } from '#lib/sidebar.svelte.ts';
   import { restoreTheme } from '#lib/theme.svelte.ts';
@@ -191,10 +191,6 @@
   });
 </script>
 
-<svelte:head>
-  <link rel="preload" href={photos[0]} as="image" type="image/webp" />
-</svelte:head>
-
 <svelte:window bind:scrollY />
 
 <!-- One photo layer for landing and the enter crossfade; dormant on settled inner pages. -->
@@ -232,12 +228,12 @@
     <div class="page-stack">
       <main>
         <div class="ridge" aria-hidden="true">
-          <div class="photo" style:background-image="url('{photos[backdrop.previous]}')"></div>
+          <div class="photo" style:background-image={photoBackground(backdrop.previous)}></div>
           {#key backdrop.index}
             <div
               class="photo"
               class:fade={backdrop.previous !== backdrop.index}
-              style:background-image="url('{photos[backdrop.index]}')"
+              style:background-image={photoBackground(backdrop.index)}
             ></div>
           {/key}
         </div>
