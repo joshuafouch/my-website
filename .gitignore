@@ -25,3 +25,7 @@ vite.config.ts.timestamp-*
 package-lock.json
 
 prompts.md
+
+# random
+AUDIT.md
+/.claude
