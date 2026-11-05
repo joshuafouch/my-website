@@ -1,9 +1,14 @@
 <script module lang="ts">
-  // Path data + gsap for the write animation, fetched once and shared by every instance.
-  let writer:
-    Promise<[{ default: string }, { default: typeof import('gsap').default }]> | undefined;
-  const loadWriter = () =>
-    (writer ??= Promise.all([import('#lib/assets/jaf-logo.svg?raw'), import('gsap')]));
+  // Path data for the write animation, fetched once and shared by every instance.
+  let writer: Promise<{ default: string }> | undefined;
+  const loadWriter = () => (writer ??= import('#lib/assets/jaf-logo.svg?raw'));
+
+  /** How long the signature takes to write, start to finish. */
+  const WRITE_MS = 1350;
+  /** A frame gap longer than this (e.g. a background tab) counts as LAG_STEP_MS, so the
+      signature doesn't jump ahead when the page comes back. Same defaults as gsap's lagSmoothing. */
+  const LAG_THRESHOLD_MS = 500;
+  const LAG_STEP_MS = 33;
 </script>
 
 <script lang="ts">
@@ -73,12 +78,12 @@
       return;
     }
 
-    // Write the signature stroke by stroke. The path data and gsap are fetched only now, so
-    // pages that just show the finished signature never download or parse them.
+    // Write the signature stroke by stroke. The path data is fetched only now, so pages that
+    // just show the finished signature never download or parse it.
     let cancelled = false;
     let stop: (() => void) | undefined;
     void (async () => {
-      const [{ default: raw }, { default: gsap }] = await loadWriter();
+      const { default: raw } = await loadWriter();
       if (cancelled) return;
       markup = raw;
       await tick();
@@ -88,24 +93,30 @@
       const paths = [...svg.querySelectorAll('path')];
       for (const path of paths) path.style.opacity = '0';
 
+      // Linear: reveal floor(progress × strokes) each frame.
       let cursor = 0;
-      const progress = { count: cursor };
-      const tween = gsap.to(progress, {
-        count: paths.length,
-        duration: 1.35,
-        ease: 'none',
-        onUpdate() {
-          const next = Math.floor(progress.count);
-          for (let index = cursor; index < next; index++) paths[index].style.opacity = '1';
-          cursor = next;
-        },
-        onComplete() {
-          // Finished: swap back to the static copy, which renders identically.
-          written = true;
-          markup = null;
+      let elapsed = 0;
+      let last = performance.now();
+      let frame = 0;
+      const step = (now: number) => {
+        // A rAF timestamp is the frame's start, which can be just before `last` was taken.
+        const delta = Math.max(0, now - last);
+        last = now;
+        elapsed += delta > LAG_THRESHOLD_MS ? LAG_STEP_MS : delta;
+        const progress = Math.min(1, elapsed / WRITE_MS);
+        const next = Math.floor(progress * paths.length);
+        for (let index = cursor; index < next; index++) paths[index].style.opacity = '1';
+        cursor = next;
+        if (progress < 1) {
+          frame = requestAnimationFrame(step);
+          return;
         }
-      });
-      stop = () => tween.kill();
+        // Finished: swap back to the static copy, which renders identically.
+        written = true;
+        markup = null;
+      };
+      frame = requestAnimationFrame(step);
+      stop = () => cancelAnimationFrame(frame);
     })();
 
     return () => {
