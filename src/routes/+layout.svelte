@@ -18,6 +18,15 @@
   let { children } = $props();
 
   const isLanding = $derived(page.url.pathname === '/');
+
+  /**
+   * /projects and /projects/<slug> are one page: the slug only opens the project dialog, which
+   * animates itself. Same key → the page (grid + dialog) isn't torn down and rebuilt on open/close,
+   * which made the dialog fade in twice.
+   */
+  const pageKey = (pathname: string) =>
+    pathname === '/projects' || pathname.startsWith('/projects/') ? '/projects' : pathname;
+  const transitionKey = $derived(pageKey(page.url.pathname));
   let scrollY = $state(0);
   let signatureRun = $state(0);
   let ridgePx = $state(176);
@@ -89,6 +98,8 @@
     const from = navigation.from?.url.pathname;
     const to = navigation.to?.url.pathname;
     if (!from || !to || from === to) return;
+    // Opening/closing a project dialog: no page transition (the dialog has its own fade).
+    if (pageKey(from) === pageKey(to)) return;
 
     const root = document.documentElement;
 
@@ -200,7 +211,7 @@
 {#if isLanding}
   <div class="page-stack">
     <main>
-      <Transition url={page.url.pathname}>
+      <Transition url={transitionKey}>
         {@render children()}
       </Transition>
     </main>
@@ -237,7 +248,7 @@
             ></div>
           {/key}
         </div>
-        <Transition url={page.url.pathname}>
+        <Transition url={transitionKey}>
           {@render children()}
         </Transition>
       </main>
