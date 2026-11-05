@@ -315,8 +315,8 @@
   }
 
   .is-ready .reveal {
-    animation: rise 700ms ease both;
-    animation-delay: calc(200ms + var(--step) * 220ms);
+    animation: rise 600ms ease both;
+    animation-delay: calc(120ms + var(--step) * 160ms);
   }
 
   .is-return .reveal {
