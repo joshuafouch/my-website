@@ -32,6 +32,15 @@
   let ready = $state(landingSeen);
   let replay = $state(0);
 
+  /** The layout's landing↔inner page fade is running (html[data-fade]); client-only. */
+  const pageFading = () =>
+    typeof document !== 'undefined' && document.documentElement.dataset.fade !== undefined;
+
+  // When the page fade is what brings the content in, skip the rise animation. Decided once,
+  // when the content is shown, and kept: tying it to html[data-fade] in CSS restarted the rise
+  // (a visible jump) the moment the layout removed that attribute after the fade.
+  let fadedIn = $state(returning && pageFading());
+
   onMount(() => {
     if (landingSeen) return;
 
@@ -47,6 +56,7 @@
     Promise.race([Promise.all([imageReady, hold]), giveUp]).then(() => {
       if (cancelled) return;
       landingSeen = true;
+      if (pageFading()) fadedIn = true;
       ready = true;
     });
     return () => {
@@ -80,6 +90,7 @@
   class="landing relative flex flex-col font-serif"
   class:is-ready={ready}
   class:is-return={returning}
+  class:faded-in={fadedIn}
 >
   {#if !returning}
     <div class="loader absolute inset-0 flex items-center justify-center" aria-hidden="true">
@@ -317,9 +328,9 @@
     color: var(--ink);
   }
 
-  /* The page fade is the motion when arriving from another page. */
-  :global(html[data-fade]) .is-ready .reveal,
-  :global(html[data-fade]) .is-ready .logo.quick {
+  /* The page fade is the motion when arriving from another page (see fadedIn). */
+  .faded-in.is-ready .reveal,
+  .faded-in.is-ready .logo.quick {
     animation: none;
     opacity: 1;
   }
