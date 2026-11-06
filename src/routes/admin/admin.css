@@ -1037,7 +1037,7 @@ select optgroup {
 .studio .storage-modal-card {
   width: min(28rem, 100%);
   padding: 1.25rem 1.35rem 1.4rem;
-  background: var(--color-base-100, #14171d);
+  background: var(--root-bg);
   border: 1px solid var(--border-subtle);
 }
 

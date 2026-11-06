@@ -62,7 +62,6 @@
     "@vercel/analytics": "^2.0.1",
     "@vercel/functions": "^3.10.2",
     "@vercel/speed-insights": "^2.0.0",
-    "daisyui": "^5.5.19",
     "dompurify": "^3.4.17",
     "marked": "^18.1.1",
     "rehype-slug": "^6.0.0",

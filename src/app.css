@@ -11,103 +11,95 @@
 @import '@fontsource/source-serif-4/600-italic.css';
 
 @plugin '@tailwindcss/typography';
+
+/* The parts of daisyUI the site relied on, kept after removing it (its components were unused
+   and it doubled the size of this stylesheet). Same values per theme as daisyUI produced: the
+   page colour behind <body> (shows on overscroll), the root text colour, the translucent
+   scrollbar, the status colours the admin reads, and its Tailwind Typography colours (below).
+   Themes are the classes on <html>. */
+@layer base {
+  :root {
+    --root-bg: oklch(21% 0.022 260);
+    --root-ink: oklch(95.27% 0.011 258.91);
+    --color-base-200: oklch(25.5% 0.026 258);
+    --color-base-300: oklch(31% 0.03 257);
+    --color-neutral: oklch(36% 0.035 256.3);
+    --color-neutral-content: oklch(95.27% 0.011 258.91);
+    --radius-selector: 2rem;
+    --border: 2px;
+    --color-success: oklch(73.57% 0.076 138.83);
+    --color-error: oklch(59.16% 0.128 13.9);
+    background-color: var(--root-bg);
+    color: var(--root-ink);
+    scrollbar-color: color-mix(in oklch, currentColor 35%, #0000) #0000;
+  }
+
+  :root.snow-storm {
+    --root-bg: oklch(95.127% 0.007 260.731);
+    --root-ink: oklch(32.437% 0.022 264.182);
+    --color-base-200: oklch(93.299% 0.01 261.788);
+    --color-base-300: oklch(89.925% 0.016 262.749);
+    --color-neutral: oklch(45.229% 0.035 264.131);
+    --color-neutral-content: oklch(89.925% 0.016 262.749);
+    --radius-selector: 1rem;
+    --border: 1px;
+    --color-success: oklch(76.827% 0.074 131.063);
+    --color-error: oklch(60.61% 0.12 15.341);
+  }
+
+  :root.frost {
+    --root-bg: #3d5166;
+    --root-ink: #eceff4;
+    --color-base-200: #466078;
+    --color-base-300: #50708a;
+    --color-neutral: #466078;
+    --color-neutral-content: #eceff4;
+  }
+}
+
+/* daisyUI's Tailwind Typography integration, same layer and selector so it wins over
+   .prose-invert exactly as before: theme-based prose colours and inline-code chips. */
+@layer utilities {
+  :root .prose {
+    --tw-prose-body: color-mix(in oklab, var(--root-ink) 80%, #0000);
+    --tw-prose-headings: var(--root-ink);
+    --tw-prose-lead: var(--root-ink);
+    --tw-prose-links: var(--root-ink);
+    --tw-prose-bold: var(--root-ink);
+    --tw-prose-counters: var(--root-ink);
+    --tw-prose-bullets: color-mix(in oklab, var(--root-ink) 50%, #0000);
+    --tw-prose-hr: color-mix(in oklab, var(--root-ink) 20%, #0000);
+    --tw-prose-quotes: var(--root-ink);
+    --tw-prose-quote-borders: color-mix(in oklab, var(--root-ink) 20%, #0000);
+    --tw-prose-captions: color-mix(in oklab, var(--root-ink) 50%, #0000);
+    --tw-prose-code: var(--root-ink);
+    --tw-prose-pre-code: var(--color-neutral-content);
+    --tw-prose-pre-bg: var(--color-neutral);
+    --tw-prose-th-borders: color-mix(in oklab, var(--root-ink) 50%, #0000);
+    --tw-prose-td-borders: color-mix(in oklab, var(--root-ink) 20%, #0000);
+    --tw-prose-kbd: color-mix(in oklab, var(--root-ink) 80%, #0000);
+
+    & :where(code):not(pre > code) {
+      background-color: var(--color-base-200);
+      border-radius: var(--radius-selector);
+      border: var(--border) solid var(--color-base-300);
+      font-weight: inherit;
+      padding-block: 0.2em;
+      padding-inline: 0.5em;
+
+      &::before,
+      &::after {
+        display: none;
+      }
+    }
+  }
+}
 @layer base {
   .prose {
     --tw-prose-body: 'IBM Plex Sans', sans-serif;
     --tw-prose-headings: 'DM Serif Text', serif;
     --tw-prose-code: 'IBM Plex Mono', monospace;
   }
-}
-
-@plugin 'daisyui' {
-  themes: nord;
-}
-@plugin 'daisyui/theme' {
-  name: 'nord-dark';
-  default: true;
-  prefersdark: true;
-  color-scheme: 'dark';
-  /* Nord Dark Theme for DaisyUI - Deeper Polar Night */
-  --color-base-100: oklch(21% 0.022 260); /* Deep Polar Night (#14171d) */
-  --color-base-200: oklch(25.5% 0.026 258); /* Elevated Polar Night (#1f232d) */
-  --color-base-300: oklch(31% 0.03 257); /* UI elements (#282e3b) */
-  --color-base-content: oklch(95.27% 0.011 258.91); /* nord6 (#ECEFF4) - Base text */
-
-  --color-primary: oklch(67.2% 0.057 257.73); /* nord9 (#81A1C1) - Frost Blue */
-  --color-primary-content: oklch(21% 0.022 260); /* Text on primary */
-
-  --color-secondary: oklch(74.49% 0.046 195.06); /* nord7 (#8FBCBB) - Frost Teal */
-  --color-secondary-content: oklch(21% 0.022 260); /* Text on secondary */
-
-  --color-accent: oklch(67.75% 0.07 313.52); /* nord15 (#B48EAD) - Aurora Purple */
-  --color-accent-content: oklch(21% 0.022 260); /* Text on accent */
-
-  --color-neutral: oklch(36% 0.035 256.3); /* Dark neutral */
-  --color-neutral-content: oklch(95.27% 0.011 258.91); /* nord6 (#ECEFF4) - Text on neutral */
-
-  --color-info: oklch(56.95% 0.076 257.25); /* nord10 (#5E81AC) - Darker Frost Blue */
-  --color-info-content: oklch(95.27% 0.011 258.91); /* nord6 (#ECEFF4) - Text on info */
-
-  --color-success: oklch(73.57% 0.076 138.83); /* nord14 (#A3BE8C) - Aurora Green */
-  --color-success-content: oklch(21% 0.022 260); /* Text on success */
-
-  --color-warning: oklch(85.34% 0.096 97.4); /* nord13 (#EBCB8B) - Aurora Yellow */
-  --color-warning-content: oklch(21% 0.022 260); /* Text on warning */
-
-  --color-error: oklch(59.16% 0.128 13.9); /* nord11 (#BF616A) - Aurora Red */
-  --color-error-content: oklch(95.27% 0.011 258.91); /* nord6 (#ECEFF4) - Text on error */
-
-  /* Unchanged variables from your example */
-  --radius-selector: 2rem;
-  --radius-field: 0.5rem;
-  --radius-box: 2rem;
-  --size-selector: 0.25rem;
-  --size-field: 0.25rem;
-  --border: 2px;
-  --depth: 1;
-  --noise: 1;
-}
-@plugin 'daisyui/theme' {
-  name: 'frost';
-  color-scheme: 'dark';
-  /* Nord Frost: dusk surfaces from nord8-nord10, Frost and Aurora hues unchanged */
-  --color-base-100: #3d5166;
-  --color-base-200: #466078;
-  --color-base-300: #50708a;
-  --color-base-content: #eceff4; /* nord6 */
-
-  --color-primary: oklch(67.2% 0.057 257.73); /* nord9 (#81A1C1) - Frost Blue */
-  --color-primary-content: oklch(21% 0.022 260);
-
-  --color-secondary: oklch(74.49% 0.046 195.06); /* nord7 (#8FBCBB) - Frost Teal */
-  --color-secondary-content: oklch(21% 0.022 260);
-
-  --color-accent: oklch(67.75% 0.07 313.52); /* nord15 (#B48EAD) - Aurora Purple */
-  --color-accent-content: oklch(21% 0.022 260);
-
-  --color-neutral: #466078;
-  --color-neutral-content: #eceff4;
-
-  --color-info: oklch(56.95% 0.076 257.25); /* nord10 (#5E81AC) */
-  --color-info-content: #eceff4;
-
-  --color-success: oklch(73.57% 0.076 138.83); /* nord14 (#A3BE8C) */
-  --color-success-content: oklch(21% 0.022 260);
-
-  --color-warning: oklch(85.34% 0.096 97.4); /* nord13 (#EBCB8B) */
-  --color-warning-content: oklch(21% 0.022 260);
-
-  --color-error: oklch(59.16% 0.128 13.9); /* nord11 (#BF616A) */
-  --color-error-content: #eceff4;
-
-  --radius-selector: 2rem;
-  --radius-field: 0.5rem;
-  --radius-box: 2rem;
-  --size-selector: 0.25rem;
-  --size-field: 0.25rem;
-  --border: 2px;
-  --depth: 1;
-  --noise: 1;
 }
 
 /*custom font classes*/
