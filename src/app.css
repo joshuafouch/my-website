@@ -1,6 +1,5 @@
 @import 'tailwindcss';
 @import '@fontsource/ibm-plex-mono';
-@import '@fontsource/ibm-plex-sans';
 @import '@fontsource/dm-serif-text';
 @import '@fontsource/eb-garamond/400.css';
 @import '@fontsource/eb-garamond/400-italic.css';
@@ -112,10 +111,6 @@
 }
 
 /*custom font classes*/
-.font-main {
-  font-family: 'IBM Plex Sans', sans-serif;
-}
-
 .font-title {
   font-family: 'DM Serif Text', serif;
 }
