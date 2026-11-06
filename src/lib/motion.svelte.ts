@@ -1,4 +1,9 @@
+import { MediaQuery } from 'svelte/reactivity';
+
 const STORAGE_KEY = 'site-motion';
+
+/** Reactive: effects and deriveds that read it re-run if the OS setting changes mid-visit. */
+const osReducedMotion = new MediaQuery('(prefers-reduced-motion: reduce)', false);
 
 export const motion = $state({ off: false });
 
@@ -32,6 +37,5 @@ export function reducedMotion() {
   if (typeof document !== 'undefined' && document.documentElement.dataset.motion === 'off') {
     return true;
   }
-  if (typeof window === 'undefined') return false;
-  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  return osReducedMotion.current;
 }
