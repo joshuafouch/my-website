@@ -390,7 +390,7 @@ html[data-enter='inner'][data-fade='in'] .site-backdrop {
   animation: enter-backdrop-out 260ms ease both;
 }
 
-html[data-enter='inner'][data-fade='in'] .inner-shell {
+html[data-enter='inner'][data-fade='in'] .shell-surface {
   animation: enter-surface 260ms var(--ease-out) both;
 }
 
@@ -427,7 +427,8 @@ html[data-enter='landing'][data-fade='out'] .site-backdrop {
   opacity: 1;
 }
 
-html[data-enter='landing'][data-fade='out'] .inner-shell {
+html[data-enter='landing'][data-fade='out'] .inner-shell,
+html[data-enter='landing'][data-fade='out'] .shell-surface {
   animation: page-fade-out 120ms ease both;
 }
 
@@ -473,12 +474,13 @@ html[data-enter='landing'][data-fade='in'] .landing-chrome {
   }
 }
 
+/* Opacity on .shell-surface (composited), not background-color on the whole shell. */
 @keyframes enter-surface {
   from {
-    background-color: transparent;
+    opacity: 0;
   }
   to {
-    background-color: var(--surface);
+    opacity: 1;
   }
 }
 
@@ -674,11 +676,12 @@ html[data-theme-fade]::view-transition-old(root) {
 
   html[data-enter='inner'][data-fade='out'] .landing-chrome,
   html[data-enter='inner'][data-fade='in'] .site-backdrop,
-  html[data-enter='inner'][data-fade='in'] .inner-shell,
+  html[data-enter='inner'][data-fade='in'] .shell-surface,
   html[data-enter='inner'][data-fade='in'] .inner-shell .page-stack,
   html[data-enter='inner'][data-fade='in'] .sidebar-open .page-stack,
   html[data-enter='inner'][data-fade='in'] .rail:not(.closed),
   html[data-enter='landing'][data-fade='out'] .inner-shell,
+  html[data-enter='landing'][data-fade='out'] .shell-surface,
   html[data-enter='landing'][data-fade='in'] .landing-chrome {
     animation: none !important;
   }
