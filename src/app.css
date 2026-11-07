@@ -94,23 +94,7 @@
     }
   }
 }
-@layer base {
-  .prose {
-    --tw-prose-body: 'IBM Plex Sans', sans-serif;
-    --tw-prose-headings: 'DM Serif Text', serif;
-    --tw-prose-code: 'IBM Plex Mono', monospace;
-  }
-}
-
 /*custom font classes*/
-.font-title {
-  font-family: 'DM Serif Text', serif;
-}
-
-.font-mono {
-  font-family: 'IBM Plex Mono', monospace;
-}
-
 .font-serif {
   font-family: 'EB Garamond', Garamond, 'Times New Roman', serif;
 }

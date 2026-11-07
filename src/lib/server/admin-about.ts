@@ -454,14 +454,6 @@ export async function savePortraits(
   return { ok: true };
 }
 
-/** @deprecated Prefer savePortraits(..., 'professional') */
-export async function saveProfessionalPortraits(
-  supabase: Client,
-  form: FormData
-): Promise<{ ok: true } | { error: string; portraits?: Portrait[] }> {
-  return savePortraits(supabase, form, 'professional');
-}
-
 export async function saveProfessionalWork(
   supabase: Client,
   form: FormData

@@ -2,7 +2,7 @@ import { reducedMotion } from '#lib/motion.svelte.ts';
 
 const STORAGE_KEY = 'site-theme';
 
-export const THEME_ORDER = ['polar-night', 'snow-storm', 'frost'] as const;
+const THEME_ORDER = ['polar-night', 'snow-storm', 'frost'] as const;
 
 export type ThemeMode = (typeof THEME_ORDER)[number];
 
@@ -46,7 +46,7 @@ function readTheme(saved: string | null): ThemeMode {
   return 'polar-night';
 }
 
-export function applyTheme(mode: ThemeMode) {
+function applyTheme(mode: ThemeMode) {
   if (typeof document === 'undefined') return;
   const root = document.documentElement;
   root.setAttribute('data-theme', DAISY_THEME[mode]);
@@ -100,12 +100,6 @@ export function toggleTheme() {
 
   const clear = () => delete root.dataset.themeFade;
   transition.finished.then(clear, clear);
-}
-
-export function setTheme(mode: ThemeMode) {
-  theme.current = mode;
-  applyTheme(mode);
-  persist(mode);
 }
 
 export function restoreTheme() {
