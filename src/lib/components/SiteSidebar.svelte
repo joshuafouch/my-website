@@ -362,6 +362,11 @@
     transform: translate(-50%, 50%);
   }
 
+  /* Folded, the crest sits in the transparent nav: hold its drift until the sidebar opens. */
+  .closed .crest :global(.jaf-crest) {
+    animation-play-state: paused;
+  }
+
   .tools {
     position: absolute;
     z-index: 3;

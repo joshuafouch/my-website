@@ -1,7 +1,23 @@
 <script module lang="ts">
-  // Path data for the write animation, fetched once and shared by every instance.
-  let writer: Promise<{ default: string }> | undefined;
-  const loadWriter = () => (writer ??= import('#lib/assets/jaf-logo.svg?raw'));
+  /** The signature as pen segments in writing order: x1, y1, x2, y2, width per segment. */
+  type Strokes = { box: [number, number, number, number]; segments: Float32Array };
+
+  // jaf-logo.svg is 3,167 one-segment paths. Parse them once, shared by every instance, and
+  // draw them on a canvas: no 3,167-element SVG in the DOM, no per-path style writes.
+  let writer: Promise<Strokes> | undefined;
+  const loadWriter = () =>
+    (writer ??= import('#lib/assets/jaf-logo.svg?raw').then(({ default: raw }) => {
+      const box = raw
+        .match(/viewBox="([^"]+)"/)![1]
+        .split(/\s+/)
+        .map(Number);
+      const found = [...raw.matchAll(/d="M (\S+) (\S+) L (\S+) (\S+)" stroke-width="(\S+)"/g)];
+      const segments = new Float32Array(found.length * 5);
+      found.forEach((match, index) => {
+        for (let field = 0; field < 5; field++) segments[index * 5 + field] = +match[field + 1];
+      });
+      return { box: box as Strokes['box'], segments };
+    }));
 
   /** How long the signature takes to write, start to finish. */
   const WRITE_MS = 1350;
@@ -37,8 +53,9 @@
   }: Props = $props();
 
   let host: HTMLDivElement | undefined = $state();
-  /** The 3,167-path inline SVG, loaded only while the write animation runs. */
-  let markup: string | null = $state(null);
+  /** Present only while the write animation runs. */
+  let canvas: HTMLCanvasElement | undefined = $state();
+  let writing = $state(false);
   /** The signature has been written; show the static (masked) copy. */
   let written = $state(false);
 
@@ -83,17 +100,31 @@
     let cancelled = false;
     let stop: (() => void) | undefined;
     void (async () => {
-      const { default: raw } = await loadWriter();
+      const { box, segments } = await loadWriter();
       if (cancelled) return;
-      markup = raw;
+      writing = true;
       await tick();
-      const svg = host?.querySelector('svg');
-      if (cancelled || !svg) return;
+      if (cancelled) return;
+      const context = canvas?.getContext('2d');
+      // No canvas or no box to draw in: just show the finished signature.
+      if (!canvas || !context || !canvas.clientWidth) {
+        writing = false;
+        written = true;
+        return;
+      }
 
-      const paths = [...svg.querySelectorAll('path')];
-      for (const path of paths) path.style.opacity = '0';
+      // Same box as the static copy: width 100%, the viewBox's aspect ratio.
+      const ratio = window.devicePixelRatio || 1;
+      canvas.width = Math.round(canvas.clientWidth * ratio);
+      canvas.height = Math.round(canvas.clientHeight * ratio);
+      const scale = canvas.width / box[2];
+      context.setTransform(scale, 0, 0, scale, -box[0] * scale, -box[1] * scale);
+      context.strokeStyle = getComputedStyle(canvas).color;
+      context.lineCap = 'round';
+      context.lineJoin = 'round';
 
-      // Linear: reveal floor(progress × strokes) each frame.
+      const total = segments.length / 5;
+      // Linear: draw up to floor(progress × strokes) each frame.
       let cursor = 0;
       let elapsed = 0;
       let last = performance.now();
@@ -104,8 +135,15 @@
         last = now;
         elapsed += delta > LAG_THRESHOLD_MS ? LAG_STEP_MS : delta;
         const progress = Math.min(1, elapsed / WRITE_MS);
-        const next = Math.floor(progress * paths.length);
-        for (let index = cursor; index < next; index++) paths[index].style.opacity = '1';
+        const next = Math.floor(progress * total);
+        for (let index = cursor; index < next; index++) {
+          const at = index * 5;
+          context.beginPath();
+          context.moveTo(segments[at], segments[at + 1]);
+          context.lineTo(segments[at + 2], segments[at + 3]);
+          context.lineWidth = segments[at + 4];
+          context.stroke();
+        }
         cursor = next;
         if (progress < 1) {
           frame = requestAnimationFrame(step);
@@ -113,7 +151,7 @@
         }
         // Finished: swap back to the static copy, which renders identically.
         written = true;
-        markup = null;
+        writing = false;
       };
       frame = requestAnimationFrame(step);
       stop = () => cancelAnimationFrame(frame);
@@ -133,26 +171,24 @@
   class:pb-2={!compact}
   class:shown={written || erase || (instant && !erase)}
 >
-  {#if markup}
-    <!-- eslint-disable-next-line svelte/no-at-html-tags -- bundled SVG asset, not user input -->
-    {@html markup}
+  {#if writing}
+    <canvas bind:this={canvas} class="writer">Joshua Fouch</canvas>
   {:else}
     <div class="static" role="img" aria-label="Joshua Fouch"></div>
   {/if}
 </div>
 
 <style>
-  .signature :global(path) {
-    opacity: 0;
-    stroke: currentColor;
-  }
-
-  /* The finished signature: jaf-logo.svg as a mask over currentColor. Same box as the inline
-     SVG (width 100%, the viewBox's aspect ratio), so color, filters and layout are unchanged. */
+  /* The finished signature: jaf-logo.svg as a mask over currentColor. The canvas uses the same
+     box (width 100%, the viewBox's aspect ratio), so color, filters and layout are unchanged. */
+  .writer,
   .static {
     display: block;
     width: 100%;
     aspect-ratio: 2857.14 / 850.3;
+  }
+
+  .static {
     background-color: currentColor;
     -webkit-mask: url('../assets/jaf-logo.svg') center / 100% 100% no-repeat;
     mask: url('../assets/jaf-logo.svg') center / 100% 100% no-repeat;
@@ -196,7 +232,6 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .signature :global(path),
     .static {
       opacity: 1;
     }
@@ -208,7 +243,6 @@
     }
   }
 
-  :global(html[data-motion='off']) .signature :global(path),
   :global(html[data-motion='off']) .static {
     opacity: 1;
   }

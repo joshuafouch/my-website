@@ -236,6 +236,7 @@
     <button
       type="button"
       class="watermark"
+      class:resting={sigReveal === 0}
       aria-label="Replay signature"
       style:--sig-reveal={sigReveal}
       onclick={() => signatureRun++}
@@ -410,12 +411,13 @@
         opacity 200ms ease,
         visibility 0s linear 200ms;
     }
-  }
 
-  .turn :global(svg) {
-    display: block;
-    width: 100%;
-    height: auto;
+    /* Invisible (scrolled to the top, or hidden behind the open sidebar): hold the drift
+       instead of running a filter animation nobody sees. It resumes where it stopped. */
+    .watermark.resting .turn,
+    .sidebar-open .watermark .turn {
+      animation-play-state: paused;
+    }
   }
 
   .watermark:focus-visible {
