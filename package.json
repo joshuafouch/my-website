@@ -8,7 +8,6 @@
   },
   "type": "module",
   "imports": {
-    "#lib": "./src/lib/index.ts",
     "#lib/*": "./src/lib/*"
   },
   "scripts": {
@@ -19,13 +18,15 @@
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
     "format": "prettier --write .",
-    "lint": "prettier --check . && eslint .",
-    "optimize:images": "python3 scripts/optimize-images.py"
+    "lint": "prettier --check . && eslint ."
   },
   "devDependencies": {
     "@eslint/compat": "^2.0.3",
     "@eslint/js": "^10.0.1",
-    "@sveltejs/adapter-auto": "^8.0.0",
+    "@fontsource/dm-serif-text": "^5.3.0",
+    "@fontsource/eb-garamond": "^5.3.0",
+    "@fontsource/ibm-plex-mono": "^5.3.0",
+    "@fontsource/source-serif-4": "^5.3.1",
     "@sveltejs/adapter-vercel": "^7.0.0",
     "@sveltejs/kit": "^3.0.1",
     "@sveltejs/vite-plugin-svelte": "^7.3.1",
@@ -37,7 +38,6 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-svelte": "^3.16.0",
     "globals": "^17.4.0",
-    "mdsvex": "^0.12.7",
     "prettier": "^3.8.1",
     "prettier-plugin-svelte": "^3.5.1",
     "prettier-plugin-tailwindcss": "^0.7.2",
@@ -54,22 +54,13 @@
     ]
   },
   "dependencies": {
-    "@fontsource/dm-serif-text": "^5.2.8",
-    "@fontsource/eb-garamond": "^5.3.0",
-    "@fontsource/ibm-plex-mono": "^5.2.7",
-    "@fontsource/ibm-plex-sans": "^5.2.8",
-    "@fontsource/source-serif-4": "^5.3.1",
     "@supabase/ssr": "^0.12.7",
     "@supabase/supabase-js": "^2.118.0",
     "@vercel/analytics": "^2.0.1",
     "@vercel/functions": "^3.10.2",
     "@vercel/speed-insights": "^2.0.0",
-    "daisyui": "^5.5.19",
     "dompurify": "^3.4.17",
     "marked": "^18.1.1",
-    "rehype-slug": "^6.0.0",
-    "remark-toc": "^9.0.0",
-    "sanitize-html": "^2.18.1",
-    "shiki": "^4.0.2"
+    "sanitize-html": "^2.18.1"
   }
 }

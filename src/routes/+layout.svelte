@@ -225,12 +225,18 @@
     </main>
   </div>
 {:else}
+  <!-- The inner pages' background colour, as its own layer so the landing → inner enter can fade
+       its opacity (composited) instead of animating background-color over the whole viewport
+       (a full repaint every frame). A sibling, not a pseudo-element: isolating .inner-shell would
+       trap the sidebar (z-index 40) under the back-to-top button (z-index 30). -->
+  <div class="shell-surface" aria-hidden="true"></div>
   <div class="inner-shell" class:sidebar-open={sidebar.open}>
     <SiteSidebar />
     <div class="seam" aria-hidden="true"></div>
     <button
       type="button"
       class="watermark"
+      class:resting={sigReveal === 0}
       aria-label="Replay signature"
       style:--sig-reveal={sigReveal}
       onclick={() => signatureRun++}
@@ -295,7 +301,15 @@
     position: relative;
     min-height: 100svh;
     overflow-x: clip;
+  }
+
+  /* Fixed and solid, so it looks the same as the shell's own background did. Positioned with
+     z-index auto: paints after the backdrop photo and before the shell, like that background. */
+  .shell-surface {
+    position: fixed;
+    inset: 0;
     background: var(--surface);
+    pointer-events: none;
   }
 
   .page-stack {
@@ -397,12 +411,13 @@
         opacity 200ms ease,
         visibility 0s linear 200ms;
     }
-  }
 
-  .turn :global(svg) {
-    display: block;
-    width: 100%;
-    height: auto;
+    /* Invisible (scrolled to the top, or hidden behind the open sidebar): hold the drift
+       instead of running a filter animation nobody sees. It resumes where it stopped. */
+    .watermark.resting .turn,
+    .sidebar-open .watermark .turn {
+      animation-play-state: paused;
+    }
   }
 
   .watermark:focus-visible {

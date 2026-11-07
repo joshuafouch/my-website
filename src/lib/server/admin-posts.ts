@@ -261,7 +261,7 @@ export type PostFormValues = {
   published: boolean;
 };
 
-export function readPostForm(form: FormData): PostFormValues {
+function readPostForm(form: FormData): PostFormValues {
   return {
     title: String(form.get('title') ?? ''),
     slug: String(form.get('slug') ?? ''),

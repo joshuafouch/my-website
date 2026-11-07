@@ -111,9 +111,6 @@ values (
   'An overview of the technologies I have used.'
 );
 
-insert into public.portraits (src, alt, sort_order)
-values ('/assets/joshportraits/joshpfp1.jpg', 'Joshua Fouch', 0);
-
 insert into public.work_experiences (role, time_span, body, skills, orgs, sort_order)
 values
   (

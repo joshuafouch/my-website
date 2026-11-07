@@ -65,7 +65,7 @@ export type ProjectFormValues = {
   published: boolean;
 };
 
-export function readProjectForm(form: FormData): ProjectFormValues {
+function readProjectForm(form: FormData): ProjectFormValues {
   return {
     id: String(form.get('id') ?? ''),
     title: String(form.get('title') ?? ''),

@@ -2,10 +2,6 @@ import adapter from '@sveltejs/adapter-vercel';
 import tailwindcss from '@tailwindcss/vite';
 import { sveltekit } from '@sveltejs/kit/vite';
 import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
-import { mdsvex, escapeSvelte } from 'mdsvex';
-import { createHighlighter } from 'shiki';
-import remarkToc from 'remark-toc';
-import rehypeSlug from 'rehype-slug';
 import { createHash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { defineConfig, loadEnv } from 'vite';
@@ -21,26 +17,6 @@ function appHtmlScriptHashes() {
     ([, body]) => `sha256-${createHash('sha256').update(body, 'utf8').digest('base64')}` as const
   );
 }
-
-/** @type {import('mdsvex').MdsvexOptions} */
-const mdsvexOptions = {
-  extensions: ['.md'],
-  highlight: {
-    highlighter: async (code: string, lang: string | null | undefined = 'text') => {
-      const highlighter = await createHighlighter({
-        themes: ['poimandres'],
-        langs: ['javascript', 'typescript']
-      });
-      await highlighter.loadLanguage('javascript', 'typescript');
-      const html = escapeSvelte(
-        highlighter.codeToHtml(code, { lang: lang ?? 'text', theme: 'poimandres' })
-      );
-      return `{@html \`${html}\` }`;
-    }
-  },
-  remarkPlugins: [[remarkToc, { tight: true }]],
-  rehypePlugins: [rehypeSlug]
-};
 
 export default defineConfig(({ mode }) => {
   // Supabase serves storage images and the resume PDF; allow only this project's origin.
@@ -58,8 +34,7 @@ export default defineConfig(({ mode }) => {
     plugins: [
       tailwindcss(),
       sveltekit({
-        extensions: ['.svelte', '.md'],
-        preprocess: [vitePreprocess(), mdsvex(mdsvexOptions)],
+        preprocess: [vitePreprocess()],
         adapter: adapter({
           runtime: 'nodejs24.x'
         }),
