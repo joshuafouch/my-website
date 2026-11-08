@@ -10,7 +10,6 @@
   import BackgroundSwitch from '#lib/components/BackgroundSwitch.svelte';
   import ThemeSwitch from '#lib/components/ThemeSwitch.svelte';
   import MotionToggle from '#lib/components/MotionToggle.svelte';
-  import AdminLogin from '#lib/components/AdminLogin.svelte';
   import { backdrop, photos } from '#lib/backdrop.svelte.ts';
   import { resolve } from '$app/paths';
   // The italic for the name in the greeting (the regular face is preloaded by the root layout).
@@ -214,7 +213,6 @@
         {/each}
         <!-- eslint-enable svelte/no-navigation-without-resolve -->
       </ul>
-      <AdminLogin />
     </footer>
   </div>
 </section>
@@ -373,11 +371,6 @@
     padding-bottom: max(1rem, env(safe-area-inset-bottom));
   }
 
-  .foot :global(.admin) {
-    grid-column: 3;
-    justify-self: end;
-  }
-
   /* IBM Plex Mono, lowercase: the same voice as the sidebar's links and the inner pages' trail. */
   .socials {
     grid-column: 2;
@@ -467,28 +460,7 @@
       justify-content: center;
       gap: 0.35rem 1.1rem;
       margin: 0;
-      padding-inline: 2.5rem;
-    }
-
-    /* Pinned to the right edge so the links stay centred under the signature. */
-    .foot :global(.admin) {
-      --tick: 0.32rem;
-      position: absolute;
-      right: max(0.5rem, env(safe-area-inset-right));
-      bottom: max(0.55rem, env(safe-area-inset-bottom));
-      width: 2rem;
-      height: 2rem;
-      opacity: 0.5;
-    }
-
-    .foot :global(.admin svg) {
-      width: 0.8rem;
-      height: 0.8rem;
-    }
-
-    .foot :global(.admin:hover),
-    .foot :global(.admin:focus-visible) {
-      opacity: 1;
+      padding-inline: 0;
     }
   }
 
