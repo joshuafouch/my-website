@@ -14,7 +14,7 @@
     justify-content: space-between;
     gap: 1.5rem;
     margin-top: 4rem;
-    padding: 2.5rem 1.5rem 2rem;
+    padding: 2.5rem 1.5rem calc(2rem + env(safe-area-inset-bottom));
     border-top: 1px solid var(--border-subtle);
     color: var(--ink-muted);
   }
