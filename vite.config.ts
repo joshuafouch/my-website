@@ -31,6 +31,12 @@ export default defineConfig(({ mode }) => {
     server: {
       port: 7777 // Change the default port (e.g., 5173)
     },
+    ssr: {
+      // sanitize-html is CommonJS and require()s htmlparser2 12, which is ESM-only. Node 24 allows
+      // that natively, but Vercel's function loader doesn't (ERR_REQUIRE_ESM → 500 on any page
+      // that renders markdown), so bundle both and let Rollup resolve the require at build time.
+      noExternal: ['sanitize-html', 'htmlparser2']
+    },
     plugins: [
       tailwindcss(),
       sveltekit({
