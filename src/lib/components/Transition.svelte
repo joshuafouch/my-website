@@ -1,7 +1,5 @@
 <script lang="ts">
   import type { Snippet } from 'svelte';
-  import { fade } from 'svelte/transition';
-  import { reducedMotion } from '#lib/motion.svelte.ts';
 
   type Props = {
     children: Snippet;
@@ -9,16 +7,12 @@
   };
 
   let { children, url }: Props = $props();
-
-  function fallbackFade(node: Element) {
-    const native = 'startViewTransition' in document;
-    const reduce = reducedMotion();
-    return fade(node, { duration: native || reduce ? 0 : 200 });
-  }
 </script>
 
+<!-- The motion itself lives in +layout (onNavigate) and app.css: a view transition on desktop, a
+     hand-made fade and rise on phones and in browsers without view transitions. -->
 {#key url}
-  <div class="transition" in:fallbackFade>
+  <div class="transition">
     {@render children?.()}
   </div>
 {/key}

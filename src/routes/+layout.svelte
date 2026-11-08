@@ -53,11 +53,13 @@
     window.addEventListener('resize', measure);
     const stopBackdrop = restoreBackdrop();
 
-    // Start the landing fade on click. The route data can take a moment, and the fade should not wait for it.
-    const startFade = (event: MouseEvent) => {
+    // A tap on a landing link marks it straight away (the other links dim) while the next page's
+    // data loads. The landing stays on screen until that data is in: fading it out on the tap left
+    // a blank photo for as long as the request took.
+    const markPending = (event: MouseEvent) => {
       if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey)
         return;
-      if (reducedMotion()) return;
+      if (window.location.pathname !== '/') return;
       const target = event.target;
       if (!(target instanceof Element)) return;
       const anchor = target.closest('a');
@@ -69,31 +71,40 @@
       } catch {
         return;
       }
-      if (url.origin !== window.location.origin) return;
-      const from = window.location.pathname;
-      const to = url.pathname;
-      if (!from || from === to || (from !== '/' && to !== '/')) return;
+      if (url.origin !== window.location.origin || url.pathname === '/') return;
 
-      const root = document.documentElement;
-      const nextEnter = from === '/' ? 'inner' : 'landing';
-      // Allow reversing mid-transition (landing → inner → landing immediately).
-      root.dataset.enter = nextEnter;
-      root.dataset.fade = 'out';
-      window.setTimeout(() => {
-        if (root.dataset.fade === 'out' && !root.dataset.fadeId) {
-          delete root.dataset.fade;
-          delete root.dataset.enter;
-        }
-      }, 800);
+      clearPending();
+      pendingLink = anchor;
+      anchor.dataset.pending = '';
+      document.documentElement.dataset.pending = '';
+      // A navigation that never lands (offline, cancelled) must not leave the links dimmed.
+      pendingTimer = window.setTimeout(clearPending, 8000);
     };
-    document.addEventListener('click', startFade, true);
+    document.addEventListener('click', markPending, true);
 
     return () => {
       window.removeEventListener('resize', measure);
-      document.removeEventListener('click', startFade, true);
+      document.removeEventListener('click', markPending, true);
+      clearPending();
       stopBackdrop?.();
     };
   });
+
+  let pendingLink: HTMLAnchorElement | null = null;
+  let pendingTimer = 0;
+
+  function clearPending() {
+    window.clearTimeout(pendingTimer);
+    if (pendingLink) delete pendingLink.dataset.pending;
+    pendingLink = null;
+    delete document.documentElement.dataset.pending;
+  }
+
+  afterNavigate(clearPending);
+
+  /** Phones swap pages by hand: view transitions there fight the scroll reset and Safari's
+      toolbar, and the snapshot jumps. */
+  const narrowScreen = () => window.matchMedia('(max-width: 767px)').matches;
 
   onNavigate((navigation) => {
     if (reducedMotion()) return;
@@ -110,9 +121,11 @@
       const reversing = activeLandingFade !== null && activeLandingFade !== entering;
       activeLandingFade = entering;
 
+      // The data is in by now (onNavigate runs after load), so the outgoing page fades and the
+      // next one comes straight in, with no blank wait between them.
       root.dataset.fadeId = token;
       root.dataset.enter = entering;
-      if (root.dataset.fade !== 'out') root.dataset.fade = 'out';
+      root.dataset.fade = 'out';
 
       return new Promise((resolve) => {
         let started = false;
@@ -166,23 +179,12 @@
           return;
         }
 
-        // Click may already have finished page-fade-out; don't wait on a dead animation.
-        const fading = outgoing
-          .getAnimations()
-          .some(
-            (anim) =>
-              anim instanceof CSSAnimation &&
-              anim.animationName === 'page-fade-out' &&
-              anim.playState !== 'finished'
-          );
-        if (!fading && Number(getComputedStyle(outgoing).opacity) < 0.05) {
-          go();
-          return;
-        }
-
-        const timer = window.setTimeout(go, 140);
+        // Backstop in case animationend never fires (hidden tab, interrupted animation).
+        const timer = window.setTimeout(go, 320);
         outgoing.addEventListener('animationend', function onEnd(event) {
-          if (event.target !== outgoing || event.animationName !== 'page-fade-out') return;
+          if (event.target !== outgoing) return;
+          if (event.animationName !== 'page-fade-out' && event.animationName !== 'landing-leave')
+            return;
           outgoing.removeEventListener('animationend', onEnd);
           window.clearTimeout(timer);
           go();
@@ -191,25 +193,28 @@
     }
 
     // Page → page: the new page's blocks rise in one after another (app.css, html[data-swap]).
+    // 'after' means the old page has already faded out, so the rise starts without a lead-in.
     const token = String(Date.now());
-    const swap = () => {
-      root.dataset.swap = token;
+    const swap = (mode: 'vt' | 'after') => {
+      const value = `${mode}:${token}`;
+      root.dataset.swap = value;
       window.setTimeout(() => {
-        if (root.dataset.swap === token) delete root.dataset.swap;
+        if (root.dataset.swap === value) delete root.dataset.swap;
       }, 1100);
     };
 
-    if (!document.startViewTransition) {
-      // No view transitions (some phone browsers): fade the old page out by hand first.
+    if (!document.startViewTransition || narrowScreen()) {
+      // Fade the old page out by hand, then swap while nothing is showing (the scroll reset to
+      // the top happens out of sight).
       root.dataset.leaving = token;
       return new Promise((resolve) => {
         window.setTimeout(() => {
-          swap();
+          swap('after');
           resolve();
           navigation.complete.finally(() => {
             if (root.dataset.leaving === token) delete root.dataset.leaving;
           });
-        }, 140);
+        }, 150);
       });
     }
 
@@ -218,7 +223,7 @@
 
     return new Promise((resolve) => {
       const transition = document.startViewTransition(async () => {
-        swap();
+        swap('vt');
         resolve();
         await navigation.complete;
       });
@@ -494,16 +499,17 @@
       opacity: 1;
     }
 
+    /* Sits whole at the foot of the page, behind the footer, rather than fixed over the content. */
     .floor-crest {
-      position: fixed;
+      position: absolute;
       z-index: 0;
-      bottom: 0;
+      bottom: env(safe-area-inset-bottom);
       left: 50%;
       display: block;
-      width: 18rem;
+      width: 11rem;
       opacity: 0.22;
       pointer-events: none;
-      transform: translate(-50%, 50%);
+      transform: translateX(-50%);
     }
   }
 
