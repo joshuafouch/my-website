@@ -554,6 +554,14 @@ html[data-theme='nord'] .initial {
    background colour (--ground), where no page content can reach. Fade the landing photo's top
    and bottom edges into that colour so those strips read as part of the page. */
 @media (max-width: 767px) {
+  /* The mobile landing is exactly one screen (.landing clips its own overflow), but with
+     viewport-fit=cover Safari still let the document scroll by about the safe-area height. */
+  html:has(.landing),
+  html:has(.landing) body {
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+
   html:has(.landing) .site-backdrop .veil {
     background:
       linear-gradient(
