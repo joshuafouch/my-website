@@ -423,14 +423,18 @@ export async function savePortraits(
     portraits.push({ id: portrait.id, src: href.ok, alt: portrait.alt });
   }
 
-  for (const [index, portrait] of portraits.entries()) {
-    const { error: upsertError } = await supabase.from('portraits').upsert({
-      id: portrait.id,
-      src: portrait.src,
-      alt: portrait.alt,
-      kind,
-      sort_order: index
-    });
+  // Every row in one request: PostgREST upserts an array as a single statement (all or none),
+  // instead of a round trip per row that could fail halfway.
+  if (portraits.length > 0) {
+    const { error: upsertError } = await supabase.from('portraits').upsert(
+      portraits.map((portrait, index) => ({
+        id: portrait.id,
+        src: portrait.src,
+        alt: portrait.alt,
+        kind,
+        sort_order: index
+      }))
+    );
     if (upsertError) return { error: upsertError.message, portraits };
   }
   const portraitDelete = await deleteMissingPortraits(
@@ -496,16 +500,18 @@ export async function saveProfessionalWork(
     .eq('id', 1);
   if (profileError) return { error: profileError.message, workIntro, jobs };
 
-  for (const [index, job] of jobs.entries()) {
-    const { error: upsertError } = await supabase.from('work_experiences').upsert({
-      id: job.id,
-      role: job.role,
-      time_span: job.timeSpan,
-      body: job.body,
-      skills: job.skills,
-      orgs: job.orgs as Json,
-      sort_order: index
-    });
+  if (jobs.length > 0) {
+    const { error: upsertError } = await supabase.from('work_experiences').upsert(
+      jobs.map((job, index) => ({
+        id: job.id,
+        role: job.role,
+        time_span: job.timeSpan,
+        body: job.body,
+        skills: job.skills,
+        orgs: job.orgs as Json,
+        sort_order: index
+      }))
+    );
     if (upsertError) return { error: upsertError.message, workIntro, jobs };
   }
   const jobDelete = await deleteMissing(
@@ -557,13 +563,15 @@ export async function saveProfessionalTech(
     .eq('id', 1);
   if (profileError) return { error: profileError.message, techIntro, groups };
 
-  for (const [index, group] of groups.entries()) {
-    const { error: upsertError } = await supabase.from('tech_groups').upsert({
-      id: group.id,
-      title: group.title,
-      items: group.items as Json,
-      sort_order: index
-    });
+  if (groups.length > 0) {
+    const { error: upsertError } = await supabase.from('tech_groups').upsert(
+      groups.map((group, index) => ({
+        id: group.id,
+        title: group.title,
+        items: group.items as Json,
+        sort_order: index
+      }))
+    );
     if (upsertError) return { error: upsertError.message, techIntro, groups };
   }
   const groupDelete = await deleteMissing(
@@ -673,63 +681,71 @@ export async function savePersonalFromForm(
   });
   if (profileError) return { error: profileError.message, content };
 
-  for (const [index, entry] of artists.entries()) {
-    const { error: upsertError } = await supabase.from('music_artists').upsert({
-      id: entry.id,
-      name: entry.name,
-      note: entry.note,
-      url: entry.url || null,
-      image_id: entry.imageId || null,
-      sort_order: index
-    });
-    if (upsertError) return { error: upsertError.message, content };
-  }
+  // One request per table (up to 80 rows each), the three tables side by side: they don't
+  // reference each other (credits are typed names), only music_images.
+  const upserts = await Promise.all([
+    artists.length > 0
+      ? supabase.from('music_artists').upsert(
+          artists.map((entry, index) => ({
+            id: entry.id,
+            name: entry.name,
+            note: entry.note,
+            url: entry.url || null,
+            image_id: entry.imageId || null,
+            sort_order: index
+          }))
+        )
+      : null,
+    albums.length > 0
+      ? supabase.from('music_albums').upsert(
+          albums.map((entry, index) => ({
+            id: entry.id,
+            title: entry.title,
+            artist_name: entry.artistName,
+            note: entry.note,
+            url: entry.url || null,
+            image_id: entry.imageId || null,
+            sort_order: index
+          }))
+        )
+      : null,
+    songs.length > 0
+      ? supabase.from('music_songs').upsert(
+          songs.map((entry, index) => ({
+            id: entry.id,
+            title: entry.title,
+            artist_name: entry.artistName,
+            album_name: entry.albumName,
+            note: entry.note,
+            url: entry.url || null,
+            image_id: entry.imageId || null,
+            sort_order: index
+          }))
+        )
+      : null
+  ]);
+  const upsertError = upserts.find((result) => result?.error)?.error;
+  if (upsertError) return { error: upsertError.message, content };
 
-  for (const [index, entry] of albums.entries()) {
-    const { error: upsertError } = await supabase.from('music_albums').upsert({
-      id: entry.id,
-      title: entry.title,
-      artist_name: entry.artistName,
-      note: entry.note,
-      url: entry.url || null,
-      image_id: entry.imageId || null,
-      sort_order: index
-    });
-    if (upsertError) return { error: upsertError.message, content };
-  }
-
-  for (const [index, entry] of songs.entries()) {
-    const { error: upsertError } = await supabase.from('music_songs').upsert({
-      id: entry.id,
-      title: entry.title,
-      artist_name: entry.artistName,
-      album_name: entry.albumName,
-      note: entry.note,
-      url: entry.url || null,
-      image_id: entry.imageId || null,
-      sort_order: index
-    });
-    if (upsertError) return { error: upsertError.message, content };
-  }
-
-  const songDelete = await deleteMissing(
-    supabase,
-    'music_songs',
-    songs.map((entry) => entry.id)
-  );
-  if (songDelete) return { error: songDelete, content };
-  const albumDelete = await deleteMissing(
-    supabase,
-    'music_albums',
-    albums.map((entry) => entry.id)
-  );
-  if (albumDelete) return { error: albumDelete, content };
-  const artistDelete = await deleteMissing(
-    supabase,
-    'music_artists',
-    artists.map((entry) => entry.id)
-  );
-  if (artistDelete) return { error: artistDelete, content };
+  const deleteErrors = await Promise.all([
+    deleteMissing(
+      supabase,
+      'music_songs',
+      songs.map((entry) => entry.id)
+    ),
+    deleteMissing(
+      supabase,
+      'music_albums',
+      albums.map((entry) => entry.id)
+    ),
+    deleteMissing(
+      supabase,
+      'music_artists',
+      artists.map((entry) => entry.id)
+    )
+  ]);
+  const deleteError = deleteErrors.find(Boolean);
+  if (deleteError) return { error: deleteError, content };
 
   return { ok: true };
 }
@@ -760,7 +776,8 @@ export async function uploadMusicImage(
   const alt = text(altText).slice(0, 160) || 'Album cover';
   const { error: uploadError } = await supabase.storage.from(ALBUMS_BUCKET).upload(path, file, {
     contentType,
-    cacheControl: '86400',
+    // A fresh random name per upload, never overwritten: browsers may keep it a year.
+    cacheControl: '31536000',
     upsert: false
   });
   if (uploadError) return { error: uploadError.message };

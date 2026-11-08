@@ -2,9 +2,9 @@
   import { enhance } from '$app/forms';
   import { onMount } from 'svelte';
   import type { BlogImage } from '#lib/types.ts';
+  import { MAX_UPLOAD_BYTES, MAX_UPLOAD_LABEL } from '#lib/upload-limits.ts';
 
   const ACCEPTED = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
-  const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
 
   let {
     mode,
@@ -108,8 +108,8 @@
       rejectFile('Use a JPEG, PNG, WebP, or GIF.');
       return;
     }
-    if (file.size > MAX_IMAGE_BYTES) {
-      rejectFile('Image must be 5 MB or smaller.');
+    if (file.size > MAX_UPLOAD_BYTES) {
+      rejectFile(`Image must be ${MAX_UPLOAD_LABEL} or smaller.`);
       return;
     }
     error = '';
@@ -202,8 +202,8 @@
             cancel();
             return;
           }
-          if (file.size > MAX_IMAGE_BYTES) {
-            error = 'Image must be 5 MB or smaller.';
+          if (file.size > MAX_UPLOAD_BYTES) {
+            error = `Image must be ${MAX_UPLOAD_LABEL} or smaller.`;
             cancel();
             return;
           }
@@ -241,7 +241,7 @@
             <img src={preview} alt="" />
           {:else}
             <span>Drop a JPEG, PNG, WebP, or GIF here, or choose a file.</span>
-            <span class="limit">5 MB max</span>
+            <span class="limit">{MAX_UPLOAD_LABEL} max</span>
           {/if}
           <input
             bind:this={fileInput}

@@ -1,17 +1,27 @@
 <script lang="ts">
   import { resolve } from '$app/paths';
+  import { MAX_UPLOAD_BYTES, MAX_UPLOAD_LABEL } from '#lib/upload-limits.ts';
   import { formatDate } from '#lib/utils.ts';
 
   let { data, form } = $props();
 
   let picked = $state('');
   let pickedUrl = $state('');
+  let tooBig = $state('');
   let view = $state<'write' | 'preview'>('write');
 
   const shown = $derived(pickedUrl || data.resume.url);
 
   function onPick(event: Event) {
-    const file = (event.currentTarget as HTMLInputElement).files?.[0];
+    const input = event.currentTarget as HTMLInputElement;
+    let file = input.files?.[0];
+    tooBig = '';
+    // Caught here: a bigger file would be refused by Vercel before it reached the server.
+    if (file && file.size > MAX_UPLOAD_BYTES) {
+      tooBig = `The resume must be ${MAX_UPLOAD_LABEL} or smaller.`;
+      input.value = '';
+      file = undefined;
+    }
     if (pickedUrl) URL.revokeObjectURL(pickedUrl);
     pickedUrl = file ? URL.createObjectURL(file) : '';
     picked = file?.name ?? '';
@@ -56,12 +66,12 @@
       </p>
 
       <form method="POST" enctype="multipart/form-data">
-        {#if form?.error}
-          <p class="error">{form.error}</p>
+        {#if tooBig || form?.error}
+          <p class="error">{tooBig || form?.error}</p>
         {/if}
 
         <label class="field">
-          <span>New resume (PDF, up to 10 MB)</span>
+          <span>New resume (PDF, up to {MAX_UPLOAD_LABEL})</span>
           <input type="file" name="resume" accept="application/pdf" required onchange={onPick} />
         </label>
 

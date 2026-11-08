@@ -7,7 +7,7 @@
 
 <Metadata
   title="Personal - Joshua Fouch"
-  description={data.intro.trim() || 'A few personal notes from Joshua Fouch.'}
+  description={data.description || 'A few personal notes from Joshua Fouch.'}
   url="/about/personal"
   image={data.portraits[0]?.src || '/assets/backgrounds/hero-bg.webp'}
   imageAlt="Joshua Fouch"

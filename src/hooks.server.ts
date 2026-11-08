@@ -13,12 +13,29 @@ const CONTENT_TAG = 'content';
  */
 const PUBLIC_CDN_CACHE = 'public, max-age=3600, stale-while-revalidate=86400';
 
+/**
+ * Not-found pages, briefly: scanners requesting /wp-login.php and friends would otherwise run the
+ * function every time. Publishing purges the tag, so a new post never stays hidden behind a 404.
+ */
+const NOT_FOUND_CDN_CACHE = 'public, max-age=300';
+
 /** Admin POSTs that don't change site content (no purge needed). */
 const AUTH_ONLY_POSTS = /^\/admin\/(login(\/mfa)?|logout|mfa)\/?$/;
 
+/**
+ * The admin session cookies. @supabase/ssr sets them readable by page scripts and for 400 days;
+ * nothing in the browser needs them (all auth runs on the server), so they are HttpOnly, and an
+ * unused session lapses after two weeks. Every token refresh re-sets them, so active use slides on.
+ */
+const AUTH_COOKIE_MAX_AGE = 60 * 60 * 24 * 14;
+
+const isAdminPath = (value: string | null | undefined) =>
+  value === '/admin' || (value?.startsWith('/admin/') ?? false);
+
 export const handle: Handle = async ({ event, resolve }) => {
   const path = event.url.pathname;
-  const adminArea = path === '/admin' || path.startsWith('/admin/');
+  // The route id as well as the raw path: an encoded path (/%61dmin) still routes to the admin.
+  const adminArea = isAdminPath(path) || isAdminPath(event.route.id);
 
   // @supabase/ssr writes cookies from an auth-state callback, which can fire after the response
   // is generated (e.g. a token refresh that finishes late). SvelteKit throws on cookies.set at
@@ -53,7 +70,16 @@ export const handle: Handle = async ({ event, resolve }) => {
           return;
         }
         cookiesToSet.forEach(({ name, value, options }) => {
-          event.cookies.set(name, value, { ...options, path: '/' });
+          event.cookies.set(name, value, {
+            ...options,
+            path: '/',
+            httpOnly: true,
+            // 0 deletes the cookie (sign-out); keep that as is.
+            maxAge:
+              options.maxAge === 0
+                ? 0
+                : Math.min(options.maxAge ?? AUTH_COOKIE_MAX_AGE, AUTH_COOKIE_MAX_AGE)
+          });
         });
         if (Object.keys(headers).length > 0) {
           event.setHeaders(headers);
@@ -88,34 +114,50 @@ export const handle: Handle = async ({ event, resolve }) => {
   }
 
   if (adminArea) {
+    // Never stored by the browser (no back-button copy after logging out), never indexed.
+    response.headers.set('Cache-Control', 'private, no-store');
+    response.headers.set('X-Robots-Tag', 'noindex, nofollow');
+
     // Every content change goes through an admin form action, so purge cached public pages after
-    // one. A no-op outside Vercel (dev/preview).
-    if (event.request.method === 'POST' && !AUTH_ONLY_POSTS.test(path)) {
+    // one that succeeded. Failed actions answer 4xx/5xx (fail(), error()) in both the plain-form
+    // and the enhanced (fetch) case, so a rejected save leaves the cache alone. A no-op outside
+    // Vercel (dev/preview).
+    if (event.request.method === 'POST' && response.status < 400 && !AUTH_ONLY_POSTS.test(path)) {
       await dangerouslyDeleteByTag(CONTENT_TAG).catch((error: unknown) => {
         console.error('[cache] failed to purge cached public pages', error);
       });
     }
-  } else if (
-    !upstreamFailed &&
-    isCacheablePublicResponse(event.request.method, event.isDataRequest, response)
-  ) {
-    response.headers.set('Vercel-CDN-Cache-Control', PUBLIC_CDN_CACHE);
-    response.headers.set('Vercel-Cache-Tag', CONTENT_TAG);
+  } else {
+    if (!upstreamFailed) {
+      const cdnCache = publicCdnCache(event.request.method, event.isDataRequest, response);
+      if (cdnCache) {
+        response.headers.set('Vercel-CDN-Cache-Control', cdnCache);
+        response.headers.set('Vercel-Cache-Tag', CONTENT_TAG);
+      }
+    }
+    // Browsers always revalidate pages (Vercel's own default, made explicit). Explicit matters:
+    // vercel.json gives /assets/* a month of caching, and without a header of its own a 404 for
+    // a missing asset would pick that up.
+    if (!response.headers.has('cache-control')) {
+      response.headers.set('Cache-Control', 'public, max-age=0, must-revalidate');
+    }
   }
 
   return response;
 };
 
-function isCacheablePublicResponse(method: string, isDataRequest: boolean, response: Response) {
-  if (method !== 'GET' && method !== 'HEAD') return false;
-  if (response.status !== 200) return false;
-  if (response.headers.has('set-cookie')) return false;
+/** The CDN cache policy for a public response, or null to leave it uncached. */
+function publicCdnCache(method: string, isDataRequest: boolean, response: Response) {
+  if (method !== 'GET' && method !== 'HEAD') return null;
+  if (response.status !== 200 && response.status !== 404) return null;
+  if (response.headers.has('set-cookie')) return null;
+  const policy = response.status === 404 ? NOT_FOUND_CDN_CACHE : PUBLIC_CDN_CACHE;
   // Kit marks every __data.json (client-side navigation data) `private, no-store` because data
   // can be per-user. Outside /admin it can't be here (no session), so the CDN may cache it; the
   // browser still gets Kit's header. For anything else, respect a route's private/no-store.
-  if (isDataRequest) return true;
+  if (isDataRequest) return policy;
   const cacheControl = response.headers.get('cache-control') ?? '';
-  return !/\b(private|no-store)\b/i.test(cacheControl);
+  return /\b(private|no-store)\b/i.test(cacheControl) ? null : policy;
 }
 
 const securityHeaders = {
@@ -123,5 +165,8 @@ const securityHeaders = {
   'X-Frame-Options': 'DENY',
   'Referrer-Policy': 'strict-origin-when-cross-origin',
   'Permissions-Policy':
-    'camera=(), microphone=(), geolocation=(), payment=(), usb=(), browsing-topics=()'
+    'camera=(), microphone=(), geolocation=(), payment=(), usb=(), browsing-topics=()',
+  // A cross-origin page that opens this one (or that this one is opened from) gets no handle on
+  // it. allow-popups keeps popups this site opens working (the Vercel Toolbar sign-in on previews).
+  'Cross-Origin-Opener-Policy': 'same-origin-allow-popups'
 };

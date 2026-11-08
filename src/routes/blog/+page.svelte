@@ -120,6 +120,8 @@
                   srcset={post.image ? undefined : FALLBACK_COVER_SRCSET}
                   sizes={post.image ? undefined : '(min-width: 700px) 28rem, 100vw'}
                   alt=""
+                  loading={index > 1 ? 'lazy' : undefined}
+                  decoding="async"
                 />
               </span>
             </span>

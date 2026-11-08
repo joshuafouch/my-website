@@ -90,7 +90,7 @@
     </ul>
   {:else if !usage.configured}
     <p class="note">
-      API charts appear after SUPABASE_ACCESS_TOKEN and SUPABASE_PROJECT_REF are set.
+      API charts appear after SUPABASE_USAGE_TOKEN and SUPABASE_PROJECT_REF are set.
     </p>
   {:else}
     <p class="note">

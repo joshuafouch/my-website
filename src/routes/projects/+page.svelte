@@ -36,6 +36,8 @@
                   srcset={project.image ? undefined : FALLBACK_COVER_SRCSET}
                   sizes={project.image ? undefined : '(max-width: 640px) 100vw, 30rem'}
                   alt=""
+                  loading={index > 1 ? 'lazy' : undefined}
+                  decoding="async"
                 />
               </span>
             </span>

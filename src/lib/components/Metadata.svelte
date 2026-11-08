@@ -121,7 +121,7 @@
 
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image" />
-  <meta property="twitter:domain" content="joshuafouch.vercel.app" />
+  <meta property="twitter:domain" content={new URL(config.url).host} />
   <meta property="twitter:url" content={fullUrl} />
   <meta name="twitter:title" content={title} />
   <meta name="twitter:description" content={description} />

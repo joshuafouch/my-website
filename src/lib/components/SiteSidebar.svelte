@@ -9,7 +9,6 @@
   import MotionToggle from '#lib/components/MotionToggle.svelte';
   import JafCrest from '#lib/components/JafCrest.svelte';
   import JafMark from '#lib/components/JafMark.svelte';
-  import AdminLogin from '#lib/components/AdminLogin.svelte';
 
   let menu = $state(false);
   let narrow = $state(false);
@@ -98,7 +97,6 @@
       <ThemeSwitch compact />
       <MotionToggle compact />
     </div>
-    <AdminLogin compact />
   </div>
 
   <!-- Folded, the appearance switches stand in a column in the strip that stays on screen. -->
@@ -538,10 +536,6 @@
       height: auto;
       margin: 0;
       padding-right: 0.15rem;
-    }
-
-    .tools > :global(.admin) {
-      display: none;
     }
 
     nav {
