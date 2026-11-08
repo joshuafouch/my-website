@@ -495,14 +495,9 @@ html[data-theme='nord'] .initial {
   --site-backdrop: url('/assets/backgrounds/hero-bg.webp');
 }
 
-/* Fixed layers are top-anchored and 100lvh tall rather than bottom: 0, so their bottom edge sits
-   below iOS Safari's floating toolbar. Safari 26 paints that toolbar as a solid bar in the colour
-   of any fixed element touching the bottom edge, hiding the content under it. */
 .site-backdrop {
   position: fixed;
-  inset: 0 0 auto;
-  height: 100vh;
-  height: 100lvh;
+  inset: 0;
   z-index: 0;
   background: var(--ground);
   pointer-events: none;
