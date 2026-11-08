@@ -23,13 +23,17 @@
 <div class="about-copy">
   <AboutIntro {introHtml} {portraits} side="end" label="Personal portraits" />
 
-  <section class="block" class:after-intro={Boolean(introHtml || portraits.length)}>
+  <section
+    class="rise block"
+    class:after-intro={Boolean(introHtml || portraits.length)}
+    style:--i={3}
+  >
     <h2>Favorite music</h2>
     <MusicLibraryView {library} />
   </section>
 
   {#if videoId || videoHref}
-    <section class="block">
+    <section class="rise block" style:--i={4}>
       <h2>Latest video</h2>
       {#if videoId}
         <iframe
@@ -60,6 +64,8 @@
 
   h2 {
     margin: 0;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid var(--border-strong);
     font-size: 2.4rem;
     font-weight: 500;
   }
@@ -68,7 +74,10 @@
     display: block;
     width: 100%;
     aspect-ratio: 16 / 9;
-    margin-top: 1.25rem;
-    border: 0;
+    margin-top: 1.5rem;
+    padding: 0.55rem;
+    border: 1px solid var(--card-border);
+    background: var(--mat);
+    box-sizing: border-box;
   }
 </style>

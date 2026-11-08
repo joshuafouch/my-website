@@ -17,7 +17,7 @@
 </script>
 
 {#if portraits.length > 0 || introHtml}
-  <header class="intro" class:flip={side === 'end'}>
+  <header class="intro rise" class:flip={side === 'end'} style:--i={2}>
     {#if portraits.length > 0}
       <div class="portraits">
         <PortraitSlideshow {portraits} {label} />
@@ -46,8 +46,19 @@
   .copy :global(p) {
     margin: 0;
     color: var(--ink-muted);
-    font-size: 1.25rem;
-    line-height: 1.55;
+    font-size: 1.35rem;
+    line-height: 1.5;
+  }
+
+  .copy :global(a) {
+    color: var(--ink);
+    background-image: linear-gradient(var(--ink-accent), var(--ink-accent));
+    background-size: 100% 1px;
+  }
+
+  .copy :global(a:hover),
+  .copy :global(a:focus-visible) {
+    color: var(--ink-accent);
   }
 
   .copy :global(p) + :global(p) {
@@ -58,10 +69,10 @@
     .intro {
       display: flex;
       flex-direction: row;
-      align-items: center;
+      align-items: flex-start;
       justify-content: flex-start;
       text-align: left;
-      gap: 1.75rem;
+      gap: 2.75rem;
     }
 
     .intro.flip {

@@ -106,33 +106,35 @@
       if (!root?.contains(event.relatedTarget as Node | null)) paused = false;
     }}
   >
-    <div class="frame">
-      {#each slides as slide, slideIndex (slide.id)}
-        <button
-          type="button"
-          class="slide"
-          class:active={slideIndex === index}
-          aria-label={`Show portrait ${slideIndex + 1} of ${slides.length}`}
-          aria-current={slideIndex === index ? 'true' : undefined}
-          tabindex={slideIndex === index ? 0 : -1}
-          onkeydown={(event) => {
-            if (!canCycle) return;
-            if (event.key === 'ArrowRight') {
-              event.preventDefault();
-              step(1);
-            } else if (event.key === 'ArrowLeft') {
-              event.preventDefault();
-              step(-1);
-            }
-          }}
-          onclick={() => {
-            if (slideIndex === index && canCycle) step(1);
-            else go(slideIndex);
-          }}
-        >
-          <img src={loadAll || slideIndex === index ? slide.src : undefined} alt={slide.alt} />
-        </button>
-      {/each}
+    <div class="mat">
+      <div class="frame">
+        {#each slides as slide, slideIndex (slide.id)}
+          <button
+            type="button"
+            class="slide"
+            class:active={slideIndex === index}
+            aria-label={`Show portrait ${slideIndex + 1} of ${slides.length}`}
+            aria-current={slideIndex === index ? 'true' : undefined}
+            tabindex={slideIndex === index ? 0 : -1}
+            onkeydown={(event) => {
+              if (!canCycle) return;
+              if (event.key === 'ArrowRight') {
+                event.preventDefault();
+                step(1);
+              } else if (event.key === 'ArrowLeft') {
+                event.preventDefault();
+                step(-1);
+              }
+            }}
+            onclick={() => {
+              if (slideIndex === index && canCycle) step(1);
+              else go(slideIndex);
+            }}
+          >
+            <img src={loadAll || slideIndex === index ? slide.src : undefined} alt={slide.alt} />
+          </button>
+        {/each}
+      </div>
     </div>
 
     {#if canCycle}
@@ -163,9 +165,10 @@
     justify-items: center;
   }
 
+  /* A square portrait on the same mat as the site's other pictures. */
   .frame {
     position: relative;
-    width: min(14rem, 72vw);
+    width: min(13rem, 64vw);
     aspect-ratio: 1;
   }
 
@@ -176,7 +179,6 @@
     padding: 0;
     border: 0;
     background: transparent;
-    border-radius: 9999px;
     overflow: hidden;
     cursor: pointer;
     opacity: 0;
@@ -197,25 +199,32 @@
     object-fit: cover;
   }
 
+  /* One short line per portrait; the shown one takes the accent. */
   .dots {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.3rem;
+    gap: 0.15rem;
     justify-content: center;
   }
 
   .dot {
-    width: 0.32rem;
-    height: 0.32rem;
+    width: 1.9rem;
+    height: 1.4rem;
     padding: 0;
     border: 0;
-    border-radius: 9999px;
-    background: color-mix(in oklab, var(--ink-muted) 45%, transparent);
+    border-radius: 0;
+    background: linear-gradient(currentColor, currentColor) center / 1.4rem 1px no-repeat;
+    color: var(--border-strong);
     cursor: pointer;
+    transition: color 300ms ease;
+  }
+
+  .dot:hover {
+    color: var(--ink-muted);
   }
 
   .dot.active {
-    background: var(--ink-accent);
+    color: var(--ink-accent);
   }
 
   .dot:focus-visible {
