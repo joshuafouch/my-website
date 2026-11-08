@@ -26,10 +26,8 @@
 
 <nav class="section-nav" aria-label="Professional sections">
   {#each links as link (link.key)}
-    <a
-      class="quiet-link"
-      href={link.href}
-      aria-current={current === link.key ? 'page' : undefined}>{link.label}</a
+    <a class="quiet-link" href={link.href} aria-current={current === link.key ? 'page' : undefined}
+      >{link.label}</a
     >
   {/each}
 </nav>

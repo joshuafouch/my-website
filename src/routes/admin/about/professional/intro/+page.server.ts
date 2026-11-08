@@ -16,7 +16,10 @@ export const actions: Actions = {
     const form = await request.formData();
     const result = await saveProfessionalIntro(locals.supabase, form);
     if ('error' in result) {
-      return fail(400, { error: result.error, intro: result.intro ?? String(form.get('intro') ?? '') });
+      return fail(400, {
+        error: result.error,
+        intro: result.intro ?? String(form.get('intro') ?? '')
+      });
     }
     redirect(303, '/admin/about/professional/intro?saved=1');
   }

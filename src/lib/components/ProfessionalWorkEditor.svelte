@@ -81,9 +81,7 @@
           id: job.id,
           role: job.role.trim(),
           timeSpan: job.timeSpan.trim(),
-          body: job.body.trim()
-            ? openLinks(await renderMarkdown(job.body.trim()))
-            : '',
+          body: job.body.trim() ? openLinks(await renderMarkdown(job.body.trim())) : '',
           skills: job.skillsText
             .split(',')
             .map((skill) => skill.trim())
