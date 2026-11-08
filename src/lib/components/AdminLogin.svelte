@@ -4,7 +4,7 @@
   let { compact = false }: { compact?: boolean } = $props();
 </script>
 
-<a class="admin" class:compact href={resolve('/admin/login')} aria-label="Admin login">
+<a class="admin ticked" class:compact href={resolve('/admin/login')} aria-label="Admin login">
   <svg viewBox="0 0 24 24" aria-hidden="true">
     <circle cx="12" cy="8" r="3.15" fill="none" stroke="currentColor" stroke-width="1.6" />
     <path
@@ -41,8 +41,9 @@
   }
 
   .compact {
-    width: 2rem;
-    height: 2rem;
+    --tick: 0.38rem;
+    width: 2.25rem;
+    height: 2.25rem;
   }
 
   .compact svg {
@@ -53,7 +54,6 @@
   .admin:hover,
   .admin:focus-visible {
     color: var(--ink);
-    border-color: var(--border-strong);
     outline: none;
   }
 </style>
