@@ -497,13 +497,13 @@
     .floor-crest {
       position: fixed;
       z-index: 0;
-      bottom: 0;
+      bottom: env(safe-area-inset-bottom);
       left: 50%;
       display: block;
       width: 18rem;
       opacity: 0.22;
       pointer-events: none;
-      transform: translate(-50%, 50%);
+      transform: translateX(-50%);
     }
   }
 
