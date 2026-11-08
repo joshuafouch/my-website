@@ -24,44 +24,43 @@
   <AboutIntro {introHtml} {portraits} side="start" label="Professional portraits" />
 
   {#if workIntro || jobs.length > 0}
-    <section class="block">
+    <section class="rise block" style:--i={3}>
       <h2>Work</h2>
       {#if workIntro}
         <p class="lede">{workIntro}</p>
       {/if}
       {#if jobs.length > 0}
-        <ol>
+        <!-- A ledger: the dates in the margin, the role beside them. -->
+        <ol class="jobs">
           {#each jobs as job (job.id)}
             <li>
-              <div class="role">
+              <p class="when font-mono">{job.timeSpan}</p>
+              <div>
                 <h3>{job.role}</h3>
-                {#if job.timeSpan}
-                  <p class="when">{job.timeSpan}</p>
+                {#if job.orgs.length > 0}
+                  <p class="orgs">
+                    {#each job.orgs as org, index (org.name + org.href)}
+                      {#if index > 0}<span aria-hidden="true"> · </span>{/if}
+                      {@const href = safeHref(org.href)}
+                      {#if href}
+                        <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- external URL -->
+                        <a class="quiet-link" {href} target="_blank" rel="noopener noreferrer"
+                          >{org.name}</a
+                        >
+                      {:else}
+                        {org.name}
+                      {/if}
+                    {/each}
+                  </p>
+                {/if}
+                {#if job.body}
+                  <!-- eslint-disable-next-line svelte/no-at-html-tags -- sanitized by renderMarkdown -->
+                  <div class="job-body">{@html job.body}</div>
+                {/if}
+                {#if job.skills.length > 0}
+                  <p class="skills">{job.skills.join(' · ')}</p>
                 {/if}
               </div>
-              {#if job.orgs.length > 0}
-                <p class="orgs">
-                  {#each job.orgs as org, index (org.name + org.href)}
-                    {#if index > 0}<span aria-hidden="true"> · </span>{/if}
-                    {@const href = safeHref(org.href)}
-                    {#if href}
-                      <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- external URL -->
-                      <a class="quiet-link" {href} target="_blank" rel="noopener noreferrer"
-                        >{org.name}</a
-                      >
-                    {:else}
-                      {org.name}
-                    {/if}
-                  {/each}
-                </p>
-              {/if}
-              {#if job.body}
-                <!-- eslint-disable-next-line svelte/no-at-html-tags -- sanitized by renderMarkdown -->
-                <div class="job-body">{@html job.body}</div>
-              {/if}
-              {#if job.skills.length > 0}
-                <p class="skills">{job.skills.join(' · ')}</p>
-              {/if}
             </li>
           {/each}
         </ol>
@@ -70,43 +69,105 @@
   {/if}
 
   {#if techIntro || groups.length > 0}
-    <section class="block">
+    <section class="rise block" style:--i={4}>
       <h2>Tech stack</h2>
       {#if techIntro}
         <p class="lede">{techIntro}</p>
       {/if}
       {#if groups.length > 0}
-        <div class="groups">
+        <dl class="groups">
           {#each groups as group (group.id)}
             <div class="tool-row">
-              <h3>{group.title}</h3>
-              <ul>
-                {#each group.items as item (item.text + item.href)}
-                  {@const href = safeHref(item.href)}
-                  <li>
-                    {#if href}
-                      <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- external URL -->
-                      <a class="chip" {href} target="_blank" rel="noopener noreferrer">{item.text}</a>
-                    {:else}
-                      <span class="chip">{item.text}</span>
-                    {/if}
-                  </li>
-                {/each}
-              </ul>
+              <dt class="font-mono">{group.title}</dt>
+              <dd>
+                <ul>
+                  {#each group.items as item (item.text + item.href)}
+                    {@const href = safeHref(item.href)}
+                    <li>
+                      {#if href}
+                        <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -- external URL -->
+                        <a class="tool-link" {href} target="_blank" rel="noopener noreferrer"
+                          >{item.text}</a
+                        >
+                      {:else}
+                        {item.text}
+                      {/if}
+                    </li>
+                  {/each}
+                </ul>
+              </dd>
             </div>
           {/each}
-        </div>
+        </dl>
       {/if}
     </section>
   {/if}
 </div>
 
 <style>
+  .block {
+    margin-top: 4.5rem;
+  }
+
+  h2 {
+    margin: 0;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid var(--border-strong);
+    font-size: 2.4rem;
+    font-weight: 500;
+  }
+
   .lede,
   .job-body :global(p) {
     color: var(--ink-muted);
-    font-size: 1.25rem;
+    font-size: 1.2rem;
     line-height: 1.55;
+  }
+
+  .lede {
+    margin: 0.9rem 0 0;
+  }
+
+  .jobs {
+    margin: 0.75rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .jobs > li {
+    display: grid;
+    gap: 0.35rem;
+    padding: 1.5rem 0;
+    border-bottom: 1px solid var(--border-subtle);
+  }
+
+  .when {
+    margin: 0;
+    color: var(--ink-faint);
+    font-size: 0.8rem;
+    letter-spacing: 0.04em;
+    text-transform: lowercase;
+  }
+
+  h3 {
+    margin: 0;
+    font-size: 1.7rem;
+    font-weight: 500;
+    line-height: 1.15;
+  }
+
+  .orgs {
+    margin: 0.3rem 0 0;
+    font-size: 1.15rem;
+    font-style: italic;
+  }
+
+  .orgs a {
+    color: var(--ink-accent);
+  }
+
+  .job-body {
+    margin-top: 0.6rem;
   }
 
   .job-body :global(p) {
@@ -121,119 +182,78 @@
     color: var(--ink-accent);
   }
 
-  .block {
-    margin-top: 4.5rem;
-  }
-
-  h2 {
-    margin: 0 0 0.4rem;
-    font-size: 2.4rem;
-    font-weight: 500;
-  }
-
-  .lede {
-    margin: 0;
-  }
-
-  ol {
-    display: grid;
-    gap: 0.85rem;
-    margin: 1.5rem 0 0;
-    padding: 0;
-    list-style: none;
-  }
-
-  ol > li {
-    padding: 1.15rem 1.25rem;
-    border: 1px solid var(--card-border);
-    background: var(--card-bg);
-  }
-
-  .role {
-    display: flex;
-    flex-direction: column;
-    gap: 0.15rem;
-  }
-
-  h3 {
-    margin: 0;
-    font-size: 1.55rem;
-    font-weight: 500;
-  }
-
-  .when,
   .skills {
-    margin: 0.35rem 0 0;
-    font-size: 1.05rem;
-    letter-spacing: 0.04em;
-  }
-
-  .orgs {
-    margin: 0.35rem 0 0.6rem;
+    margin: 0.6rem 0 0;
+    color: var(--ink-muted);
+    font-size: 1.03rem;
+    font-variant: small-caps;
+    letter-spacing: 0.12em;
   }
 
   .groups {
-    display: grid;
-    gap: 1.35rem;
-    margin-top: 1.6rem;
+    margin: 0.75rem 0 0;
   }
 
   .tool-row {
     display: grid;
-    gap: 0.55rem;
+    gap: 0.35rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid var(--border-subtle);
   }
 
-  .groups h3 {
+  dt {
+    color: var(--ink-faint);
+    font-size: 0.8rem;
+    letter-spacing: 0.04em;
+    text-transform: lowercase;
+  }
+
+  dd {
     margin: 0;
-    font-size: 0.95rem;
-    font-weight: 500;
-    font-variant: small-caps;
-    letter-spacing: 0.14em;
-    color: var(--ink-muted);
   }
 
   .groups ul {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.55rem;
     margin: 0;
     padding: 0;
     list-style: none;
+    font-size: 1.2rem;
+    line-height: 1.5;
   }
 
-  .chip {
-    display: inline-block;
-    border: 1px solid color-mix(in oklab, var(--nord4) 40%, transparent);
-    padding: 0.35rem 0.7rem;
-    color: var(--ink);
-    font-size: 1.02rem;
-    line-height: 1.3;
-    text-decoration: none;
+  .groups li + li::before {
+    content: '·';
+    padding-inline: 0.5rem;
+    color: var(--ink-faint);
   }
 
-  a.chip:hover,
-  a.chip:focus-visible {
+  .tool-link {
     color: var(--ink-accent);
-    border-color: var(--ink-accent);
+    text-decoration: none;
+    background: linear-gradient(currentColor, currentColor) no-repeat left bottom / 100% 1px;
+    padding-bottom: 1px;
+  }
+
+  .tool-link:hover,
+  .tool-link:focus-visible {
+    color: var(--ink);
     outline: none;
   }
 
   @media (min-width: 640px) {
-    .role {
-      flex-direction: row;
-      align-items: baseline;
-      justify-content: space-between;
-      gap: 1rem;
-    }
-
+    .jobs > li,
     .tool-row {
-      grid-template-columns: 9.5rem minmax(0, 1fr);
-      gap: 1.15rem 1.5rem;
-      align-items: start;
+      grid-template-columns: 10.5rem minmax(0, 1fr);
+      gap: 2rem;
     }
 
-    .groups h3 {
-      margin-top: 0.4rem;
+    .when {
+      padding-top: 0.55rem;
+    }
+
+    dt {
+      padding-top: 0.3rem;
     }
   }
 </style>

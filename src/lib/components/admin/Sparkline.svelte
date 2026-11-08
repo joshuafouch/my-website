@@ -19,9 +19,7 @@
     return values
       .map((value, index) => {
         const x =
-          values.length === 1
-            ? width / 2
-            : pad + (index / (values.length - 1)) * (width - pad * 2);
+          values.length === 1 ? width / 2 : pad + (index / (values.length - 1)) * (width - pad * 2);
         const y = height - pad - ((value - min) / span) * (height - pad * 2);
         return `${index === 0 ? 'M' : 'L'}${x.toFixed(1)} ${y.toFixed(1)}`;
       })

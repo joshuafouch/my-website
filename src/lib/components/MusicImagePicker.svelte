@@ -8,14 +8,12 @@
     images = $bindable(),
     imageId = $bindable(''),
     altDefault = '',
-    inUse = () => false,
-    open = $bindable(false)
+    inUse = () => false
   }: {
     images: MusicImage[];
     imageId: string;
     altDefault?: string;
     inUse?: (id: string) => boolean;
-    open?: boolean;
   } = $props();
 
   let dialog = $state<HTMLDialogElement | null>(null);
@@ -56,14 +54,12 @@
 
   function openPicker() {
     resetPicker();
-    open = true;
     queueMicrotask(() => {
       if (dialog && !dialog.open) dialog.showModal();
     });
   }
 
   function requestClose() {
-    open = false;
     dialog?.close();
   }
 
@@ -320,7 +316,6 @@
   onclick={(event) => {
     if (event.target === dialog) requestClose();
   }}
-  onclose={() => (open = false)}
 >
   <header>
     <h2 id="music-image-title">Music cover</h2>
@@ -399,11 +394,8 @@
               >
                 <img src={image.url} alt="" />
               </button>
-              <button
-                type="button"
-                class="text"
-                disabled={busy}
-                onclick={() => askRemove(image.id)}>Remove</button
+              <button type="button" class="text" disabled={busy} onclick={() => askRemove(image.id)}
+                >Remove</button
               >
             </div>
           {/each}

@@ -1,8 +1,13 @@
 <script lang="ts">
+  import { resolve } from '$app/paths';
   import PostPreview from '#lib/components/PostPreview.svelte';
+  import PageTurn from '#lib/components/PageTurn.svelte';
   import Metadata from '#lib/components/Metadata.svelte';
 
   let { data } = $props();
+
+  const turn = (to: { title: string; slug: string } | null, label: string) =>
+    to ? { label, title: to.title, href: resolve('/[slug]', { slug: to.slug }) } : null;
 </script>
 
 <Metadata
@@ -25,3 +30,19 @@
   image={data.meta.image}
   html={data.html}
 />
+
+<div class="turn">
+  <PageTurn
+    label="More posts"
+    previous={turn(data.earlier, 'earlier')}
+    next={turn(data.later, 'later')}
+  />
+</div>
+
+<style>
+  .turn {
+    max-width: var(--page-width);
+    margin-inline: auto;
+    padding: 0 1.5rem 3rem;
+  }
+</style>

@@ -1,10 +1,6 @@
 import { error, fail, redirect } from '@sveltejs/kit';
 import { getAdminProjectBySlug, saveProjectFromForm } from '#lib/server/admin-projects.ts';
-import {
-  listBlogImages,
-  requireAdmin,
-  uploadBlogImageFromForm
-} from '#lib/server/admin-posts.ts';
+import { listBlogImages, requireAdmin, uploadBlogImageFromForm } from '#lib/server/admin-posts.ts';
 import type { Actions, PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ locals, params, url }) => {

@@ -6,7 +6,7 @@
 
 <button
   type="button"
-  class="motion"
+  class="motion ticked"
   class:compact
   aria-pressed={motion.off}
   aria-label={motion.off ? 'Play animations' : 'Pause animations'}
@@ -72,13 +72,13 @@
   }
 
   .motion:focus-visible {
-    outline: 1px solid var(--nord4);
-    outline-offset: 3px;
+    outline: none;
   }
 
   .compact {
-    width: 2rem;
-    height: 2rem;
+    --tick: 0.38rem;
+    width: 2.25rem;
+    height: 2.25rem;
   }
 
   .compact svg {

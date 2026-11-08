@@ -15,9 +15,10 @@ async function guard(supabase: Parameters<typeof requireAdmin>[0]) {
   } catch (error) {
     if (isHttpError(error)) {
       return fail(error.status, {
-        error: typeof error.body === 'object' && error.body && 'message' in error.body
-          ? String(error.body.message)
-          : 'Unauthorized'
+        error:
+          typeof error.body === 'object' && error.body && 'message' in error.body
+            ? String(error.body.message)
+            : 'Unauthorized'
       });
     }
     throw error;

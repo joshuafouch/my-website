@@ -10,7 +10,7 @@
 
 <button
   type="button"
-  class="switch"
+  class="switch ticked"
   class:compact
   aria-label={label}
   title={label}
@@ -78,15 +78,12 @@
     place-items: center;
     width: 2.75rem;
     height: 2.75rem;
-    border: 1px solid var(--btn-border);
-    border-radius: 9999px;
-    background: var(--btn-bg);
+    padding: 0;
+    border: 0;
+    background: none;
     color: var(--ink-muted);
     cursor: pointer;
-    transition:
-      color 200ms ease,
-      border-color 200ms ease,
-      background-color 200ms ease;
+    transition: color 200ms ease;
   }
 
   .switch svg {
@@ -98,7 +95,6 @@
   .switch:hover,
   .switch:focus-visible {
     color: var(--ink);
-    border-color: var(--border-strong);
     outline: none;
   }
 
@@ -107,9 +103,9 @@
   }
 
   .compact {
-    width: 2rem;
-    height: 2rem;
-    background: transparent;
+    --tick: 0.38rem;
+    width: 2.25rem;
+    height: 2.25rem;
   }
 
   .compact svg {

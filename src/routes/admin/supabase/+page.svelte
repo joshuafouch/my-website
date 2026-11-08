@@ -39,9 +39,9 @@
   </article>
   <article class="obs-stat">
     <p class="obs-label">Storage total</p>
-    <p class="obs-value"
-      >{formatBytes(usage.buckets.reduce((sum, bucket) => sum + bucket.bytes, 0))}</p
-    >
+    <p class="obs-value">
+      {formatBytes(usage.buckets.reduce((sum, bucket) => sum + bucket.bytes, 0))}
+    </p>
   </article>
 </section>
 
@@ -89,8 +89,12 @@
       {/each}
     </ul>
   {:else if !usage.configured}
-    <p class="note">API charts appear after SUPABASE_ACCESS_TOKEN and SUPABASE_PROJECT_REF are set.</p>
+    <p class="note">
+      API charts appear after SUPABASE_ACCESS_TOKEN and SUPABASE_PROJECT_REF are set.
+    </p>
   {:else}
-    <p class="note">No API request samples returned yet (or the token is missing Usage Analytics Read).</p>
+    <p class="note">
+      No API request samples returned yet (or the token is missing Usage Analytics Read).
+    </p>
   {/if}
 </section>

@@ -13,7 +13,6 @@ import {
   type PersonalContent,
   type Portrait,
   type PortraitKind,
-  type ProfessionalContent,
   type TechGroup,
   type TechItem
 } from '#lib/about.ts';
@@ -479,7 +478,8 @@ export async function saveProfessionalWork(
     const orgs: Org[] = [];
     for (const org of job.orgs) {
       if (!org.name && !org.href) continue;
-      if (!org.name) return { error: 'Each organization needs a name.', workIntro, jobs: draftJobs };
+      if (!org.name)
+        return { error: 'Each organization needs a name.', workIntro, jobs: draftJobs };
       if (org.name.length > 120) {
         return { error: 'An organization name is too long.', workIntro, jobs: draftJobs };
       }

@@ -350,9 +350,13 @@
                   type="button"
                   class="text"
                   onclick={() =>
-                    askRemove('Clear this image?', 'The cover will be cleared until you choose another.', () => {
-                      image = '';
-                    })}>Remove</button
+                    askRemove(
+                      'Clear this image?',
+                      'The cover will be cleared until you choose another.',
+                      () => {
+                        image = '';
+                      }
+                    )}>Remove</button
                 >
               {/if}
             </div>
@@ -412,13 +416,15 @@
 
     <aside class="split-preview narrow" aria-label="Live preview">
       <ProjectPreview
+        compact
         {title}
         {description}
-        detailsHtml={detailsHtml}
+        {detailsHtml}
         {image}
         images={gallery}
         tags={previewTags}
         {sourceUrl}
+        {date}
       />
     </aside>
   </div>

@@ -14,7 +14,8 @@
   <div>
     <h1>Traffic</h1>
     <p class="note">
-      Anonymous visitors via free Vercel Web Analytics (no cookies, no personal IDs). {traffic.since} →
+      Anonymous visitors via free Vercel Web Analytics (no cookies, no personal IDs). {traffic.since}
+      →
       {traffic.until}
     </p>
   </div>

@@ -134,10 +134,7 @@
 
   function addAlbum() {
     const id = crypto.randomUUID();
-    albums = [
-      ...albums,
-      { id, title: '', artistName: '', note: '', url: '', imageId: '' }
-    ];
+    albums = [...albums, { id, title: '', artistName: '', note: '', url: '', imageId: '' }];
     kind = 'albums';
     selectedId = id;
   }
@@ -253,7 +250,9 @@
         </div>
 
         <h2>Favorite music</h2>
-        <p class="note">Pick a kind, then edit one entry at a time. Covers come from the shared library.</p>
+        <p class="note">
+          Pick a kind, then edit one entry at a time. Covers come from the shared library.
+        </p>
 
         <datalist id="music-artist-names">
           {#each artists as artist (artist.id)}
@@ -305,10 +304,14 @@
                   <button
                     type="button"
                     onclick={() =>
-                      askRemove('Remove artist?', 'This artist will be dropped when you save.', () => {
-                        artists = artists.filter((item) => item.id !== artist.id);
-                        if (selectedId === artist.id) selectedId = artists[0]?.id ?? '';
-                      })}>Remove</button
+                      askRemove(
+                        'Remove artist?',
+                        'This artist will be dropped when you save.',
+                        () => {
+                          artists = artists.filter((item) => item.id !== artist.id);
+                          if (selectedId === artist.id) selectedId = artists[0]?.id ?? '';
+                        }
+                      )}>Remove</button
                   >
                 </div>
               </li>
@@ -369,10 +372,14 @@
                   <button
                     type="button"
                     onclick={() =>
-                      askRemove('Remove album?', 'This album will be dropped when you save.', () => {
-                        albums = albums.filter((item) => item.id !== album.id);
-                        if (selectedId === album.id) selectedId = albums[0]?.id ?? '';
-                      })}>Remove</button
+                      askRemove(
+                        'Remove album?',
+                        'This album will be dropped when you save.',
+                        () => {
+                          albums = albums.filter((item) => item.id !== album.id);
+                          if (selectedId === album.id) selectedId = albums[0]?.id ?? '';
+                        }
+                      )}>Remove</button
                   >
                 </div>
               </li>
@@ -424,14 +431,17 @@
                     <strong>{song.title.trim() || 'Untitled song'}</strong>
                     {#if song.artistName.trim() || song.albumName.trim()}
                       <span
-                        >{[song.artistName, song.albumName].filter((part) => part.trim()).join(' · ')}</span
+                        >{[song.artistName, song.albumName]
+                          .filter((part) => part.trim())
+                          .join(' · ')}</span
                       >
                     {/if}
                   </span>
                 </button>
                 <div class="row-actions">
                   <button type="button" onclick={() => (songs = move(songs, index, -1))}>Up</button>
-                  <button type="button" onclick={() => (songs = move(songs, index, 1))}>Down</button>
+                  <button type="button" onclick={() => (songs = move(songs, index, 1))}>Down</button
+                  >
                   <button
                     type="button"
                     onclick={() =>

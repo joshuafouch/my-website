@@ -105,7 +105,7 @@ export function toggleTheme() {
 export function restoreTheme() {
   if (typeof window === 'undefined') return;
   let saved: string | null = null;
-  let mode: ThemeMode = 'polar-night';
+  let mode: ThemeMode;
   try {
     saved = localStorage.getItem(STORAGE_KEY);
     mode = readTheme(saved);

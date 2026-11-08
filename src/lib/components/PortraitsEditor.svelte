@@ -24,9 +24,7 @@
     note?: string;
   } = $props();
 
-  let portraits = $state<Portrait[]>(
-    untrack(() => initial.map((portrait) => ({ ...portrait })))
-  );
+  let portraits = $state<Portrait[]>(untrack(() => initial.map((portrait) => ({ ...portrait }))));
   let library = $state<BlogImage[]>(untrack(() => images));
   let pickerOpen = $state(false);
   let activeId = $state('');
@@ -183,8 +181,7 @@
       <button
         type="button"
         class="solid"
-        onclick={() =>
-          (portraits = [...portraits, { id: crypto.randomUUID(), src: '', alt: '' }])}
+        onclick={() => (portraits = [...portraits, { id: crypto.randomUUID(), src: '', alt: '' }])}
         >Add portrait</button
       >
       <button class="solid" type="submit">Save portraits</button>

@@ -1,11 +1,29 @@
 import { error } from '@sveltejs/kit';
-import { getPublishedProjectBySlug } from '#lib/projects.ts';
+import { openLinks } from '#lib/links.ts';
+import { getPublishedProjects } from '#lib/projects.ts';
+import { renderMarkdown } from '#lib/server/markdown.ts';
 import type { PageServerLoad } from './$types';
 
 export const load: PageServerLoad = async ({ locals, params }) => {
-  const project = await getPublishedProjectBySlug(locals.supabase, params.slug);
-  if (!project) error(404, `Could not find ${params.slug}`);
-  // Only what the page's metadata needs; the dialog content comes from the layout's detailsHtml.
-  const { title, description, slug, image } = project;
-  return { project: { title, description, slug, image } };
+  // The list gives the previous/next links too; it is small, so one query covers both.
+  const projects = await getPublishedProjects(locals.supabase);
+  const index = projects.findIndex((project) => project.slug === params.slug);
+  if (index === -1) error(404, `Could not find ${params.slug}`);
+
+  const { details, ...project } = projects[index];
+  const neighbour = (offset: number) => {
+    if (projects.length < 2) return null;
+    const { title, slug } = projects[(index + offset + projects.length) % projects.length];
+    return { title, slug };
+  };
+
+  return {
+    project: {
+      ...project,
+      // Rendered here so the browser gets finished HTML: no marked/sanitizer download.
+      detailsHtml: details?.trim() ? openLinks(await renderMarkdown(details)) : ''
+    },
+    previous: neighbour(-1),
+    next: neighbour(1)
+  };
 };

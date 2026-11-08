@@ -138,12 +138,7 @@ export async function loadProfessional(supabase: Client): Promise<ProfessionalCo
   ]);
 
   if (profile.error || work.error || groups.error) {
-    console.error(
-      'Failed to load professional about',
-      profile.error,
-      work.error,
-      groups.error
-    );
+    console.error('Failed to load professional about', profile.error, work.error, groups.error);
     error(500, 'Failed to load the about page');
   }
 
