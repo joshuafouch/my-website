@@ -12,6 +12,7 @@
   import MotionToggle from '#lib/components/MotionToggle.svelte';
   import { backdrop, photos } from '#lib/backdrop.svelte.ts';
   import { resolve } from '$app/paths';
+  import { preloadCode } from '$app/navigation';
   // The italic for the name in the greeting (the regular face is preloaded by the root layout).
   import garamondItalic from '@fontsource/eb-garamond/files/eb-garamond-latin-400-italic.woff2?url';
 
@@ -61,6 +62,17 @@
   // document.fonts.ready — that waits for every face on the site and made the loader feel stuck.
   $effect(() => {
     if (backdrop.revealed && loaderShown) finishLoading();
+  });
+
+  // Fetch the three pages' code once the landing has settled, so a tap only waits on their data
+  // (which the hover/touchstart preload starts). Saves a round trip on a phone's first visit.
+  onMount(() => {
+    const timer = setTimeout(() => {
+      for (const id of ['/about/professional', '/projects', '/blog'] as const) {
+        preloadCode(id).catch(() => {});
+      }
+    }, 1500);
+    return () => clearTimeout(timer);
   });
 
   onMount(() => {
@@ -340,11 +352,26 @@
     color: var(--ink);
   }
 
-  /* The page fade is the motion when arriving from another page (see fadedIn). */
-  .faded-in.is-ready .reveal,
+  /* Back from an inner page (see fadedIn): that page has dissolved into the photo, and the
+     signature, then each row under it, rise back in one after another. */
   .faded-in.is-ready .logo.quick {
-    animation: none;
-    opacity: 1;
+    animation: return-rise 620ms var(--ease-out) 40ms both;
+  }
+
+  .faded-in.is-ready .reveal {
+    animation: return-rise 560ms var(--ease-out) both;
+    animation-delay: calc(160ms + var(--step) * 110ms);
+  }
+
+  @keyframes return-rise {
+    from {
+      opacity: 0;
+      transform: translateY(0.9rem) scale(0.985);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
   }
 
   .pages {
@@ -435,6 +462,23 @@
     outline: none;
   }
 
+  /* While the tapped page loads (+layout, html[data-pending]): it stays lit and underlined, and
+     the other links step back, so the tap answers at once instead of the screen blanking. */
+  .link-line:global([data-pending]) {
+    color: var(--ink-accent);
+    background-size: 100% 1px;
+  }
+
+  .social-link:global([data-pending]) .label {
+    background-size: 100% 1px;
+  }
+
+  :global(html[data-pending]) .link-line:not(:global([data-pending])),
+  :global(html[data-pending]) .dot {
+    opacity: 0.35;
+    transition: opacity 220ms ease;
+  }
+
   @media (max-width: 767px) {
     .landing {
       height: 100svh;
@@ -514,7 +558,9 @@
     }
 
     .is-ready .reveal,
-    .is-ready .logo.quick {
+    .is-ready .logo.quick,
+    .faded-in.is-ready .reveal,
+    .faded-in.is-ready .logo.quick {
       animation: none;
       opacity: 1;
     }

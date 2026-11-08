@@ -1,6 +1,7 @@
 <script lang="ts">
   import type { Portrait } from '#lib/about.ts';
   import PortraitSlideshow from '#lib/components/PortraitSlideshow.svelte';
+  import { withInitial } from '#lib/initial.ts';
 
   let {
     introHtml = '',
@@ -14,6 +15,9 @@
     side?: 'start' | 'end';
     label?: string;
   } = $props();
+
+  // Opens with a versal, like the blog posts and projects (#lib/initial.ts, .initial in app.css).
+  const html = $derived(withInitial(introHtml));
 </script>
 
 {#if portraits.length > 0 || introHtml}
@@ -25,7 +29,7 @@
     {/if}
     {#if introHtml}
       <!-- eslint-disable-next-line svelte/no-at-html-tags -- sanitized by renderMarkdown -->
-      <div class="copy">{@html introHtml}</div>
+      <div class="copy">{@html html}</div>
     {/if}
   </header>
 {/if}
@@ -63,6 +67,13 @@
 
   .copy :global(p) + :global(p) {
     margin-top: 0.8rem;
+  }
+
+  /* The versal hangs off the left edge, so the copy reads from the left even where the
+     portraits above it are centred (phones). */
+  .copy {
+    width: 100%;
+    text-align: left;
   }
 
   @media (min-width: 640px) {
