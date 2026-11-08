@@ -64,25 +64,7 @@ async function vercelGet(path: string, query: Record<string, string | undefined>
   const response = await fetch(url, {
     headers: { Authorization: `Bearer ${VERCEL_TOKEN}` }
   });
-  const text = await response.text();
-  let body: unknown;
-  try {
-    body = text ? JSON.parse(text) : null;
-  } catch {
-    body = { error: text };
-  }
-  if (!response.ok) {
-    const message =
-      typeof body === 'object' &&
-      body &&
-      'error' in body &&
-      typeof (body as { error: unknown }).error === 'object' &&
-      (body as { error: { message?: string } }).error?.message
-        ? (body as { error: { message: string } }).error.message
-        : `Vercel API ${response.status}`;
-    throw new Error(message);
-  }
-  return body;
+  return readResponse(response);
 }
 
 async function vercelPost(path: string, payload: Record<string, unknown>) {
@@ -97,25 +79,32 @@ async function vercelPost(path: string, payload: Record<string, unknown>) {
     },
     body: JSON.stringify(payload)
   });
+  return readResponse(response);
+}
+
+/** Parses a Vercel API response; failures throw with the status and Vercel's own message. */
+async function readResponse(response: Response): Promise<unknown> {
   const text = await response.text();
-  let parsed: unknown;
+  let body: unknown;
   try {
-    parsed = text ? JSON.parse(text) : null;
+    body = text ? JSON.parse(text) : null;
   } catch {
-    parsed = { error: text };
+    body = null;
   }
   if (!response.ok) {
+    const error =
+      body && typeof body === 'object' && 'error' in body
+        ? (body as { error: unknown }).error
+        : null;
     const message =
-      typeof parsed === 'object' &&
-      parsed &&
-      'error' in parsed &&
-      typeof (parsed as { error: unknown }).error === 'object' &&
-      (parsed as { error: { message?: string } }).error?.message
-        ? (parsed as { error: { message: string } }).error.message
-        : `Vercel API ${response.status}`;
-    throw new Error(message);
+      error &&
+      typeof error === 'object' &&
+      typeof (error as { message?: unknown }).message === 'string'
+        ? (error as { message: string }).message
+        : text.trim().slice(0, 200) || response.statusText;
+    throw new Error(`Vercel API ${response.status}${message ? `: ${message}` : ''}`);
   }
-  return parsed;
+  return body;
 }
 
 function isoDate(d: Date) {
@@ -263,7 +252,14 @@ function pickVitalNumber(payload: unknown): number | null {
   return null;
 }
 
-async function vitalValue(metric: string, startTime: string, endTime: string) {
+type VitalResult = { value: number | null; error: string | null };
+
+/** One p75 value. Errors are returned, not thrown, so one failed metric doesn't hide the rest. */
+async function vitalValue(
+  metric: string,
+  startTime: string,
+  endTime: string
+): Promise<VitalResult> {
   try {
     const result = await vercelPost('/v2/observability/query', {
       metric,
@@ -272,9 +268,9 @@ async function vitalValue(metric: string, startTime: string, endTime: string) {
       startTime,
       endTime
     });
-    return pickVitalNumber(result);
-  } catch {
-    return null;
+    return { value: pickVitalNumber(result), error: null };
+  } catch (err) {
+    return { value: null, error: err instanceof Error ? err.message : String(err) };
   }
 }
 
@@ -324,20 +320,30 @@ export async function loadInfraReport(): Promise<InfraReport> {
         ready: item.ready == null ? null : asNumber(item.ready)
       }));
 
+      const results = { lcp, inp, cls, ttfb, fcp };
       const vitals: VitalMetric[] = [
-        { id: 'lcp', label: 'LCP', value: lcp, unit: 'ms' },
-        { id: 'inp', label: 'INP', value: inp, unit: 'ms' },
-        { id: 'cls', label: 'CLS', value: cls, unit: '' },
-        { id: 'ttfb', label: 'TTFB', value: ttfb, unit: 'ms' },
-        { id: 'fcp', label: 'FCP', value: fcp, unit: 'ms' }
+        { id: 'lcp', label: 'LCP', value: lcp.value, unit: 'ms' },
+        { id: 'inp', label: 'INP', value: inp.value, unit: 'ms' },
+        { id: 'cls', label: 'CLS', value: cls.value, unit: '' },
+        { id: 'ttfb', label: 'TTFB', value: ttfb.value, unit: 'ms' },
+        { id: 'fcp', label: 'FCP', value: fcp.value, unit: 'ms' }
       ];
+
+      // A failed query (bad token, missing scope, API change) is reported as such, not as "no
+      // data", so a misconfiguration doesn't look like a quiet week.
+      const failed = Object.entries(results).filter(([, result]) => result.error);
+      const messages = [...new Set(failed.map(([, result]) => result.error))];
+      const failedNames = failed.map(([id]) => id.toUpperCase()).join(', ');
       const noVitals = vitals.every((vital) => vital.value == null);
 
       return {
         configured: true,
-        error: noVitals
-          ? 'Speed Insights has no data yet. Enable it on the Vercel project, deploy to production once, then wait for real visits.'
-          : null,
+        error:
+          failed.length > 0
+            ? `Speed Insights query failed for ${failedNames}: ${messages.join('; ')}`
+            : noVitals
+              ? 'Speed Insights has no data yet. Enable it on the Vercel project, deploy to production once, then wait for real visits.'
+              : null,
         deployments,
         vitals,
         note
