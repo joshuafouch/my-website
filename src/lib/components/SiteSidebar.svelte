@@ -29,6 +29,11 @@
     return () => query.removeEventListener('change', sync);
   });
 
+  /** Fold the phone menu on the tap itself, while the page loads, not halfway through the swap. */
+  function closeMenu() {
+    menu = false;
+  }
+
   function current(href: string) {
     if (href.startsWith('/about')) return pathname.startsWith('/about');
     return pathname === href;
@@ -113,7 +118,11 @@
       <ul class="pages" inert={linksHidden}>
         {#each links as link (link.href)}
           <li>
-            <a href={resolve(link.href)} aria-current={current(link.href) ? 'page' : undefined}>
+            <a
+              href={resolve(link.href)}
+              aria-current={current(link.href) ? 'page' : undefined}
+              onclick={closeMenu}
+            >
               {link.text}
             </a>
           </li>
@@ -127,7 +136,7 @@
         <div class="foot-row" inert={linksHidden}>
           <ul class="socials">
             <li>
-              <a class="social" href={resolve('/resume')}>
+              <a class="social" href={resolve('/resume')} onclick={closeMenu}>
                 <svg viewBox="0 0 24 24" aria-hidden="true">
                   <path
                     d="M14 3.25H7.4c-.9 0-1.65.75-1.65 1.65v14.2c0 .9.75 1.65 1.65 1.65h9.2c.9 0 1.65-.75 1.65-1.65V8.15L14 3.25z"

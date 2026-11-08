@@ -628,9 +628,16 @@ html[data-fade] .inner-shell {
   pointer-events: none;
 }
 
-/* Landing → inner: dissolve text only; photo stays put. */
+/* Landing → inner: dissolve text only; photo stays put. Starts once the next page's data is in
+   (+layout onNavigate), so the inner page follows straight on. */
 html[data-enter='inner'][data-fade='out'] .landing-chrome {
-  animation: page-fade-out 120ms ease both;
+  animation: landing-leave 200ms ease-in both;
+}
+
+@keyframes landing-leave {
+  to {
+    opacity: 0;
+  }
 }
 
 /* Landing → inner: surface + body rise while the photo yields. */
@@ -745,8 +752,36 @@ html[data-swap] .inner-shell .rise .initial {
   animation-delay: calc(340ms + min(var(--i, 0), 6) * 55ms);
 }
 
+/* Swapped by hand (phones, browsers without view transitions): the old page has already faded
+   out, so the new one rises without waiting. */
+html[data-swap^='after'] .inner-shell .rise {
+  animation-delay: calc(20ms + min(var(--i, 0), 6) * 50ms);
+}
+
+html[data-swap^='after'] .inner-shell .rise .mat::before,
+html[data-swap^='after'] .inner-shell .rise .mat::after,
+html[data-swap^='after'] .inner-shell .rise .initial {
+  animation-delay: calc(220ms + min(var(--i, 0), 6) * 50ms);
+}
+
 html[data-leaving] .inner-shell .transition {
   animation: vt-fade-out 140ms ease both;
+}
+
+/* Phones: rise without the blur. A filter on every block, animated at once, drops frames on
+   iOS Safari; transform and opacity stay on the compositor. */
+@media (max-width: 767px) {
+  html[data-entrance] .rise,
+  html[data-swap] .inner-shell .rise {
+    animation-name: entrance-rise-lite;
+  }
+}
+
+@keyframes entrance-rise-lite {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
 }
 
 @keyframes entrance-shutter {
