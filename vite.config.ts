@@ -18,7 +18,7 @@ function appHtmlScriptHashes() {
   );
 }
 
-export default defineConfig(({ mode }) => {
+export default defineConfig(({ command, mode }) => {
   // Supabase serves storage images and the resume PDF; allow only this project's origin.
   const { PUBLIC_SUPABASE_URL } = loadEnv(mode, '.', 'PUBLIC_');
   const supabase = PUBLIC_SUPABASE_URL ? new URL(PUBLIC_SUPABASE_URL).origin : '';
@@ -35,7 +35,8 @@ export default defineConfig(({ mode }) => {
       // sanitize-html is CommonJS and require()s htmlparser2 12, which is ESM-only. Node 24 allows
       // that natively, but Vercel's function loader doesn't (ERR_REQUIRE_ESM → 500 on any page
       // that renders markdown), so bundle both and let Rollup resolve the require at build time.
-      noExternal: ['sanitize-html', 'htmlparser2']
+      // Build only: the dev server doesn't convert CommonJS it inlines ("require is not defined").
+      noExternal: command === 'build' ? ['sanitize-html', 'htmlparser2'] : []
     },
     plugins: [
       tailwindcss(),
