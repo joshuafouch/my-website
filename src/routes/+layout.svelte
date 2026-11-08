@@ -323,7 +323,9 @@
      z-index auto: paints after the backdrop photo and before the shell, like that background. */
   .shell-surface {
     position: fixed;
-    inset: 0;
+    inset: 0 0 auto;
+    height: 100vh;
+    height: 100lvh;
     background: var(--surface);
     pointer-events: none;
   }
@@ -354,7 +356,8 @@
     z-index: 0;
     top: 0;
     right: 0;
-    bottom: 0;
+    height: 100vh;
+    height: 100lvh;
     display: block;
     width: var(--sig-thickness);
     padding: 0;
@@ -497,13 +500,13 @@
     .floor-crest {
       position: fixed;
       z-index: 0;
-      bottom: 0;
+      top: 100lvh;
       left: 50%;
       display: block;
       width: 18rem;
       opacity: 0.22;
       pointer-events: none;
-      transform: translate(-50%, 50%);
+      transform: translate(-50%, -50%);
     }
   }
 
