@@ -494,13 +494,14 @@
       opacity: 1;
     }
 
+    /* Sits whole at the foot of the page, behind the footer, rather than fixed over the content. */
     .floor-crest {
-      position: fixed;
+      position: absolute;
       z-index: 0;
       bottom: env(safe-area-inset-bottom);
       left: 50%;
       display: block;
-      width: 18rem;
+      width: 11rem;
       opacity: 0.22;
       pointer-events: none;
       transform: translateX(-50%);
