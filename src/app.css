@@ -302,6 +302,14 @@ body {
   color: var(--ink);
 }
 
+/* iOS Safari 26 tints its see-through bottom toolbar from the root background, not from what's
+   painted on top. Inner pages paint --surface over a fixed layer, so match the root to it or the
+   toolbar shows a dark --ground band over the page. */
+html:has(.inner-shell),
+html:has(.inner-shell) body {
+  background-color: var(--surface);
+}
+
 .font-mono {
   font-family: 'IBM Plex Mono', ui-monospace, monospace;
 }
