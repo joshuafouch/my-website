@@ -550,19 +550,6 @@ html[data-theme='nord'] .initial {
   background: radial-gradient(ellipse at center, var(--veil-inner) 0%, var(--veil-outer) 70%);
 }
 
-/* iOS Safari 26 doesn't paint fixed layers under its see-through bottom toolbar, so on the mobile
-   landing the photo stopped at the toolbar and the dark root showed beneath it. There the page
-   never scrolls, so lay the photo in the page instead, as tall as the screen with the toolbar
-   collapsed, and it runs under the toolbar like any other content. */
-@media (max-width: 767px) {
-  html:has(.landing) .site-backdrop {
-    position: absolute;
-    inset: 0 0 auto;
-    height: 100vh;
-    height: 100lvh;
-  }
-}
-
 @keyframes backdrop-in {
   to {
     opacity: 1;
