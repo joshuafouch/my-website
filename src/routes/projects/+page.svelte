@@ -1,57 +1,247 @@
 <script lang="ts">
-  // import * as config from '#lib/config.ts';
-  import Metadata from '#lib/components/Metadata.svelte';
-  import { formatDate } from '#lib/utils.ts';
   import { resolve } from '$app/paths';
+  import Metadata from '#lib/components/Metadata.svelte';
+  import { FALLBACK_COVER, FALLBACK_COVER_SRCSET } from '#lib/fallback-cover.ts';
+
   let { data } = $props();
+
+  const year = (date: string) => (/^\d{4}/.test(date) ? date.slice(0, 4) : '');
 </script>
 
 <Metadata
   title="My Projects"
-  description="A collection of my professional, personal, and academic projects"
+  description="Personal, research, and collaborative projects."
   url="/projects"
-  image="/assets/happy_snow.webp"
-  imageAlt="My Projects"
+  image="/assets/backgrounds/IMG_1797.webp"
+  imageAlt="Dog on a dock"
 />
 
-<div
-  class="hero h-[60vh] rounded-b-4xl bg-cover bg-bottom sm:bg-fixed sm:bg-center"
-  style="background-image: url(/assets/happy_snow.webp);"
->
-  <div class="hero-overlay rounded-b-4xl bg-black/60"></div>
-  <div class="hero-content text-neutral-content pt-24 text-center">
-    <div class="max-w-md">
-      <h1 class="font-title mb-5 text-5xl font-bold">My Projects</h1>
-      <!-- <p class="font-main text-accent mb-5 text-xl">
-        Here are some of my professional, personal, and academic projects I have produced over the
-        years. Most of these are GitHub links to the source code.
-      </p> -->
-    </div>
-  </div>
+<div class="projects font-serif">
+  <header class="rise" style:--i={0}>
+    <h1>Projects</h1>
+    <p>Personal, research, and collaborative projects.</p>
+  </header>
+
+  {#if data.projects.length === 0}
+    <p class="empty">Nothing here yet.</p>
+  {:else}
+    <ul>
+      {#each data.projects as project, index (project.slug)}
+        <li class="rise" class:feature={index === 0} style:--i={index + 1}>
+          <a class="card" href={resolve('/projects/[slug]', { slug: project.slug })}>
+            <span class="mat">
+              <span class="frame">
+                <img
+                  src={project.image || FALLBACK_COVER}
+                  srcset={project.image ? undefined : FALLBACK_COVER_SRCSET}
+                  sizes={project.image ? undefined : '(max-width: 640px) 100vw, 30rem'}
+                  alt=""
+                  loading={index > 1 ? 'lazy' : undefined}
+                  decoding="async"
+                />
+              </span>
+            </span>
+            <span class="copy">
+              <span class="title">{project.title}</span>
+              {#if year(project.date)}
+                <span class="year font-mono">{year(project.date)}</span>
+              {/if}
+              {#if project.description}
+                <span class="desc">{project.description}</span>
+              {/if}
+              <span class="tags">{project.tags.join(' · ')}</span>
+            </span>
+          </a>
+        </li>
+      {/each}
+    </ul>
+  {/if}
 </div>
 
-<div class="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
-  <section>
-    <div class="grid grid-cols-1 gap-8 pt-8 md:grid-cols-2 lg:grid-cols-3 lg:pt-10">
-      {#each data.projects as project (project.slug)}
-        <a
-          href={resolve('/[slug]', { slug: project.slug })}
-          class="card bg-neutral border-secondary border-2 text-left shadow-xl transition-transform duration-300 hover:-translate-y-1 hover:shadow-2xl"
-        >
-          <figure>
-            <img
-              class="h-56 w-full object-cover opacity-75"
-              src={project.image || '/previews/spencer-glacier.webp'}
-              alt={project.title}
-            />
-          </figure>
-          <div class="card-body">
-            <h2 class="card-title font-title">{project.title}</h2>
-            <p class="text-sm opacity-70">{formatDate(project.date)}</p>
-            <p class="text-base-content/80 mt-2">{project.description}</p>
-          </div>
-        </a>
-      {/each}
-    </div>
-  </section>
-</div>
+<style>
+  .projects {
+    max-width: var(--page-width);
+    margin-inline: auto;
+    padding: 2.25rem 1.5rem 2.5rem;
+    color: var(--ink);
+  }
+
+  header {
+    padding-bottom: 1.4rem;
+    border-bottom: 1px solid var(--border-strong);
+  }
+
+  h1 {
+    margin: 0;
+    font-size: 3rem;
+    font-weight: 500;
+    line-height: 1;
+  }
+
+  header p,
+  .empty {
+    color: var(--ink-muted);
+  }
+
+  header p {
+    margin: 0.5rem 0 0;
+    font-size: 1.3rem;
+  }
+
+  ul {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 3.25rem 2.5rem;
+    margin: 2.75rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .feature {
+    grid-column: 1 / -1;
+  }
+
+  .card {
+    display: flex;
+    flex-direction: column;
+    color: inherit;
+    text-decoration: none;
+    transition: transform 220ms var(--ease-out);
+  }
+
+  .feature .card {
+    display: grid;
+    grid-template-columns: minmax(0, 7fr) minmax(0, 5fr);
+    gap: 2.25rem;
+    align-items: end;
+  }
+
+  .frame {
+    display: block;
+    overflow: hidden;
+    aspect-ratio: 4 / 3;
+  }
+
+  .feature .frame {
+    aspect-ratio: 16 / 10;
+  }
+
+  img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 480ms var(--ease-out);
+  }
+
+  .copy {
+    display: flex;
+    flex-direction: column;
+    padding-top: 1rem;
+  }
+
+  .feature .copy {
+    padding: 0 0 0.25rem;
+  }
+
+  .title {
+    font-size: 1.8rem;
+    font-weight: 500;
+    line-height: 1.1;
+    transition: color 180ms ease;
+  }
+
+  .feature .title {
+    font-size: 2.5rem;
+  }
+
+  .year {
+    margin-top: 0.35rem;
+    color: var(--ink-faint);
+    font-size: 0.78rem;
+    letter-spacing: 0.04em;
+  }
+
+  .desc {
+    margin-top: 0.6rem;
+    color: var(--ink-muted);
+    font-size: 1.15rem;
+    line-height: 1.45;
+  }
+
+  .tags {
+    margin-top: 0.85rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid var(--border-subtle);
+    color: var(--ink-muted);
+    font-size: 1.03rem;
+    font-variant: small-caps;
+    letter-spacing: 0.12em;
+  }
+
+  .card:hover,
+  .card:focus-visible {
+    transform: translateY(-2px);
+    outline: none;
+  }
+
+  .card:hover .mat,
+  .card:focus-visible .mat {
+    border-color: var(--border-strong);
+  }
+
+  .card:hover .mat::before,
+  .card:hover .mat::after,
+  .card:focus-visible .mat::before,
+  .card:focus-visible .mat::after {
+    border-color: var(--ink-accent);
+  }
+
+  .card:hover img,
+  .card:focus-visible img {
+    transform: scale(1.03);
+  }
+
+  .card:hover .title,
+  .card:focus-visible .title {
+    color: var(--ink-accent);
+  }
+
+  .empty {
+    margin-top: 2rem;
+    font-size: 1.25rem;
+  }
+
+  @media (max-width: 700px) {
+    ul {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .feature .card {
+      display: flex;
+      gap: 0;
+    }
+
+    .feature .copy {
+      padding-top: 1rem;
+    }
+
+    .feature .title {
+      font-size: 2rem;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .card,
+    img {
+      transition: none;
+    }
+
+    .card:hover,
+    .card:focus-visible,
+    .card:hover img,
+    .card:focus-visible img {
+      transform: none;
+    }
+  }
+</style>

@@ -21,8 +21,8 @@
     title = config.title,
     description = config.description,
     url = '',
-    image = '/previews/spencer-glacier.webp',
-    imageAlt = 'Spencer Glacier - Alaska',
+    image = '/assets/backgrounds/IMG_1797.webp',
+    imageAlt = 'Dog on a dock',
     imageWidth = 1200,
     imageHeight = 630,
     type = 'website',
@@ -79,10 +79,20 @@
     };
   };
 
-  const schemaHtml =
-    `<script type="application/ld+json">${JSON.stringify(getSchemaData(), null, 2)}` +
-    '</' +
-    'script>';
+  // Title/description/tags come from the DB, so a value containing a closing script tag must not
+  // be able to end this element and inject markup. Escaping <, >, & (and the JS line separators)
+  // as \uXXXX keeps the JSON identical once parsed but leaves no raw markup inside the element.
+  const jsonForScript = (value: unknown) =>
+    JSON.stringify(value, null, 2)
+      .replace(/</g, '\\u003c')
+      .replace(/>/g, '\\u003e')
+      .replace(/&/g, '\\u0026')
+      .replace(/\u2028/g, '\\u2028')
+      .replace(/\u2029/g, '\\u2029');
+
+  const schemaHtml = $derived(
+    `<script type="application/ld+json">${jsonForScript(getSchemaData())}` + '</' + 'script>'
+  );
 </script>
 
 <svelte:head>
@@ -111,7 +121,7 @@
 
   <!-- Twitter -->
   <meta name="twitter:card" content="summary_large_image" />
-  <meta property="twitter:domain" content="joshuafouch.vercel.app" />
+  <meta property="twitter:domain" content={new URL(config.url).host} />
   <meta property="twitter:url" content={fullUrl} />
   <meta name="twitter:title" content={title} />
   <meta name="twitter:description" content={description} />
@@ -121,6 +131,6 @@
   <link rel="canonical" href={fullUrl} />
 
   <!-- Schema.org JSON-LD -->
-  <!-- eslint-disable-next-line svelte/no-at-html-tags -->
+  <!-- eslint-disable-next-line svelte/no-at-html-tags -- JSON escaped by jsonForScript -->
   {@html schemaHtml}
 </svelte:head>

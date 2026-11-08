@@ -1,12 +1,10 @@
 export const title = 'Joshua Fouch';
 export const description = "Josh's Corner of the Web";
-export const url = 'https://joshuafouch.com';
-export const local_url = 'http://localhost:7777';
+/** The canonical origin. The apex (joshuafouch.com) 308-redirects here, so links use www. */
+export const url = 'https://www.joshuafouch.com';
 
 export const links = [
-  { href: '/', text: 'Home' },
-  // { href: '/about', text: 'About' },
-  // { href: '/projects', text: 'Projects' },
-  { href: '/blog', text: 'Blog' },
-  { href: '/contact', text: 'Contact' }
-];
+  { href: '/about/professional', text: 'About' },
+  { href: '/projects', text: 'Projects' },
+  { href: '/blog', text: 'Blog' }
+] as const;

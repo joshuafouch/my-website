@@ -1,0 +1,337 @@
+import { error } from '@sveltejs/kit';
+import type { SupabaseClient } from '@supabase/supabase-js';
+import { isAdminEmail } from '#lib/admin.ts';
+import { getMfaState } from '#lib/server/mfa.ts';
+import { PORTRAITS_BUCKET, type PortraitKind } from '#lib/about.ts';
+import type { Database } from '#lib/database.types.ts';
+import { slugify } from '#lib/slug.ts';
+import type { BlogImage } from '#lib/types.ts';
+import { MAX_UPLOAD_BYTES, MAX_UPLOAD_LABEL } from '#lib/upload-limits.ts';
+
+type Client = SupabaseClient<Database>;
+
+/** Accepted image types and the extension each is stored under (never the uploaded name's). */
+const IMAGE_EXTENSIONS: Record<string, string> = {
+  'image/jpeg': 'jpg',
+  'image/png': 'png',
+  'image/webp': 'webp',
+  'image/gif': 'gif'
+};
+
+/** Uploads get a fresh random name and are never overwritten, so browsers may keep them a year. */
+const IMMUTABLE_CACHE_SECONDS = '31536000';
+
+export type AdminPost = Database['public']['Tables']['posts']['Row'];
+
+/**
+ * Gate for admin loads and form actions. Form actions and +server.ts handlers do not run
+ * admin/+layout.server.ts, so the MFA step must be enforced here, not only in the layout.
+ * Pass `allowPendingMfa` only for the MFA challenge itself, where the session is still aal1.
+ */
+export async function requireAdmin(
+  supabase: Client,
+  { allowPendingMfa = false }: { allowPendingMfa?: boolean } = {}
+) {
+  const { data, error: authError } = await supabase.auth.getClaims();
+  const email =
+    !authError && data?.claims && typeof data.claims.email === 'string' ? data.claims.email : null;
+
+  if (!isAdminEmail(email)) {
+    error(401, 'Unauthorized');
+  }
+
+  if (allowPendingMfa) return;
+
+  const mfa = await getMfaState(supabase);
+  if (mfa.needsMfa) {
+    error(401, 'Complete two-factor verification first.');
+  }
+}
+
+export async function getAdminPosts(supabase: Client) {
+  const { data, error: dbError } = await supabase
+    .from('posts')
+    .select('id, title, slug, date, published, image')
+    .order('date', { ascending: false });
+
+  if (dbError) {
+    console.error('Failed to list admin posts', dbError);
+    error(500, 'Failed to load posts');
+  }
+
+  return data ?? [];
+}
+
+export async function getAdminPostBySlug(supabase: Client, slug: string) {
+  const { data, error: dbError } = await supabase
+    .from('posts')
+    .select('*')
+    .eq('slug', slug)
+    .maybeSingle();
+
+  if (dbError) {
+    console.error('Failed to load admin post', dbError);
+    error(500, 'Failed to load post');
+  }
+
+  return data;
+}
+
+export type ImageFolder = 'covers' | 'inline' | 'portraits';
+
+/** The checks every image upload shares; returns the stored extension, or the error to show. */
+function checkImage(file: File): { extension: string } | { error: string } {
+  const extension = IMAGE_EXTENSIONS[file.type];
+  if (!extension) return { error: 'Use a JPEG, PNG, WebP, or GIF.' };
+  if (file.size > MAX_UPLOAD_BYTES) {
+    return { error: `Image must be ${MAX_UPLOAD_LABEL} or smaller.` };
+  }
+  return { extension };
+}
+
+export async function uploadBlogImage(
+  supabase: Client,
+  file: File,
+  folder: ImageFolder
+): Promise<{ url: string } | { error: string }> {
+  const checked = checkImage(file);
+  if ('error' in checked) return checked;
+
+  const path = `${folder}/${crypto.randomUUID()}.${checked.extension}`;
+  const { error: uploadError } = await supabase.storage.from('blog-images').upload(path, file, {
+    contentType: file.type,
+    cacheControl: IMMUTABLE_CACHE_SECONDS,
+    upsert: false
+  });
+
+  if (uploadError) {
+    return { error: uploadError.message };
+  }
+
+  const { data } = supabase.storage.from('blog-images').getPublicUrl(path);
+  return { url: data.publicUrl };
+}
+
+export async function uploadPortraitImage(
+  supabase: Client,
+  file: File,
+  kind: PortraitKind
+): Promise<{ url: string } | { error: string }> {
+  const checked = checkImage(file);
+  if ('error' in checked) return checked;
+
+  const path = `${kind}/${crypto.randomUUID()}.${checked.extension}`;
+  const { error: uploadError } = await supabase.storage.from(PORTRAITS_BUCKET).upload(path, file, {
+    contentType: file.type,
+    cacheControl: IMMUTABLE_CACHE_SECONDS,
+    upsert: false
+  });
+
+  if (uploadError) {
+    return { error: uploadError.message };
+  }
+
+  const { data } = supabase.storage.from(PORTRAITS_BUCKET).getPublicUrl(path);
+  return { url: data.publicUrl };
+}
+
+export async function listPortraitImages(
+  supabase: Client,
+  kind: PortraitKind
+): Promise<{ images: BlogImage[]; imageError: string | null }> {
+  const { data, error: listError } = await supabase.storage.from(PORTRAITS_BUCKET).list(kind, {
+    limit: 100,
+    sortBy: { column: 'created_at', order: 'desc' }
+  });
+
+  if (listError) {
+    console.error(`Failed to list ${kind} portraits`, listError);
+    return { images: [], imageError: 'Could not load the image library.' };
+  }
+
+  const images = (data ?? [])
+    .filter((file) => file.id && file.name && !file.name.startsWith('.'))
+    .map((file) => {
+      const { data: pub } = supabase.storage
+        .from(PORTRAITS_BUCKET)
+        .getPublicUrl(`${kind}/${file.name}`);
+      return {
+        url: pub.publicUrl,
+        name: file.name,
+        folder: kind,
+        createdAt: file.created_at ?? ''
+      };
+    })
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+    .map(({ url, name, folder }) => ({ url, name, folder }));
+
+  return { images, imageError: null };
+}
+
+export async function uploadPortraitImageFromForm(
+  supabase: Client,
+  form: FormData
+): Promise<{ url: string } | { error: string }> {
+  const kind = String(form.get('kind') ?? form.get('folder') ?? '');
+  if (kind !== 'professional' && kind !== 'personal') {
+    return { error: 'Choose a professional or personal portrait folder.' };
+  }
+
+  const file = form.get('file');
+  if (!(file instanceof File) || file.size === 0) {
+    return { error: 'Choose an image to upload.' };
+  }
+
+  return uploadPortraitImage(supabase, file, kind);
+}
+
+const LIBRARY_FOLDERS = ['covers', 'inline'] as const;
+
+export async function listBlogImages(
+  supabase: Client,
+  folders: readonly ImageFolder[] = LIBRARY_FOLDERS
+): Promise<{ images: BlogImage[]; imageError: string | null }> {
+  const listed = await Promise.all(
+    folders.map(async (folder) => {
+      const { data, error: listError } = await supabase.storage.from('blog-images').list(folder, {
+        limit: 100,
+        sortBy: { column: 'created_at', order: 'desc' }
+      });
+
+      if (listError) {
+        console.error(`Failed to list ${folder} images`, listError);
+        return { folder, failed: true, files: [] };
+      }
+
+      return {
+        folder,
+        failed: false,
+        files: (data ?? []).filter((file) => file.id && file.name && !file.name.startsWith('.'))
+      };
+    })
+  );
+
+  const images = listed
+    .flatMap((entry) =>
+      entry.files.map((file) => {
+        const { data } = supabase.storage
+          .from('blog-images')
+          .getPublicUrl(`${entry.folder}/${file.name}`);
+        return {
+          url: data.publicUrl,
+          name: file.name,
+          folder: entry.folder,
+          createdAt: file.created_at ?? ''
+        };
+      })
+    )
+    .sort((a, b) => b.createdAt.localeCompare(a.createdAt))
+    .map(({ url, name, folder }) => ({ url, name, folder }));
+
+  return {
+    images,
+    imageError: listed.some((entry) => entry.failed) ? 'Could not load the image library.' : null
+  };
+}
+
+export async function uploadBlogImageFromForm(
+  supabase: Client,
+  form: FormData
+): Promise<{ url: string } | { error: string }> {
+  const folder = String(form.get('folder') ?? '');
+  if (folder !== 'covers' && folder !== 'inline' && folder !== 'portraits') {
+    return { error: 'Choose a cover, body, or portrait image.' };
+  }
+
+  const file = form.get('file');
+  if (!(file instanceof File) || file.size === 0) {
+    return { error: 'Choose an image to upload.' };
+  }
+
+  return uploadBlogImage(supabase, file, folder);
+}
+
+export type PostFormValues = {
+  title: string;
+  slug: string;
+  description: string;
+  date: string;
+  categories: string;
+  image: string;
+  body: string;
+  published: boolean;
+};
+
+function readPostForm(form: FormData): PostFormValues {
+  return {
+    title: String(form.get('title') ?? ''),
+    slug: String(form.get('slug') ?? ''),
+    description: String(form.get('description') ?? ''),
+    date: String(form.get('date') ?? ''),
+    categories: String(form.get('categories') ?? ''),
+    image: String(form.get('image') ?? ''),
+    body: String(form.get('body') ?? ''),
+    published: form.get('published') === 'on'
+  };
+}
+
+export async function savePostFromForm(
+  supabase: Client,
+  form: FormData,
+  existingId?: string
+): Promise<{ slug: string } | { error: string; values: PostFormValues }> {
+  const values = readPostForm(form);
+  const title = values.title.trim();
+  const slug = slugify(values.slug || title);
+  const description = values.description.trim();
+  const body = values.body;
+  const date = values.date.trim();
+  const categories = values.categories
+    .split(',')
+    .map((category) => category.trim())
+    .filter(Boolean);
+
+  if (!title || !slug || !description || !body.trim() || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    return {
+      error: 'Title, slug, description, date, and body are required.',
+      values: { ...values, slug }
+    };
+  }
+
+  let image = values.image.trim() || null;
+  const cover = form.get('cover');
+
+  if (cover instanceof File && cover.size > 0) {
+    const uploaded = await uploadBlogImage(supabase, cover, 'covers');
+    if ('error' in uploaded) {
+      return { error: uploaded.error, values: { ...values, slug } };
+    }
+    image = uploaded.url;
+  }
+
+  const row = {
+    title,
+    slug,
+    description,
+    date,
+    categories,
+    image,
+    body,
+    published: values.published,
+    updated_at: new Date().toISOString()
+  };
+
+  const query = existingId
+    ? supabase.from('posts').update(row).eq('id', existingId)
+    : supabase.from('posts').insert(row);
+
+  const { data, error: dbError } = await query.select('slug').single();
+
+  if (dbError) {
+    const message =
+      dbError.code === '23505' ? 'A post with that slug already exists.' : dbError.message;
+    return { error: message, values: { ...values, slug, image: image ?? '' } };
+  }
+
+  return { slug: data.slug };
+}

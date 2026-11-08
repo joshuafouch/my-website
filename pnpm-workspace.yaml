@@ -1,0 +1,7 @@
+# pnpm settings (pnpm 10+ reads these here, not from package.json).
+overrides:
+  # @tailwindcss/typography pins 6.0.10 (GHSA-rj75-hqrm-r3gf); 6.1.5 is the fixed 6.x release.
+  postcss-selector-parser@6: 6.1.5
+  # @vercel/functions → @vercel/oidc → @vercel/cli-config pins zod 4.1.11 (GHSA-mrhx-c7xc-m3w5);
+  # 4.6.6 is the fixed 4.x release.
+  zod@4: ^4.6.6

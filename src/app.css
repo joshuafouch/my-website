@@ -1,79 +1,1031 @@
 @import 'tailwindcss';
 @import '@fontsource/ibm-plex-mono';
-@import '@fontsource/ibm-plex-sans';
 @import '@fontsource/dm-serif-text';
+@import '@fontsource/eb-garamond/400.css';
+@import '@fontsource/eb-garamond/400-italic.css';
+@import '@fontsource/eb-garamond/500.css';
+/* No 500 italic: nothing on the site renders it (the browser would use 400 italic). */
+@import '@fontsource/source-serif-4/400.css';
+@import '@fontsource/source-serif-4/400-italic.css';
+@import '@fontsource/source-serif-4/600.css';
+@import '@fontsource/source-serif-4/600-italic.css';
+/* The illuminated initial at the start of a write-up (see #lib/initial.ts). */
+@import '@fontsource/grenze-gotisch/500.css';
 
 @plugin '@tailwindcss/typography';
+
+/* The parts of daisyUI the site relied on, kept after removing it (its components were unused
+   and it doubled the size of this stylesheet). Same values per theme as daisyUI produced: the
+   page colour behind <body> (shows on overscroll), the root text colour, the translucent
+   scrollbar, the status colours the admin reads, and its Tailwind Typography colours (below).
+   Themes are the classes on <html>. */
 @layer base {
-  .prose {
-    --tw-prose-body: 'IBM Plex Sans', sans-serif;
-    --tw-prose-headings: 'DM Serif Text', serif;
-    --tw-prose-code: 'IBM Plex Mono', monospace;
+  :root {
+    --root-bg: oklch(21% 0.022 260);
+    --root-ink: oklch(95.27% 0.011 258.91);
+    --color-base-200: oklch(25.5% 0.026 258);
+    --color-base-300: oklch(31% 0.03 257);
+    --color-neutral: oklch(36% 0.035 256.3);
+    --color-neutral-content: oklch(95.27% 0.011 258.91);
+    --radius-selector: 2rem;
+    --border: 2px;
+    --color-success: oklch(73.57% 0.076 138.83);
+    --color-error: oklch(59.16% 0.128 13.9);
+    background-color: var(--root-bg);
+    color: var(--root-ink);
+    scrollbar-color: color-mix(in oklch, currentColor 35%, #0000) #0000;
+  }
+
+  :root.snow-storm {
+    --root-bg: oklch(95.127% 0.007 260.731);
+    --root-ink: oklch(32.437% 0.022 264.182);
+    --color-base-200: oklch(93.299% 0.01 261.788);
+    --color-base-300: oklch(89.925% 0.016 262.749);
+    --color-neutral: oklch(45.229% 0.035 264.131);
+    --color-neutral-content: oklch(89.925% 0.016 262.749);
+    --radius-selector: 1rem;
+    --border: 1px;
+    --color-success: oklch(76.827% 0.074 131.063);
+    --color-error: oklch(60.61% 0.12 15.341);
+  }
+
+  :root.frost {
+    --root-bg: #3d5166;
+    --root-ink: #eceff4;
+    --color-base-200: #466078;
+    --color-base-300: #50708a;
+    --color-neutral: #466078;
+    --color-neutral-content: #eceff4;
   }
 }
 
-@plugin 'daisyui' {
-  themes: nord;
+/* daisyUI's Tailwind Typography integration, same layer and selector so it wins over
+   .prose-invert exactly as before: theme-based prose colours and inline-code chips. */
+@layer utilities {
+  :root .prose {
+    --tw-prose-body: color-mix(in oklab, var(--root-ink) 80%, #0000);
+    --tw-prose-headings: var(--root-ink);
+    --tw-prose-lead: var(--root-ink);
+    --tw-prose-links: var(--root-ink);
+    --tw-prose-bold: var(--root-ink);
+    --tw-prose-counters: var(--root-ink);
+    --tw-prose-bullets: color-mix(in oklab, var(--root-ink) 50%, #0000);
+    --tw-prose-hr: color-mix(in oklab, var(--root-ink) 20%, #0000);
+    --tw-prose-quotes: var(--root-ink);
+    --tw-prose-quote-borders: color-mix(in oklab, var(--root-ink) 20%, #0000);
+    --tw-prose-captions: color-mix(in oklab, var(--root-ink) 50%, #0000);
+    --tw-prose-code: var(--root-ink);
+    --tw-prose-pre-code: var(--color-neutral-content);
+    --tw-prose-pre-bg: var(--color-neutral);
+    --tw-prose-th-borders: color-mix(in oklab, var(--root-ink) 50%, #0000);
+    --tw-prose-td-borders: color-mix(in oklab, var(--root-ink) 20%, #0000);
+    --tw-prose-kbd: color-mix(in oklab, var(--root-ink) 80%, #0000);
+
+    & :where(code):not(pre > code) {
+      background-color: var(--color-base-200);
+      border-radius: var(--radius-selector);
+      border: var(--border) solid var(--color-base-300);
+      font-weight: inherit;
+      padding-block: 0.2em;
+      padding-inline: 0.5em;
+
+      &::before,
+      &::after {
+        display: none;
+      }
+    }
+  }
 }
-@plugin 'daisyui/theme' {
-  name: 'nord-dark';
-  default: true;
-  prefersdark: true;
-  color-scheme: 'dark';
-  /* Nord Dark Theme for DaisyUI */
-  --color-base-100: oklch(33.1% 0.027 259.62); /* nord0 (#2E3440) - Main background */
-  --color-base-200: oklch(38.07% 0.032 258.12); /* nord1 (#3B4252) - Lighter background */
-  --color-base-300: oklch(42.34% 0.035 257.21); /* nord2 (#434C5E) - UI elements */
-  --color-base-content: oklch(95.27% 0.011 258.91); /* nord6 (#ECEFF4) - Base text */
-
-  --color-primary: oklch(67.2% 0.057 257.73); /* nord9 (#81A1C1) - Frost Blue */
-  --color-primary-content: oklch(33.1% 0.027 259.62); /* nord0 (#2E3440) - Text on primary */
-
-  --color-secondary: oklch(74.49% 0.046 195.06); /* nord7 (#8FBCBB) - Frost Teal */
-  --color-secondary-content: oklch(33.1% 0.027 259.62); /* nord0 (#2E3440) - Text on secondary */
-
-  --color-accent: oklch(67.75% 0.07 313.52); /* nord15 (#B48EAD) - Aurora Purple */
-  --color-accent-content: oklch(33.1% 0.027 259.62); /* nord0 (#2E3440) - Text on accent */
-
-  --color-neutral: oklch(46.3% 0.039 256.3); /* nord3 (#4C566A) - UI elements, slight contrast */
-  --color-neutral-content: oklch(95.27% 0.011 258.91); /* nord6 (#ECEFF4) - Text on neutral */
-
-  --color-info: oklch(56.95% 0.076 257.25); /* nord10 (#5E81AC) - Darker Frost Blue */
-  --color-info-content: oklch(95.27% 0.011 258.91); /* nord6 (#ECEFF4) - Text on info */
-
-  --color-success: oklch(73.57% 0.076 138.83); /* nord14 (#A3BE8C) - Aurora Green */
-  --color-success-content: oklch(33.1% 0.027 259.62); /* nord0 (#2E3440) - Text on success */
-
-  --color-warning: oklch(85.34% 0.096 97.4); /* nord13 (#EBCB8B) - Aurora Yellow */
-  --color-warning-content: oklch(33.1% 0.027 259.62); /* nord0 (#2E3440) - Text on warning */
-
-  --color-error: oklch(59.16% 0.128 13.9); /* nord11 (#BF616A) - Aurora Red */
-  --color-error-content: oklch(95.27% 0.011 258.91); /* nord6 (#ECEFF4) - Text on error */
-
-  /* Unchanged variables from your example */
-  --radius-selector: 2rem;
-  --radius-field: 0.5rem;
-  --radius-box: 2rem;
-  --size-selector: 0.25rem;
-  --size-field: 0.25rem;
-  --border: 2px;
-  --depth: 1;
-  --noise: 1;
-}
-
 /*custom font classes*/
-.font-main {
-  font-family: 'IBM Plex Sans', sans-serif;
+.font-serif {
+  font-family: 'EB Garamond', Garamond, 'Times New Roman', serif;
 }
 
-.font-title {
-  font-family: 'DM Serif Text', serif;
+.font-reading {
+  font-family: 'Source Serif 4', 'EB Garamond', Georgia, serif;
+}
+
+:root {
+  /* Nord official palette tokens */
+  --nord0: #2e3440;
+  --nord1: #3b4252;
+  --nord2: #434c5e;
+  --nord3: #4c566a;
+  --nord4: #d8dee9;
+  --nord5: #e5e9f0;
+  --nord6: #eceff4;
+  --nord7: #8fbcbb;
+  --nord8: #88c0d0;
+  --nord9: #81a1c1;
+  --nord10: #5e81ac;
+  --nord11: #bf616a;
+  --nord12: #d08770;
+  --nord13: #ebcb8b;
+  --nord14: #a3be8c;
+  --nord15: #b48ead;
+
+  --sidebar-width: 15rem;
+  --rail-mini: 3.5rem;
+  --rail-speed: 460ms;
+  --ease-slide: cubic-bezier(0.7, 0, 0.2, 1);
+  --ease-out: cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+/* Polar Night: deep dark surfaces */
+:root,
+html[data-theme='nord-dark'] {
+  color-scheme: dark;
+
+  --ground: #13161c;
+  --surface: #2e3440; /* nord0 */
+  --surface-raised: #3b4252; /* nord1 */
+  --surface-elevated: #434c5e; /* nord2 */
+
+  --ink: var(--nord6); /* #eceff4 */
+  --ink-muted: color-mix(in oklab, var(--nord4) 75%, transparent);
+  --ink-accent: var(--nord14); /* #a3be8c */
+
+  --card-bg: color-mix(in oklab, var(--surface-raised) 75%, transparent);
+  --card-border: color-mix(in oklab, var(--nord4) 18%, transparent);
+  --border-subtle: color-mix(in oklab, var(--nord4) 22%, transparent);
+  --border-strong: color-mix(in oklab, var(--nord4) 40%, transparent);
+
+  --btn-bg: color-mix(in oklab, var(--ground) 65%, transparent);
+  --btn-border: color-mix(in oklab, var(--nord4) 30%, transparent);
+
+  --dialog-bg: color-mix(in oklab, var(--ground) 94%, transparent);
+  --dialog-bar: color-mix(in oklab, var(--ground) 88%, transparent);
+  --dialog-backdrop: color-mix(in oklab, var(--ground) 72%, transparent);
+
+  --crest-color: var(--nord8);
+  --watermark-color: var(--nord8);
+  --watermark-opacity: 0.16;
+  --logo-outline: #88c0d0;
+  --signature-rest: #88c0d0;
+  --sig-end-saturate: 1;
+  --sig-end-brightness: 1;
+
+  --input-border: color-mix(in oklab, var(--nord4) 35%, transparent);
+  --veil-inner: color-mix(in oklab, var(--ground) 58%, transparent);
+  --veil-outer: color-mix(in oklab, var(--ground) 74%, transparent);
+}
+
+/* Snow Storm: Nord light, muted so the landing photo isn’t washed out */
+html[data-theme='nord'] {
+  color-scheme: light;
+
+  --ground: #e5e9f0; /* nord5 */
+  --surface: #eceff4; /* nord6 */
+  --surface-raised: #f2f4f8;
+  --surface-elevated: #d8dee9; /* nord4 */
+
+  --ink: var(--nord0); /* #2e3440 */
+  --ink-muted: var(--nord3); /* #4c566a */
+  --ink-accent: var(--nord10); /* #5e81ac */
+
+  --card-bg: color-mix(in oklab, var(--nord6) 82%, transparent);
+  --card-border: color-mix(in oklab, var(--nord3) 18%, transparent);
+  --border-subtle: color-mix(in oklab, var(--nord3) 16%, transparent);
+  --border-strong: color-mix(in oklab, var(--nord3) 38%, transparent);
+
+  --btn-bg: color-mix(in oklab, var(--nord6) 72%, transparent);
+  --btn-border: color-mix(in oklab, var(--nord3) 22%, transparent);
+
+  --dialog-bg: color-mix(in oklab, var(--nord6) 92%, transparent);
+  --dialog-bar: color-mix(in oklab, var(--nord5) 88%, transparent);
+  --dialog-backdrop: color-mix(in oklab, var(--nord0) 28%, transparent);
+
+  --crest-color: var(--nord10);
+  --watermark-color: var(--nord9);
+  --watermark-opacity: 0.14;
+  --logo-outline: #242933;
+  --signature-rest: initial;
+  --sig-end-saturate: 0.35;
+  --sig-end-brightness: 1;
+
+  --input-border: color-mix(in oklab, var(--nord3) 30%, transparent);
+  /* A light frost over the photo, a little heavier at the edges where the switches and links
+     sit, so the dark ink reads on any photo (a dark edge left them unreadable). */
+  --veil-inner: color-mix(in oklab, var(--nord6) 30%, transparent);
+  --veil-outer: color-mix(in oklab, var(--nord5) 42%, transparent);
+}
+
+/* Snow Storm landing: the darkest inks, with a soft pale halo for busy parts of a photo. */
+html[data-theme='nord'] .landing {
+  --ink-muted: var(--nord1);
+  --border-strong: color-mix(in oklab, var(--nord1) 55%, transparent);
+  text-shadow:
+    0 0 1px color-mix(in oklab, var(--nord6) 80%, transparent),
+    0 0 10px color-mix(in oklab, var(--nord6) 90%, transparent),
+    0 0 22px color-mix(in oklab, var(--nord6) 60%, transparent);
+}
+
+/* The signature's colour drift starts from the darker Nord blue, so it holds on the light haze. */
+html[data-theme='nord'] .landing .drift {
+  color: var(--nord10);
+}
+
+html[data-theme='nord'] .landing svg {
+  filter: drop-shadow(0 0 6px color-mix(in oklab, var(--nord6) 80%, transparent));
+}
+
+/* Frost: dusk built from nord7–nord10, between Polar Night and Snow Storm */
+html[data-theme='frost'] {
+  color-scheme: dark;
+
+  --ground: #3d5166;
+  --surface: #466078;
+  --surface-raised: #50708a;
+  --surface-elevated: #62829b;
+
+  --ink: var(--nord6); /* #eceff4 */
+  --ink-muted: var(--nord4); /* #d8dee9 */
+  --ink-accent: var(--nord7); /* #8fbcbb */
+
+  --card-bg: color-mix(in oklab, var(--nord8) 18%, var(--surface-raised));
+  --card-border: color-mix(in oklab, var(--nord8) 40%, transparent);
+  --border-subtle: color-mix(in oklab, var(--nord8) 28%, transparent);
+  --border-strong: color-mix(in oklab, var(--nord8) 48%, transparent);
+
+  --btn-bg: color-mix(in oklab, var(--nord8) 18%, var(--ground));
+  --btn-border: color-mix(in oklab, var(--nord8) 45%, transparent);
+
+  --dialog-bg: color-mix(in oklab, var(--ground) 88%, var(--nord8));
+  --dialog-bar: color-mix(in oklab, var(--ground) 82%, var(--nord8));
+  --dialog-backdrop: color-mix(in oklab, var(--ground) 72%, transparent);
+
+  --crest-color: var(--nord8);
+  --watermark-color: var(--nord8);
+  --watermark-opacity: 0.22;
+  --logo-outline: #88c0d0;
+  --signature-rest: #88c0d0;
+  --sig-end-saturate: 1;
+  --sig-end-brightness: 1;
+
+  --input-border: color-mix(in oklab, var(--nord8) 40%, transparent);
+  --veil-inner: color-mix(in oklab, var(--ground) 52%, transparent);
+  --veil-outer: color-mix(in oklab, var(--ground) 68%, transparent);
+}
+
+/* Catalogue tokens: the faint mono ink, the mat behind framed pictures, and the header window's
+   duotone (tint) and veil, per theme. */
+:root,
+html[data-theme='nord-dark'] {
+  --ink-faint: #9aa2b1;
+  --tint: var(--nord10);
+  --win-in: color-mix(in oklab, var(--ground) 30%, transparent);
+  --win-out: color-mix(in oklab, var(--ground) 70%, transparent);
+}
+
+html[data-theme='nord'] {
+  --ink-faint: #5b6579;
+  --tint: var(--nord9);
+  --win-in: color-mix(in oklab, var(--nord5) 10%, transparent);
+  --win-out: color-mix(in oklab, var(--nord3) 50%, transparent);
+}
+
+html[data-theme='frost'] {
+  --ink-faint: #c9d2dd;
+  --tint: var(--nord8);
+  --win-in: color-mix(in oklab, var(--ground) 25%, transparent);
+  --win-out: color-mix(in oklab, var(--ground) 65%, transparent);
+}
+
+:root {
+  --mat: color-mix(in oklab, var(--surface) 70%, var(--ground));
+  --page-width: 54rem;
+  --tick: 0.7rem;
+}
+
+body {
+  background: var(--ground);
+  color: var(--ink);
 }
 
 .font-mono {
-  font-family: 'IBM Plex Mono', monospace;
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
 }
 
-html {
-  scroll-behavior: smooth;
+/* A framed picture: hairline border, a mat, and two corner ticks. */
+.mat {
+  position: relative;
+  display: block;
+  padding: 0.55rem;
+  border: 1px solid var(--card-border);
+  background: var(--mat);
+  transition: border-color 220ms var(--ease-out);
+}
+
+.mat::before,
+.mat::after,
+.ticked::before,
+.ticked::after {
+  content: '';
+  position: absolute;
+  width: var(--tick);
+  height: var(--tick);
+  border: 0 solid var(--border-strong);
+  pointer-events: none;
+  transition: border-color 220ms ease;
+}
+
+.mat::before {
+  top: -0.45rem;
+  left: -0.45rem;
+  border-width: 1px 0 0 1px;
+}
+
+.mat::after {
+  right: -0.45rem;
+  bottom: -0.45rem;
+  border-width: 0 1px 1px 0;
+}
+
+/* Icon buttons: no box, two corner ticks. On hover they reach out a little and take the accent. */
+.ticked {
+  --tick: 0.45rem;
+  --tick-at: 0.3rem;
+  position: relative;
+}
+
+.ticked::before,
+.ticked::after {
+  transition:
+    border-color 220ms ease,
+    width 280ms var(--ease-out),
+    height 280ms var(--ease-out),
+    top 280ms var(--ease-out),
+    left 280ms var(--ease-out),
+    right 280ms var(--ease-out),
+    bottom 280ms var(--ease-out);
+}
+
+.ticked::before {
+  top: var(--tick-at);
+  left: var(--tick-at);
+  border-width: 1px 0 0 1px;
+}
+
+.ticked::after {
+  right: var(--tick-at);
+  bottom: var(--tick-at);
+  border-width: 0 1px 1px 0;
+}
+
+.ticked:hover,
+.ticked:focus-visible {
+  --tick-at: 0.1rem;
+}
+
+.ticked:hover::before,
+.ticked:hover::after,
+.ticked:focus-visible::before,
+.ticked:focus-visible::after {
+  width: calc(var(--tick) * 1.55);
+  height: calc(var(--tick) * 1.55);
+  border-color: var(--ink-accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ticked::before,
+  .ticked::after {
+    transition: border-color 220ms ease;
+  }
+}
+
+html[data-motion='off'] .ticked::before,
+html[data-motion='off'] .ticked::after {
+  transition: border-color 220ms ease;
+}
+
+/* Pictures in a write-up number themselves in page order with a CSS counter: the cover, inline
+   images in the text (a paragraph holding an image) and the gallery. Nothing is counted in markup,
+   so a missing cover or an image added in the editor never leaves a gap or a wrong number. */
+.figures {
+  counter-reset: fig;
+}
+
+.figures figure,
+.figures .prose p:has(> img) {
+  counter-increment: fig;
+}
+
+.figures figcaption::before,
+.figures .prose p:has(> img)::after {
+  content: 'fig. ' counter(fig);
+}
+
+.figures .prose p:has(> img) img {
+  margin-bottom: 0;
+}
+
+.figures .prose p:has(> img)::after {
+  display: block;
+  margin-top: 0.6rem;
+  color: var(--ink-faint);
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  letter-spacing: 0.04em;
+}
+
+/* The first letter of a write-up, set like a versal in a chant book (#lib/initial.ts). */
+.initial {
+  float: left;
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 4.4rem;
+  height: 4.4rem;
+  margin: 0.45rem 1rem 0.1rem 0;
+  border: 1px solid var(--card-border);
+  color: var(--nord8);
+  font-family: 'Grenze Gotisch', 'DM Serif Text', serif;
+  font-size: 3.7rem;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 1;
+}
+
+html[data-theme='nord'] .initial {
+  color: var(--nord10);
+}
+
+.initial::before,
+.initial::after {
+  content: '';
+  position: absolute;
+  width: 0.55rem;
+  height: 0.55rem;
+  border: 0 solid var(--border-strong);
+}
+
+.initial::before {
+  top: -0.4rem;
+  left: -0.4rem;
+  border-width: 1px 0 0 1px;
+}
+
+.initial::after {
+  right: -0.4rem;
+  bottom: -0.4rem;
+  border-width: 0 1px 1px 0;
+}
+
+.has-initial::after {
+  content: '';
+  display: table;
+  clear: both;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* First-paint backdrop photo; app.html's inline script swaps in the visitor's saved choice. */
+:root {
+  --site-backdrop: url('/assets/backgrounds/hero-bg.webp');
+}
+
+.site-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  background: var(--ground);
+  pointer-events: none;
+}
+
+.site-backdrop .photo,
+.site-backdrop .veil {
+  position: absolute;
+  inset: 0;
+}
+
+.site-backdrop .photo {
+  background-color: var(--ground);
+  background-size: cover;
+  background-position: center bottom;
+  opacity: 0;
+}
+
+.site-backdrop .under {
+  z-index: 0;
+}
+
+.site-backdrop.ready .under.held {
+  opacity: 1;
+}
+
+.site-backdrop .over {
+  z-index: 1;
+}
+
+.site-backdrop .over.shown {
+  animation: backdrop-in 700ms ease forwards;
+}
+
+.site-backdrop .over.shown.settled {
+  animation: none;
+  opacity: 1;
+}
+
+.site-backdrop .veil {
+  z-index: 2;
+  background: radial-gradient(ellipse at center, var(--veil-inner) 0%, var(--veil-outer) 70%);
+}
+
+@keyframes backdrop-in {
+  to {
+    opacity: 1;
+  }
+}
+
+@media (min-width: 640px) {
+  .site-backdrop .photo {
+    background-position: center;
+  }
+}
+
+html[data-vt] .inner-shell .transition {
+  view-transition-name: page;
+}
+
+/* The side signature is thousands of paths. Leave it out of snapshots. */
+html[data-vt] .watermark,
+html[data-vt] .floor-crest,
+html[data-theme-fade] .watermark,
+html[data-theme-fade] .floor-crest {
+  visibility: hidden;
+}
+
+html[data-vt] .turn,
+html[data-vt] .jaf-crest,
+html[data-fade] .turn,
+html[data-fade] .drift,
+html[data-fade] .jaf-crest,
+html[data-theme-fade] .turn,
+html[data-theme-fade] .drift,
+html[data-theme-fade] .jaf-crest {
+  animation-play-state: paused;
+}
+
+/* Color and filter tweens repaint the signature every frame. Hold them off during the crossfade. */
+html[data-theme-fade] *,
+html[data-theme-fade] *::before,
+html[data-theme-fade] *::after {
+  transition: none !important;
+}
+
+/* Settled inner pages: keep the shared photo mounted but out of the paint path. */
+html:has(.inner-shell):not([data-fade]) .site-backdrop {
+  opacity: 0;
+  visibility: hidden;
+}
+
+html[data-fade] .landing,
+html[data-fade] .inner-shell {
+  pointer-events: none;
+}
+
+/* Landing → inner: dissolve text only; photo stays put. */
+html[data-enter='inner'][data-fade='out'] .landing-chrome {
+  animation: page-fade-out 120ms ease both;
+}
+
+/* Landing → inner: surface + body rise while the photo yields. */
+html[data-enter='inner'][data-fade='in'] .site-backdrop {
+  visibility: visible;
+  animation: enter-backdrop-out 260ms ease both;
+}
+
+html[data-enter='inner'][data-fade='in'] .shell-surface {
+  animation: enter-surface 260ms var(--ease-out) both;
+}
+
+html[data-enter='inner'][data-fade='in'] .watermark,
+html[data-enter='inner'][data-fade='in'] .floor-crest,
+html[data-enter='inner'][data-fade='in'] .seam {
+  opacity: 0;
+}
+
+html[data-enter='inner'][data-fade='in'] .inner-shell .page-stack {
+  animation: enter-body 260ms var(--ease-out) both;
+}
+
+html[data-enter='inner'][data-fade='in'] .sidebar-open .page-stack {
+  animation: enter-body-open 320ms var(--ease-slide) both;
+}
+
+@media (min-width: 768px) {
+  html[data-enter='inner'][data-fade='in'] .rail:not(.closed) {
+    animation: enter-rail 320ms var(--ease-slide) both;
+  }
+}
+
+/* Mobile rail is an overlay menu — only fade the body, no slide. */
+@media (max-width: 767px) {
+  html[data-enter='inner'][data-fade='in'] .sidebar-open .page-stack {
+    animation: enter-body 260ms var(--ease-out) both;
+  }
+}
+
+/* Landing → inner (+layout sets html[data-entrance] for ~1.9s): everything comes in together
+   with the rail. The header window opens like a shutter, the breadcrumb types itself out
+   (PageWindow), and the page's blocks (.rise, ordered by --i) and the sidebar's links rise with
+   only a slight offset between them. */
+html[data-entrance] .page-window .window {
+  animation: entrance-shutter 640ms var(--ease-slide) both;
+}
+
+html[data-entrance] .page-window .photo {
+  animation: entrance-settle 1300ms var(--ease-out) both;
+}
+
+html[data-entrance] .rise {
+  animation: entrance-rise 560ms var(--ease-out) both;
+  animation-delay: calc(60ms + min(var(--i, 0), 6) * 40ms);
+}
+
+html[data-entrance] .rise .mat::before,
+html[data-entrance] .rise .mat::after,
+html[data-entrance] .rise .initial {
+  animation: entrance-fade 500ms ease both;
+  animation-delay: calc(240ms + min(var(--i, 0), 6) * 40ms);
+}
+
+@media (min-width: 768px) {
+  html[data-entrance] .rail .pages li,
+  html[data-entrance] .rail .tools,
+  html[data-entrance] .rail .socials li {
+    animation: entrance-rise 520ms var(--ease-out) both;
+  }
+
+  html[data-entrance] .rail .pages li:nth-child(1) {
+    animation-delay: 40ms;
+  }
+
+  html[data-entrance] .rail .pages li:nth-child(2) {
+    animation-delay: 70ms;
+  }
+
+  html[data-entrance] .rail .pages li:nth-child(3) {
+    animation-delay: 100ms;
+  }
+
+  html[data-entrance] .rail .tools {
+    animation-delay: 130ms;
+  }
+
+  html[data-entrance] .rail .socials li:nth-child(1) {
+    animation-delay: 150ms;
+  }
+
+  html[data-entrance] .rail .socials li:nth-child(2) {
+    animation-delay: 170ms;
+  }
+
+  html[data-entrance] .rail .socials li:nth-child(3) {
+    animation-delay: 190ms;
+  }
+}
+
+/* Page → page (+layout sets html[data-swap]): the old page fades, then the new one rises in
+   block by block, the same rise as the entrance but quicker. On phones too, and without view
+   transitions (html[data-leaving] fades the old page out first). */
+html[data-swap] .inner-shell .rise {
+  animation: entrance-rise 460ms var(--ease-out) both;
+  animation-delay: calc(120ms + min(var(--i, 0), 6) * 55ms);
+}
+
+html[data-swap] .inner-shell .rise .mat::before,
+html[data-swap] .inner-shell .rise .mat::after,
+html[data-swap] .inner-shell .rise .initial {
+  animation: entrance-fade 400ms ease both;
+  animation-delay: calc(340ms + min(var(--i, 0), 6) * 55ms);
+}
+
+html[data-leaving] .inner-shell .transition {
+  animation: vt-fade-out 140ms ease both;
+}
+
+@keyframes entrance-shutter {
+  from {
+    clip-path: inset(50% 0 50% 0);
+  }
+}
+
+@keyframes entrance-settle {
+  from {
+    transform: scale(1.08);
+  }
+}
+
+@keyframes entrance-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes entrance-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+    filter: blur(4px);
+  }
+}
+
+/* Inner → landing: reveal the photo under the fading shell, then bring chrome back. */
+html[data-enter='landing'][data-fade='out'] .site-backdrop {
+  visibility: visible;
+  opacity: 1;
+}
+
+html[data-enter='landing'][data-fade='out'] .inner-shell,
+html[data-enter='landing'][data-fade='out'] .shell-surface {
+  animation: page-fade-out 120ms ease both;
+}
+
+/* Kill mid-enter body/rail motion so a quick reverse does not snap translate. */
+html[data-enter='landing'][data-fade] .inner-shell .page-stack,
+html[data-enter='landing'][data-fade] .rail,
+html[data-enter='landing'][data-fade] .watermark,
+html[data-enter='landing'][data-fade] .floor-crest,
+html[data-enter='landing'][data-fade] .seam {
+  animation: none !important;
+}
+
+html[data-enter='landing'][data-fade='in'] .site-backdrop {
+  visibility: visible;
+  opacity: 1;
+}
+
+html[data-enter='landing'][data-fade='in'] .landing-chrome {
+  animation: page-fade-in 200ms var(--ease-out) both;
+}
+
+@keyframes page-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes page-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes enter-backdrop-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* Opacity on .shell-surface (composited), not background-color on the whole shell. */
+@keyframes enter-surface {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes enter-body {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes enter-body-open {
+  from {
+    opacity: 0;
+    translate: var(--rail-mini) 0;
+  }
+  to {
+    opacity: 1;
+    translate: var(--sidebar-width) 0;
+  }
+}
+
+@keyframes enter-rail {
+  from {
+    translate: calc(var(--rail-mini) - 100%) 0;
+  }
+  to {
+    translate: 0 0;
+  }
+}
+
+html[data-vt='enter'][data-vt-phase='new'] .rail,
+html[data-vt='leave']:not([data-vt-phase]) .rail {
+  view-transition-name: site-rail;
+}
+
+.to-top {
+  --tick: 0.5rem;
+  position: fixed;
+  z-index: 30;
+  right: max(1.25rem, env(safe-area-inset-right));
+  bottom: max(1.25rem, env(safe-area-inset-bottom));
+  display: grid;
+  place-items: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink-muted);
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition:
+    opacity 200ms ease,
+    color 200ms ease;
+}
+
+.to-top svg {
+  width: 1.05rem;
+  height: 1.05rem;
+}
+
+.to-top.shown {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.to-top:hover,
+.to-top:focus-visible {
+  color: var(--ink);
+  outline: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .to-top {
+    transition: none;
+  }
+}
+
+/* Inner pages only move the page column. Theme changes crossfade the whole screen once. */
+::view-transition-group(*) {
+  animation-duration: 200ms;
+  animation-timing-function: var(--ease-out);
+}
+
+::view-transition-group(root),
+::view-transition-old(root),
+::view-transition-new(root),
+::view-transition-group(page),
+::view-transition-group(about-tabs),
+::view-transition-group(site-rail) {
+  animation: none;
+}
+
+::view-transition-old(root),
+::view-transition-new(root),
+::view-transition-old(page),
+::view-transition-new(page) {
+  mix-blend-mode: normal;
+}
+
+html[data-theme-fade]::view-transition-old(root) {
+  z-index: 1;
+  animation: vt-fade-out 240ms ease both;
+}
+
+::view-transition-old(page) {
+  animation: vt-fade-out 120ms ease both;
+}
+
+::view-transition-new(page) {
+  animation: entrance-fade 220ms ease both;
+}
+
+::view-transition-old(about-tabs),
+::view-transition-new(about-tabs) {
+  mix-blend-mode: normal;
+  animation: none;
+}
+
+::view-transition-old(about-tabs):only-child {
+  animation: vt-fade-out 200ms ease both;
+}
+
+::view-transition-new(about-tabs):only-child {
+  animation: vt-rise 420ms var(--ease-out) 110ms both;
+}
+
+::view-transition-new(site-rail) {
+  animation: vt-rail-in 560ms var(--ease-slide) both;
+}
+
+::view-transition-old(site-rail) {
+  animation: vt-rail-out 360ms var(--ease-slide) both;
+}
+
+@keyframes vt-fade-out {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes vt-rise {
+  from {
+    opacity: 0;
+    translate: 0 0.75rem;
+  }
+}
+
+@keyframes vt-rail-in {
+  from {
+    translate: -100% 0;
+  }
+}
+
+@keyframes vt-rail-out {
+  to {
+    translate: -100% 0;
+  }
+}
+
+.quiet-link {
+  color: var(--ink-muted);
+  background: linear-gradient(currentColor, currentColor) no-repeat left bottom / 0 1px;
+  padding-bottom: 2px;
+  transition:
+    background-size 300ms ease,
+    color 300ms ease;
+}
+
+.quiet-link:hover,
+.quiet-link:focus-visible {
+  color: var(--ink-accent);
+  background-size: 100% 1px;
+  outline: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+
+  .site-backdrop .over.shown {
+    animation: none;
+    opacity: 1;
+  }
+
+  html[data-enter='inner'][data-fade='out'] .landing-chrome,
+  html[data-enter='inner'][data-fade='in'] .site-backdrop,
+  html[data-enter='inner'][data-fade='in'] .shell-surface,
+  html[data-enter='inner'][data-fade='in'] .inner-shell .page-stack,
+  html[data-enter='inner'][data-fade='in'] .sidebar-open .page-stack,
+  html[data-enter='inner'][data-fade='in'] .rail:not(.closed),
+  html[data-enter='landing'][data-fade='out'] .inner-shell,
+  html[data-enter='landing'][data-fade='out'] .shell-surface,
+  html[data-enter='landing'][data-fade='in'] .landing-chrome {
+    animation: none !important;
+  }
+}
+
+/* The pause control sets this before paint. Short durations let a reveal
+   finish on its end state instead of freezing halfway through. */
+html[data-motion='off'] *,
+html[data-motion='off'] *::before,
+html[data-motion='off'] *::after {
+  animation-duration: 0.01ms !important;
+  animation-delay: 0ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  transition-delay: 0ms !important;
+  scroll-behavior: auto !important;
+}
+
+html[data-motion='off']::view-transition-group(*),
+html[data-motion='off']::view-transition-old(*),
+html[data-motion='off']::view-transition-new(*) {
+  animation: none !important;
+}
+
+html[data-motion='off'] .site-backdrop .over.shown {
+  animation: none;
+  opacity: 1;
 }

@@ -4,6 +4,39 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" href="/favicon.png" />
+    <script>
+      (function () {
+        try {
+          if (localStorage.getItem('site-motion') === 'off') {
+            document.documentElement.dataset.motion = 'off';
+          }
+        } catch (e) {}
+        try {
+          var saved = localStorage.getItem('site-theme');
+          var mode = 'polar-night';
+          if (saved === 'light' || saved === 'snow-storm') mode = 'snow-storm';
+          else if (saved === 'frost') mode = 'frost';
+          var daisy = mode === 'snow-storm' ? 'nord' : mode === 'frost' ? 'frost' : 'nord-dark';
+          var doc = document.documentElement;
+          doc.setAttribute('data-theme', daisy);
+          doc.classList.add(mode);
+          doc.style.colorScheme = mode === 'snow-storm' ? 'light' : 'dark';
+        } catch (e) {}
+        // Backdrop photo: start downloading the visitor's saved one (not the default) right away.
+        var photo = '/assets/backgrounds/hero-bg.webp';
+        try {
+          var chosen = localStorage.getItem('site-backdrop');
+          if (chosen && /^\/assets\/backgrounds\/[\w-]+\.webp$/.test(chosen)) photo = chosen;
+        } catch (e) {}
+        document.documentElement.style.setProperty('--site-backdrop', "url('" + photo + "')");
+        var link = document.createElement('link');
+        link.rel = 'preload';
+        link.as = 'image';
+        link.type = 'image/webp';
+        link.href = photo;
+        document.head.appendChild(link);
+      })();
+    </script>
     %sveltekit.head%
   </head>
 
