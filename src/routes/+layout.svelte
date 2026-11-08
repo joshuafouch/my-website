@@ -180,7 +180,7 @@
         }
 
         // Backstop in case animationend never fires (hidden tab, interrupted animation).
-        const timer = window.setTimeout(go, 260);
+        const timer = window.setTimeout(go, 320);
         outgoing.addEventListener('animationend', function onEnd(event) {
           if (event.target !== outgoing) return;
           if (event.animationName !== 'page-fade-out' && event.animationName !== 'landing-leave')

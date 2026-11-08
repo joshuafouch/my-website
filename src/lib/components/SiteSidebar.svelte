@@ -72,27 +72,14 @@
       aria-label={menu ? 'Close' : 'Menu'}
       onclick={() => (menu = !menu)}
     >
-      {#if menu}
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path
-            d="M6 6l12 12M18 6 6 18"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.5"
-            stroke-linecap="round"
-          />
-        </svg>
-      {:else}
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path
-            d="M4 7h16M4 12h16M4 17h16"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="1.5"
-            stroke-linecap="round"
-          />
-        </svg>
-      {/if}
+      <!-- One icon: the outer bars turn into the cross and the middle one fades (.expanded). -->
+      <svg class="burger" viewBox="0 0 24 24" aria-hidden="true">
+        <g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+          <path class="bar-top" d="M4 7h16" />
+          <path class="bar-mid" d="M4 12h16" />
+          <path class="bar-low" d="M4 17h16" />
+        </g>
+      </svg>
     </button>
   </div>
 
@@ -116,8 +103,8 @@
   <nav id="site-links" aria-label="Pages">
     <div class="sheet">
       <ul class="pages" inert={linksHidden}>
-        {#each links as link (link.href)}
-          <li>
+        {#each links as link, index (link.href)}
+          <li style:--n={index}>
             <a
               href={resolve(link.href)}
               aria-current={current(link.href) ? 'page' : undefined}
@@ -556,15 +543,11 @@
       transition: grid-template-rows 280ms cubic-bezier(0.2, 0.8, 0.2, 1);
     }
 
+    /* The sheet keeps min-height 0 and its overflow clipped while open too: either one set to
+       auto/visible makes the row jump to full height instead of growing. */
     .expanded nav {
       grid-template-rows: 1fr;
-      min-height: auto;
       border-top: 1px solid var(--border-subtle);
-    }
-
-    .expanded .sheet {
-      min-height: auto;
-      overflow: visible;
     }
 
     .sheet {
@@ -573,13 +556,50 @@
       overflow: hidden;
     }
 
-    .expanded .sheet {
-      padding-bottom: 0.85rem;
-    }
-
     .rail-foot {
       margin-top: 0.35rem;
-      padding: 0.35rem 0 0;
+      padding: 0.35rem 0 0.85rem;
+    }
+
+    /* The links drop in one after another as the sheet opens, and lift away quickly as it
+       closes. */
+    .pages li,
+    .rail-foot {
+      opacity: 0;
+      translate: 0 -0.5rem;
+      transition:
+        opacity 140ms ease,
+        translate 180ms ease;
+    }
+
+    .expanded .pages li,
+    .expanded .rail-foot {
+      opacity: 1;
+      translate: 0 0;
+      transition:
+        opacity 280ms ease,
+        translate 380ms var(--ease-out);
+      transition-delay: calc(70ms + var(--n, 3) * 45ms);
+    }
+
+    .burger path {
+      transform-box: fill-box;
+      transform-origin: center;
+      transition:
+        transform 300ms var(--ease-slide),
+        opacity 180ms ease;
+    }
+
+    .expanded .burger .bar-top {
+      transform: translateY(5px) rotate(45deg);
+    }
+
+    .expanded .burger .bar-mid {
+      opacity: 0;
+    }
+
+    .expanded .burger .bar-low {
+      transform: translateY(-5px) rotate(-45deg);
     }
 
     .crest {
@@ -594,7 +614,12 @@
     .mini-tools,
     nav,
     .fold svg,
-    .pages a {
+    .pages a,
+    .pages li,
+    .rail-foot,
+    .expanded .pages li,
+    .expanded .rail-foot,
+    .burger path {
       transition: none;
     }
 

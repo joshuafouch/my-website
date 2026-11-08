@@ -816,9 +816,11 @@ html[data-enter='landing'][data-fade='out'] .site-backdrop {
   opacity: 1;
 }
 
+/* Long enough to see the page dissolve into the photo before the landing rises back in
+   (+page.svelte, .faded-in). */
 html[data-enter='landing'][data-fade='out'] .inner-shell,
 html[data-enter='landing'][data-fade='out'] .shell-surface {
-  animation: page-fade-out 120ms ease both;
+  animation: page-fade-out 240ms ease-in both;
 }
 
 /* Kill mid-enter body/rail motion so a quick reverse does not snap translate. */

@@ -352,11 +352,26 @@
     color: var(--ink);
   }
 
-  /* The page fade is the motion when arriving from another page (see fadedIn). */
-  .faded-in.is-ready .reveal,
+  /* Back from an inner page (see fadedIn): that page has dissolved into the photo, and the
+     signature, then each row under it, rise back in one after another. */
   .faded-in.is-ready .logo.quick {
-    animation: none;
-    opacity: 1;
+    animation: return-rise 620ms var(--ease-out) 40ms both;
+  }
+
+  .faded-in.is-ready .reveal {
+    animation: return-rise 560ms var(--ease-out) both;
+    animation-delay: calc(160ms + var(--step) * 110ms);
+  }
+
+  @keyframes return-rise {
+    from {
+      opacity: 0;
+      transform: translateY(0.9rem) scale(0.985);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
   }
 
   .pages {
@@ -543,7 +558,9 @@
     }
 
     .is-ready .reveal,
-    .is-ready .logo.quick {
+    .is-ready .logo.quick,
+    .faded-in.is-ready .reveal,
+    .faded-in.is-ready .logo.quick {
       animation: none;
       opacity: 1;
     }
