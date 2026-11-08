@@ -9,6 +9,8 @@
 @import '@fontsource/source-serif-4/400-italic.css';
 @import '@fontsource/source-serif-4/600.css';
 @import '@fontsource/source-serif-4/600-italic.css';
+/* The illuminated initial at the start of a write-up (see #lib/initial.ts). */
+@import '@fontsource/grenze-gotisch/500.css';
 
 @plugin '@tailwindcss/typography';
 
@@ -202,9 +204,29 @@ html[data-theme='nord'] {
   --sig-end-brightness: 1;
 
   --input-border: color-mix(in oklab, var(--nord3) 30%, transparent);
-  /* Soft cool haze: quieter than the old white wash, still readable for dark ink. */
-  --veil-inner: color-mix(in oklab, var(--nord5) 38%, transparent);
-  --veil-outer: color-mix(in oklab, var(--nord3) 52%, transparent);
+  /* A light frost over the photo, a little heavier at the edges where the switches and links
+     sit, so the dark ink reads on any photo (a dark edge left them unreadable). */
+  --veil-inner: color-mix(in oklab, var(--nord6) 30%, transparent);
+  --veil-outer: color-mix(in oklab, var(--nord5) 42%, transparent);
+}
+
+/* Snow Storm landing: the darkest inks, with a soft pale halo for busy parts of a photo. */
+html[data-theme='nord'] .landing {
+  --ink-muted: var(--nord1);
+  --border-strong: color-mix(in oklab, var(--nord1) 55%, transparent);
+  text-shadow:
+    0 0 1px color-mix(in oklab, var(--nord6) 80%, transparent),
+    0 0 10px color-mix(in oklab, var(--nord6) 90%, transparent),
+    0 0 22px color-mix(in oklab, var(--nord6) 60%, transparent);
+}
+
+/* The signature's colour drift starts from the darker Nord blue, so it holds on the light haze. */
+html[data-theme='nord'] .landing .drift {
+  color: var(--nord10);
+}
+
+html[data-theme='nord'] .landing svg {
+  filter: drop-shadow(0 0 6px color-mix(in oklab, var(--nord6) 80%, transparent));
 }
 
 /* Frost: dusk built from nord7–nord10, between Polar Night and Snow Storm */
@@ -245,9 +267,227 @@ html[data-theme='frost'] {
   --veil-outer: color-mix(in oklab, var(--ground) 68%, transparent);
 }
 
+/* Catalogue tokens: the faint mono ink, the mat behind framed pictures, and the header window's
+   duotone (tint) and veil, per theme. */
+:root,
+html[data-theme='nord-dark'] {
+  --ink-faint: #9aa2b1;
+  --tint: var(--nord10);
+  --win-in: color-mix(in oklab, var(--ground) 30%, transparent);
+  --win-out: color-mix(in oklab, var(--ground) 70%, transparent);
+}
+
+html[data-theme='nord'] {
+  --ink-faint: #5b6579;
+  --tint: var(--nord9);
+  --win-in: color-mix(in oklab, var(--nord5) 10%, transparent);
+  --win-out: color-mix(in oklab, var(--nord3) 50%, transparent);
+}
+
+html[data-theme='frost'] {
+  --ink-faint: #c9d2dd;
+  --tint: var(--nord8);
+  --win-in: color-mix(in oklab, var(--ground) 25%, transparent);
+  --win-out: color-mix(in oklab, var(--ground) 65%, transparent);
+}
+
+:root {
+  --mat: color-mix(in oklab, var(--surface) 70%, var(--ground));
+  --page-width: 54rem;
+  --tick: 0.7rem;
+}
+
 body {
   background: var(--ground);
   color: var(--ink);
+}
+
+.font-mono {
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+}
+
+/* A framed picture: hairline border, a mat, and two corner ticks. */
+.mat {
+  position: relative;
+  display: block;
+  padding: 0.55rem;
+  border: 1px solid var(--card-border);
+  background: var(--mat);
+  transition: border-color 220ms var(--ease-out);
+}
+
+.mat::before,
+.mat::after,
+.ticked::before,
+.ticked::after {
+  content: '';
+  position: absolute;
+  width: var(--tick);
+  height: var(--tick);
+  border: 0 solid var(--border-strong);
+  pointer-events: none;
+  transition: border-color 220ms ease;
+}
+
+.mat::before {
+  top: -0.45rem;
+  left: -0.45rem;
+  border-width: 1px 0 0 1px;
+}
+
+.mat::after {
+  right: -0.45rem;
+  bottom: -0.45rem;
+  border-width: 0 1px 1px 0;
+}
+
+/* Icon buttons: no box, two corner ticks. On hover they reach out a little and take the accent. */
+.ticked {
+  --tick: 0.45rem;
+  --tick-at: 0.3rem;
+  position: relative;
+}
+
+.ticked::before,
+.ticked::after {
+  transition:
+    border-color 220ms ease,
+    width 280ms var(--ease-out),
+    height 280ms var(--ease-out),
+    top 280ms var(--ease-out),
+    left 280ms var(--ease-out),
+    right 280ms var(--ease-out),
+    bottom 280ms var(--ease-out);
+}
+
+.ticked::before {
+  top: var(--tick-at);
+  left: var(--tick-at);
+  border-width: 1px 0 0 1px;
+}
+
+.ticked::after {
+  right: var(--tick-at);
+  bottom: var(--tick-at);
+  border-width: 0 1px 1px 0;
+}
+
+.ticked:hover,
+.ticked:focus-visible {
+  --tick-at: 0.1rem;
+}
+
+.ticked:hover::before,
+.ticked:hover::after,
+.ticked:focus-visible::before,
+.ticked:focus-visible::after {
+  width: calc(var(--tick) * 1.55);
+  height: calc(var(--tick) * 1.55);
+  border-color: var(--ink-accent);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ticked::before,
+  .ticked::after {
+    transition: border-color 220ms ease;
+  }
+}
+
+html[data-motion='off'] .ticked::before,
+html[data-motion='off'] .ticked::after {
+  transition: border-color 220ms ease;
+}
+
+/* Pictures in a write-up number themselves in page order with a CSS counter: the cover, inline
+   images in the text (a paragraph holding an image) and the gallery. Nothing is counted in markup,
+   so a missing cover or an image added in the editor never leaves a gap or a wrong number. */
+.figures {
+  counter-reset: fig;
+}
+
+.figures figure,
+.figures .prose p:has(> img) {
+  counter-increment: fig;
+}
+
+.figures figcaption::before,
+.figures .prose p:has(> img)::after {
+  content: 'fig. ' counter(fig);
+}
+
+.figures .prose p:has(> img) img {
+  margin-bottom: 0;
+}
+
+.figures .prose p:has(> img)::after {
+  display: block;
+  margin-top: 0.6rem;
+  color: var(--ink-faint);
+  font-family: 'IBM Plex Mono', ui-monospace, monospace;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  letter-spacing: 0.04em;
+}
+
+/* The first letter of a write-up, set like a versal in a chant book (#lib/initial.ts). */
+.initial {
+  float: left;
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 4.4rem;
+  height: 4.4rem;
+  margin: 0.45rem 1rem 0.1rem 0;
+  border: 1px solid var(--card-border);
+  color: var(--nord8);
+  font-family: 'Grenze Gotisch', 'DM Serif Text', serif;
+  font-size: 3.7rem;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 1;
+}
+
+html[data-theme='nord'] .initial {
+  color: var(--nord10);
+}
+
+.initial::before,
+.initial::after {
+  content: '';
+  position: absolute;
+  width: 0.55rem;
+  height: 0.55rem;
+  border: 0 solid var(--border-strong);
+}
+
+.initial::before {
+  top: -0.4rem;
+  left: -0.4rem;
+  border-width: 1px 0 0 1px;
+}
+
+.initial::after {
+  right: -0.4rem;
+  bottom: -0.4rem;
+  border-width: 0 1px 1px 0;
+}
+
+.has-initial::after {
+  content: '';
+  display: table;
+  clear: both;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }
 
 /* First-paint backdrop photo; app.html's inline script swaps in the visitor's saved choice. */
@@ -397,6 +637,111 @@ html[data-enter='inner'][data-fade='in'] .sidebar-open .page-stack {
   }
 }
 
+/* Landing → inner (+layout sets html[data-entrance] for ~1.9s): everything comes in together
+   with the rail. The header window opens like a shutter, the breadcrumb types itself out
+   (PageWindow), and the page's blocks (.rise, ordered by --i) and the sidebar's links rise with
+   only a slight offset between them. */
+html[data-entrance] .page-window .window {
+  animation: entrance-shutter 640ms var(--ease-slide) both;
+}
+
+html[data-entrance] .page-window .photo {
+  animation: entrance-settle 1300ms var(--ease-out) both;
+}
+
+html[data-entrance] .rise {
+  animation: entrance-rise 560ms var(--ease-out) both;
+  animation-delay: calc(60ms + min(var(--i, 0), 6) * 40ms);
+}
+
+html[data-entrance] .rise .mat::before,
+html[data-entrance] .rise .mat::after,
+html[data-entrance] .rise .initial {
+  animation: entrance-fade 500ms ease both;
+  animation-delay: calc(240ms + min(var(--i, 0), 6) * 40ms);
+}
+
+@media (min-width: 768px) {
+  html[data-entrance] .rail .pages li,
+  html[data-entrance] .rail .tools,
+  html[data-entrance] .rail .socials li {
+    animation: entrance-rise 520ms var(--ease-out) both;
+  }
+
+  html[data-entrance] .rail .pages li:nth-child(1) {
+    animation-delay: 40ms;
+  }
+
+  html[data-entrance] .rail .pages li:nth-child(2) {
+    animation-delay: 70ms;
+  }
+
+  html[data-entrance] .rail .pages li:nth-child(3) {
+    animation-delay: 100ms;
+  }
+
+  html[data-entrance] .rail .tools {
+    animation-delay: 130ms;
+  }
+
+  html[data-entrance] .rail .socials li:nth-child(1) {
+    animation-delay: 150ms;
+  }
+
+  html[data-entrance] .rail .socials li:nth-child(2) {
+    animation-delay: 170ms;
+  }
+
+  html[data-entrance] .rail .socials li:nth-child(3) {
+    animation-delay: 190ms;
+  }
+}
+
+/* Page → page (+layout sets html[data-swap]): the old page fades, then the new one rises in
+   block by block, the same rise as the entrance but quicker. On phones too, and without view
+   transitions (html[data-leaving] fades the old page out first). */
+html[data-swap] .inner-shell .rise {
+  animation: entrance-rise 460ms var(--ease-out) both;
+  animation-delay: calc(120ms + min(var(--i, 0), 6) * 55ms);
+}
+
+html[data-swap] .inner-shell .rise .mat::before,
+html[data-swap] .inner-shell .rise .mat::after,
+html[data-swap] .inner-shell .rise .initial {
+  animation: entrance-fade 400ms ease both;
+  animation-delay: calc(340ms + min(var(--i, 0), 6) * 55ms);
+}
+
+html[data-leaving] .inner-shell .transition {
+  animation: vt-fade-out 140ms ease both;
+}
+
+@keyframes entrance-shutter {
+  from {
+    clip-path: inset(50% 0 50% 0);
+  }
+}
+
+@keyframes entrance-settle {
+  from {
+    transform: scale(1.08);
+  }
+}
+
+@keyframes entrance-fade {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes entrance-rise {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+    filter: blur(4px);
+  }
+}
+
 /* Inner → landing: reveal the photo under the fading shell, then bring chrome back. */
 html[data-enter='landing'][data-fade='out'] .site-backdrop {
   visibility: visible;
@@ -495,6 +840,7 @@ html[data-vt='leave']:not([data-vt-phase]) .rail {
 }
 
 .to-top {
+  --tick: 0.5rem;
   position: fixed;
   z-index: 30;
   right: max(1.25rem, env(safe-area-inset-right));
@@ -503,18 +849,16 @@ html[data-vt='leave']:not([data-vt-phase]) .rail {
   place-items: center;
   width: 2.75rem;
   height: 2.75rem;
-  border: 1px solid var(--btn-border);
-  border-radius: 9999px;
-  background: var(--btn-bg);
+  padding: 0;
+  border: 0;
+  background: none;
   color: var(--ink-muted);
   cursor: pointer;
   opacity: 0;
   pointer-events: none;
   transition:
     opacity 200ms ease,
-    color 200ms ease,
-    border-color 200ms ease,
-    background-color 200ms ease;
+    color 200ms ease;
 }
 
 .to-top svg {
@@ -530,7 +874,6 @@ html[data-vt='leave']:not([data-vt-phase]) .rail {
 .to-top:hover,
 .to-top:focus-visible {
   color: var(--ink);
-  border-color: var(--border-strong);
   outline: none;
 }
 
@@ -572,7 +915,7 @@ html[data-theme-fade]::view-transition-old(root) {
 }
 
 ::view-transition-new(page) {
-  animation: vt-rise 200ms var(--ease-out) both;
+  animation: entrance-fade 220ms ease both;
 }
 
 ::view-transition-old(about-tabs),
