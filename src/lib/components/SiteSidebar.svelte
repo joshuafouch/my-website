@@ -101,6 +101,15 @@
     <AdminLogin compact />
   </div>
 
+  <!-- Folded, the appearance switches stand in a column in the strip that stays on screen. -->
+  {#if !narrow}
+    <div class="mini-tools" role="group" aria-label="Appearance" inert={!folded}>
+      <BackgroundSwitch compact />
+      <ThemeSwitch compact />
+      <MotionToggle compact />
+    </div>
+  {/if}
+
   <nav id="site-links" aria-label="Pages">
     <div class="sheet">
       <ul class="pages" inert={linksHidden}>
@@ -120,7 +129,7 @@
         <div class="foot-row" inert={linksHidden}>
           <ul class="socials">
             <li>
-              <a class="quiet-link" href={resolve('/resume')}>
+              <a class="social" href={resolve('/resume')}>
                 <svg viewBox="0 0 24 24" aria-hidden="true">
                   <path
                     d="M14 3.25H7.4c-.9 0-1.65.75-1.65 1.65v14.2c0 .9.75 1.65 1.65 1.65h9.2c.9 0 1.65-.75 1.65-1.65V8.15L14 3.25z"
@@ -145,12 +154,12 @@
                     stroke-linecap="round"
                   />
                 </svg>
-                Resume
+                <span class="label">Resume</span>
               </a>
             </li>
             <li>
               <a
-                class="quiet-link"
+                class="social"
                 href="https://github.com/joshuafouch"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -160,12 +169,12 @@
                     d="M12 0C5.37 0 0 5.37 0 12c0 5.302 3.438 9.8 8.205 11.387.6.113.82-.258.82-.577v-2.022c-3.338.724-4.033-1.61-4.033-1.61-.546-1.387-1.333-1.756-1.333-1.756-1.089-.744.083-.729.083-.729 1.205.084 1.84 1.238 1.84 1.238 1.07 1.835 2.807 1.305 3.492.998.108-.775.418-1.305.762-1.605-2.665-.305-5.467-1.334-5.467-5.931 0-1.31.468-2.381 1.236-3.221-.124-.303-.536-1.527.117-3.176 0 0 1.008-.322 3.301 1.23a11.52 11.52 0 013.003-.403c1.018.005 2.044.138 3.003.403 2.291-1.552 3.297-1.23 3.297-1.23.655 1.649.243 2.873.12 3.176.77.84 1.236 1.911 1.236 3.221 0 4.609-2.807 5.624-5.479 5.921.43.37.815 1.102.815 2.222v3.293c0 .321.218.694.825.576C20.565 21.796 24 17.298 24 12c0-6.63-5.37-12-12-12z"
                   />
                 </svg>
-                GitHub
+                <span class="label">GitHub</span><span class="out" aria-hidden="true">↗</span>
               </a>
             </li>
             <li>
               <a
-                class="quiet-link"
+                class="social"
                 href="https://www.linkedin.com/in/joshua-fouch12"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -175,7 +184,7 @@
                     d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.762 2.239 5 5 5h14c2.762 0 5-2.238 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-10h3v10zm-1.5-11.268c-.966 0-1.75-.784-1.75-1.75s.784-1.75 1.75-1.75 1.75.784 1.75 1.75-.784 1.75-1.75 1.75zm13.5 11.268h-3v-5.604c0-1.337-.026-3.063-1.867-3.063-1.867 0-2.154 1.459-2.154 2.969v5.698h-3v-10h2.881v1.367h.041c.401-.762 1.381-1.564 2.841-1.564 3.037 0 3.599 2.028 3.599 4.675v5.522z"
                   />
                 </svg>
-                LinkedIn
+                <span class="label">LinkedIn</span><span class="out" aria-hidden="true">↗</span>
               </a>
             </li>
           </ul>
@@ -187,6 +196,8 @@
 
 <style>
   .rail {
+    --foot-pad: 1.2rem;
+    --social-row: 2.5rem;
     position: fixed;
     z-index: 40;
     top: 0;
@@ -347,7 +358,7 @@
     position: relative;
     z-index: 1;
     margin-top: auto;
-    padding: 3.15rem 0 1.2rem;
+    padding: 4rem 0 var(--foot-pad);
     border-top: 1px solid var(--border-subtle);
   }
 
@@ -367,12 +378,14 @@
     animation-play-state: paused;
   }
 
+  /* Sits just under the rule over the socials: the foot is its bottom padding, the three social
+     rows and the gap above them (see .rail-foot and .socials a). */
   .tools {
     position: absolute;
     z-index: 3;
-    right: 0.35rem;
-    bottom: 8.15rem;
-    left: 1rem;
+    right: 0.75rem;
+    bottom: calc(var(--foot-pad) + 3 * var(--social-row) + 0.55rem);
+    left: 0.75rem;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -382,6 +395,23 @@
   .tool-group {
     display: flex;
     gap: 0.35rem;
+  }
+
+  .mini-tools {
+    position: absolute;
+    z-index: 3;
+    bottom: 1.25rem;
+    right: calc((var(--rail-mini) - 2.25rem) / 2);
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    opacity: 0;
+    transition: opacity 160ms ease;
+  }
+
+  .closed .mini-tools {
+    opacity: 1;
+    transition: opacity 260ms ease 220ms;
   }
 
   .foot-row {
@@ -400,23 +430,48 @@
     min-width: 0;
   }
 
+  /* IBM Plex Mono, lowercase, like the landing page's links. */
   .socials a {
     display: flex;
     align-items: center;
-    gap: 0.7rem;
-    min-height: 2.25rem;
-    padding: 0.1rem 1.35rem;
-    font-size: 1.05rem;
-    font-variant: small-caps;
-    letter-spacing: 0.14em;
+    gap: 0.75rem;
+    min-height: var(--social-row);
+    padding: 0 1.35rem;
+    color: var(--ink-muted);
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 0.82rem;
+    letter-spacing: 0.04em;
+    text-transform: lowercase;
     text-decoration: none;
+    transition: color 300ms ease;
   }
 
   .socials svg {
-    width: 1rem;
-    height: 1rem;
+    width: 1.15rem;
+    height: 1.15rem;
     flex: none;
     fill: currentColor;
+  }
+
+  .socials .label {
+    background: linear-gradient(currentColor, currentColor) no-repeat left bottom / 0 1px;
+    padding-bottom: 2px;
+    transition: background-size 300ms ease;
+  }
+
+  .socials a:hover,
+  .socials a:focus-visible {
+    color: var(--ink-accent);
+    outline: none;
+  }
+
+  .socials a:hover .label,
+  .socials a:focus-visible .label {
+    background-size: 100% 1px;
+  }
+
+  .out {
+    margin-left: -0.45rem;
   }
 
   @media (max-width: 767px) {
@@ -460,7 +515,8 @@
       height: 1.75rem;
     }
 
-    .fold {
+    .fold,
+    .mini-tools {
       display: none;
     }
 
@@ -532,6 +588,7 @@
     .rail,
     .mark,
     .tools,
+    .mini-tools,
     nav,
     .fold svg,
     .pages a {
@@ -547,6 +604,7 @@
   :global(html[data-motion='off']) .rail,
   :global(html[data-motion='off']) .mark,
   :global(html[data-motion='off']) .tools,
+  :global(html[data-motion='off']) .mini-tools,
   :global(html[data-motion='off']) nav,
   :global(html[data-motion='off']) .fold svg,
   :global(html[data-motion='off']) .pages a {
