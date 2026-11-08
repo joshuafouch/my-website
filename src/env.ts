@@ -32,7 +32,7 @@ export const variables = defineEnvVars({
   VERCEL_TEAM_ID: {
     schema: (value) => value ?? ''
   },
-  SUPABASE_ACCESS_TOKEN: {
+  SUPABASE_USAGE_TOKEN: {
     schema: (value) => value ?? ''
   },
   SUPABASE_PROJECT_REF: {

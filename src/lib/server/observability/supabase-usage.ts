@@ -1,4 +1,4 @@
-import { SUPABASE_ACCESS_TOKEN, SUPABASE_PROJECT_REF } from '$app/env/private';
+import { SUPABASE_USAGE_TOKEN, SUPABASE_PROJECT_REF } from '$app/env/private';
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '#lib/database.types.ts';
 import { ALBUMS_BUCKET, PORTRAITS_BUCKET } from '#lib/about.ts';
@@ -32,7 +32,7 @@ export type SupabaseUsageReport = {
 };
 
 function configured() {
-  return Boolean(SUPABASE_ACCESS_TOKEN && SUPABASE_PROJECT_REF);
+  return Boolean(SUPABASE_USAGE_TOKEN && SUPABASE_PROJECT_REF);
 }
 
 async function managementGet(path: string, query: Record<string, string> = {}) {
@@ -40,7 +40,7 @@ async function managementGet(path: string, query: Record<string, string> = {}) {
   const url = `${MGMT}${path}${params.size ? `?${params}` : ''}`;
   const response = await fetch(url, {
     headers: {
-      Authorization: `Bearer ${SUPABASE_ACCESS_TOKEN}`,
+      Authorization: `Bearer ${SUPABASE_USAGE_TOKEN}`,
       Accept: 'application/json'
     }
   });
@@ -164,7 +164,7 @@ export async function loadSupabaseUsage(supabase: Client): Promise<SupabaseUsage
       return {
         configured: false,
         error:
-          'Storage, database size and row counts loaded. Set SUPABASE_ACCESS_TOKEN and SUPABASE_PROJECT_REF for disk and API request charts.',
+          'Storage, database size and row counts loaded. Set SUPABASE_USAGE_TOKEN and SUPABASE_PROJECT_REF for disk and API request charts.',
         disk: null,
         databaseBytes,
         buckets,
