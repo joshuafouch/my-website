@@ -5,24 +5,34 @@ import type { Project } from '#lib/types.ts';
 
 type Client = SupabaseClient<Database>;
 
-const listColumns =
+type ProjectRow = Database['public']['Tables']['projects']['Row'];
+
+/** One project page: everything, including the long write-up. */
+const pageColumns =
   'title, slug, description, details, date, image, source_url, tags, images, published' as const;
 
-type ProjectListRow = Pick<
-  Database['public']['Tables']['projects']['Row'],
-  | 'title'
-  | 'slug'
-  | 'description'
-  | 'details'
-  | 'date'
-  | 'image'
-  | 'source_url'
-  | 'tags'
-  | 'images'
-  | 'published'
->;
+/** The cards on /projects: no write-up (up to 12 KB a row) and no gallery. */
+const cardColumns = 'title, slug, description, date, image, tags' as const;
 
-function mapProject(project: ProjectListRow): Project {
+export type ProjectCard = Pick<ProjectRow, 'title' | 'slug' | 'description' | 'date' | 'image'> & {
+  tags: string[];
+};
+
+function mapProject(
+  project: Pick<
+    ProjectRow,
+    | 'title'
+    | 'slug'
+    | 'description'
+    | 'details'
+    | 'date'
+    | 'image'
+    | 'source_url'
+    | 'tags'
+    | 'images'
+    | 'published'
+  >
+): Project {
   return {
     title: project.title,
     slug: project.slug,
@@ -37,10 +47,10 @@ function mapProject(project: ProjectListRow): Project {
   };
 }
 
-export async function getPublishedProjects(supabase: Client): Promise<Project[]> {
+export async function getPublishedProjectCards(supabase: Client): Promise<ProjectCard[]> {
   const { data, error: dbError } = await supabase
     .from('projects')
-    .select(listColumns)
+    .select(cardColumns)
     .eq('published', true)
     .order('date', { ascending: false });
 
@@ -49,7 +59,25 @@ export async function getPublishedProjects(supabase: Client): Promise<Project[]>
     error(500, 'Failed to load projects');
   }
 
-  return (data ?? []).map(mapProject);
+  return (data ?? []).map((project) => ({ ...project, tags: project.tags ?? [] }));
+}
+
+/** Every published project's title and slug, newest first: enough for previous/next links. */
+export async function getPublishedProjectTitles(
+  supabase: Client
+): Promise<{ title: string; slug: string }[]> {
+  const { data, error: dbError } = await supabase
+    .from('projects')
+    .select('title, slug')
+    .eq('published', true)
+    .order('date', { ascending: false });
+
+  if (dbError) {
+    console.error('Failed to load project titles', dbError);
+    error(500, 'Failed to load projects');
+  }
+
+  return data ?? [];
 }
 
 export async function getPublishedProjectBySlug(
@@ -58,7 +86,7 @@ export async function getPublishedProjectBySlug(
 ): Promise<Project | null> {
   const { data, error: dbError } = await supabase
     .from('projects')
-    .select(listColumns)
+    .select(pageColumns)
     .eq('published', true)
     .eq('slug', slug)
     .maybeSingle();

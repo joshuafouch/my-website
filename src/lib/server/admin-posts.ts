@@ -6,11 +6,20 @@ import { PORTRAITS_BUCKET, type PortraitKind } from '#lib/about.ts';
 import type { Database } from '#lib/database.types.ts';
 import { slugify } from '#lib/slug.ts';
 import type { BlogImage } from '#lib/types.ts';
+import { MAX_UPLOAD_BYTES, MAX_UPLOAD_LABEL } from '#lib/upload-limits.ts';
 
 type Client = SupabaseClient<Database>;
 
-const IMAGE_TYPES = new Set(['image/jpeg', 'image/png', 'image/webp', 'image/gif']);
-const MAX_IMAGE_BYTES = 5 * 1024 * 1024;
+/** Accepted image types and the extension each is stored under (never the uploaded name's). */
+const IMAGE_EXTENSIONS: Record<string, string> = {
+  'image/jpeg': 'jpg',
+  'image/png': 'png',
+  'image/webp': 'webp',
+  'image/gif': 'gif'
+};
+
+/** Uploads get a fresh random name and are never overwritten, so browsers may keep them a year. */
+const IMMUTABLE_CACHE_SECONDS = '31536000';
 
 export type AdminPost = Database['public']['Tables']['posts']['Row'];
 
@@ -70,14 +79,14 @@ export async function getAdminPostBySlug(supabase: Client, slug: string) {
 
 export type ImageFolder = 'covers' | 'inline' | 'portraits';
 
-function imageExtension(file: File) {
-  return (
-    file.name
-      .split('.')
-      .pop()
-      ?.toLowerCase()
-      .replace(/[^a-z0-9]/g, '') || 'img'
-  );
+/** The checks every image upload shares; returns the stored extension, or the error to show. */
+function checkImage(file: File): { extension: string } | { error: string } {
+  const extension = IMAGE_EXTENSIONS[file.type];
+  if (!extension) return { error: 'Use a JPEG, PNG, WebP, or GIF.' };
+  if (file.size > MAX_UPLOAD_BYTES) {
+    return { error: `Image must be ${MAX_UPLOAD_LABEL} or smaller.` };
+  }
+  return { extension };
 }
 
 export async function uploadBlogImage(
@@ -85,17 +94,13 @@ export async function uploadBlogImage(
   file: File,
   folder: ImageFolder
 ): Promise<{ url: string } | { error: string }> {
-  if (!IMAGE_TYPES.has(file.type)) {
-    return { error: 'Use a JPEG, PNG, WebP, or GIF.' };
-  }
+  const checked = checkImage(file);
+  if ('error' in checked) return checked;
 
-  if (file.size > MAX_IMAGE_BYTES) {
-    return { error: 'Image must be 5 MB or smaller.' };
-  }
-
-  const path = `${folder}/${crypto.randomUUID()}.${imageExtension(file)}`;
+  const path = `${folder}/${crypto.randomUUID()}.${checked.extension}`;
   const { error: uploadError } = await supabase.storage.from('blog-images').upload(path, file, {
     contentType: file.type,
+    cacheControl: IMMUTABLE_CACHE_SECONDS,
     upsert: false
   });
 
@@ -112,17 +117,13 @@ export async function uploadPortraitImage(
   file: File,
   kind: PortraitKind
 ): Promise<{ url: string } | { error: string }> {
-  if (!IMAGE_TYPES.has(file.type)) {
-    return { error: 'Use a JPEG, PNG, WebP, or GIF.' };
-  }
+  const checked = checkImage(file);
+  if ('error' in checked) return checked;
 
-  if (file.size > MAX_IMAGE_BYTES) {
-    return { error: 'Image must be 5 MB or smaller.' };
-  }
-
-  const path = `${kind}/${crypto.randomUUID()}.${imageExtension(file)}`;
+  const path = `${kind}/${crypto.randomUUID()}.${checked.extension}`;
   const { error: uploadError } = await supabase.storage.from(PORTRAITS_BUCKET).upload(path, file, {
     contentType: file.type,
+    cacheControl: IMMUTABLE_CACHE_SECONDS,
     upsert: false
   });
 

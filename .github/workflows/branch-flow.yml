@@ -3,19 +3,25 @@ on:
   pull_request:
     types: [opened, synchronize, reopened]
 
+# The check only reads two branch names; the job token needs nothing.
+permissions: {}
+
 jobs:
   branch-flow:
     name: Branch flow
     runs-on: ubuntu-latest
     steps:
       - name: Check merge direction
+        # Branch names come from the pull request (a fork picks its own), so they reach the shell
+        # as environment variables, never pasted into the script where quotes or $(...) would run.
+        env:
+          BASE_REF: ${{ github.base_ref }}
+          HEAD_REF: ${{ github.head_ref }}
         run: |
-          base="${{ github.base_ref }}"
-          head="${{ github.head_ref }}"
-          if [ "$base" = "main" ] && [ "$head" = "staging" ]; then
+          if [ "$BASE_REF" = "main" ] && [ "$HEAD_REF" = "staging" ]; then
             exit 0
           fi
-          if [ "$base" = "staging" ] && [ "$head" != "main" ]; then
+          if [ "$BASE_REF" = "staging" ] && [ "$HEAD_REF" != "main" ]; then
             exit 0
           fi
           echo "Feature branches merge into staging. Only staging merges into main."

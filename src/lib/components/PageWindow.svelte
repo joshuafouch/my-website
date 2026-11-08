@@ -20,9 +20,11 @@
     } else {
       parts.forEach((part, index) => {
         const last = index === parts.length - 1;
+        const href = `/${parts.slice(0, index + 1).join('/')}`;
         trail.push({
           text: part,
-          href: last ? undefined : `/${parts.slice(0, index + 1).join('/')}`
+          // /about only redirects to /about/professional; link there directly.
+          href: last ? undefined : href === '/about' ? '/about/professional' : href
         });
       });
     }

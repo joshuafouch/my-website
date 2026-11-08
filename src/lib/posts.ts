@@ -26,6 +26,24 @@ export async function getPublishedPosts(supabase: Client): Promise<Post[]> {
   }));
 }
 
+/** Every published post's title and slug, newest first: enough for previous/next links. */
+export async function getPublishedPostTitles(
+  supabase: Client
+): Promise<{ title: string; slug: string }[]> {
+  const { data, error: dbError } = await supabase
+    .from('posts')
+    .select('title, slug')
+    .eq('published', true)
+    .order('date', { ascending: false });
+
+  if (dbError) {
+    console.error('Failed to load post titles', dbError);
+    error(500, 'Failed to load posts');
+  }
+
+  return data ?? [];
+}
+
 export async function getPublishedPostBySlug(supabase: Client, slug: string) {
   const { data, error: dbError } = await supabase
     .from('posts')

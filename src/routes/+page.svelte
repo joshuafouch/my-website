@@ -19,7 +19,8 @@
   const heroImage = photos[0];
 
   const pages = [
-    { text: 'About', href: resolve('/about') },
+    // Straight to the page: /about itself is a redirect (an extra, uncached round trip).
+    { text: 'About', href: resolve('/about/professional') },
     { text: 'Projects', href: resolve('/projects') },
     { text: 'Blog', href: resolve('/blog') }
   ];

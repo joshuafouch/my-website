@@ -2,10 +2,10 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Database } from '#lib/database.types.ts';
 import { RESUME_BUCKET } from '#lib/resume.ts';
 import { requireAdmin } from '#lib/server/admin-posts.ts';
+import { MAX_UPLOAD_BYTES, MAX_UPLOAD_LABEL } from '#lib/upload-limits.ts';
 
 type Client = SupabaseClient<Database>;
 
-const MAX_RESUME_BYTES = 10 * 1024 * 1024;
 const RESUME_PATH = 'current.pdf';
 
 export async function uploadResume(
@@ -17,7 +17,9 @@ export async function uploadResume(
 
   if (file.size === 0) return { error: 'Choose a PDF to upload.' };
   if (file.type !== 'application/pdf') return { error: 'The resume must be a PDF.' };
-  if (file.size > MAX_RESUME_BYTES) return { error: 'The resume must be 10 MB or smaller.' };
+  if (file.size > MAX_UPLOAD_BYTES) {
+    return { error: `The resume must be ${MAX_UPLOAD_LABEL} or smaller.` };
+  }
 
   const { error: uploadError } = await supabase.storage
     .from(RESUME_BUCKET)
