@@ -106,11 +106,13 @@
     <div class="loader absolute inset-0 flex items-center justify-center" aria-hidden="true">
       <div class="flex flex-col items-center gap-6">
         <img src="/favicon.png" alt="" class="w-16" />
-        <span class="ellipsis">
-          <span></span>
-          <span></span>
-          <span></span>
-        </span>
+        <!-- A package-manager progress bar filling up. Plain CSS, so it runs in the first
+             paint, before hydration. -->
+        <span class="bar font-mono"
+          >[<span class="track"
+            >--------------------<span class="fill">####################</span></span
+          >]</span
+        >
       </div>
     </div>
   {/if}
@@ -180,7 +182,7 @@
                 stroke-linecap="round"
               />
             </svg>
-            Resume
+            <span class="label">Resume</span>
           </a>
         </li>
         <!-- eslint-disable svelte/no-navigation-without-resolve -- external URL (socials are GitHub/LinkedIn) -->
@@ -205,7 +207,7 @@
                   />
                 </svg>
               {/if}
-              {social.text}
+              <span class="label">{social.text}</span><span class="out" aria-hidden="true">↗</span>
             </a>
           </li>
         {/each}
@@ -234,7 +236,7 @@
     top: max(0.75rem, env(safe-area-inset-top));
     right: max(0.75rem, env(safe-area-inset-right));
     display: flex;
-    gap: 0.5rem;
+    gap: 0.2rem;
   }
 
   /* Visible in the first paint (a fade-in animation can't start until hydration frees the main
@@ -257,36 +259,29 @@
     }
   }
 
-  .ellipsis {
-    display: flex;
-    gap: 0.45rem;
+  .bar {
+    color: color-mix(in oklab, var(--nord4) 45%, transparent);
+    font-size: 0.8rem;
+    white-space: pre;
   }
 
-  .ellipsis span {
-    width: 0.35rem;
-    height: 0.35rem;
-    border-radius: 9999px;
-    background: var(--nord4);
-    opacity: 0.15;
-    animation: blink 1.2s ease-in-out infinite;
+  .track {
+    position: relative;
+    display: inline-block;
   }
 
-  .ellipsis span:nth-child(2) {
-    animation-delay: 0.2s;
+  .fill {
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 0;
+    overflow: hidden;
+    color: var(--nord4);
+    animation: term-fill 800ms steps(20) 80ms forwards;
   }
 
-  .ellipsis span:nth-child(3) {
-    animation-delay: 0.4s;
-  }
-
-  @keyframes blink {
-    0%,
-    60%,
-    100% {
-      opacity: 0.15;
-    }
-    30% {
-      opacity: 0.9;
+  @keyframes term-fill {
+    to {
+      width: 20ch;
     }
   }
 
@@ -382,31 +377,53 @@
     justify-self: end;
   }
 
+  /* IBM Plex Mono, lowercase: the same voice as the sidebar's links and the inner pages' trail. */
   .socials {
     grid-column: 2;
     align-items: center;
-    gap: 1.25rem 1.75rem;
+    gap: 1.25rem 1.9rem;
     margin: 0;
     padding: 0;
     list-style: none;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    font-size: 0.8rem;
+    font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    font-size: 0.82rem;
+    letter-spacing: 0.04em;
+    text-transform: lowercase;
     color: var(--ink-muted);
   }
 
   .social-link {
     display: inline-flex;
     align-items: center;
-    gap: 0.4rem;
+    gap: 0.6rem;
     min-height: 2.75rem;
     color: var(--ink-muted);
   }
 
   .social-link svg {
-    width: 0.95rem;
-    height: 0.95rem;
+    width: 1.15rem;
+    height: 1.15rem;
     fill: currentColor;
+  }
+
+  /* The underline sits under the word, not the icon. */
+  .social-link.link-line {
+    background: none;
+  }
+
+  .social-link .label {
+    background: linear-gradient(currentColor, currentColor) no-repeat left bottom / 0 1px;
+    padding-bottom: 2px;
+    transition: background-size 300ms ease;
+  }
+
+  .social-link:hover .label,
+  .social-link:focus-visible .label {
+    background-size: 100% 1px;
+  }
+
+  .out {
+    margin-left: -0.3rem;
   }
 
   .link-line {
@@ -438,7 +455,7 @@
       left: 0;
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: center;
       padding-inline: max(1rem, env(safe-area-inset-left)) max(0.85rem, env(safe-area-inset-right));
       padding-bottom: max(0.55rem, env(safe-area-inset-bottom));
     }
@@ -446,23 +463,26 @@
     .socials {
       width: auto;
       flex-wrap: nowrap;
-      justify-content: flex-start;
-      gap: 0.35rem 1rem;
+      justify-content: center;
+      gap: 0.35rem 1.1rem;
       margin: 0;
-      padding-inline: 0;
+      padding-inline: 2.5rem;
     }
 
+    /* Pinned to the right edge so the links stay centred under the signature. */
     .foot :global(.admin) {
-      position: static;
-      flex: none;
-      width: 1.7rem;
-      height: 1.7rem;
-      opacity: 0.4;
+      --tick: 0.32rem;
+      position: absolute;
+      right: max(0.5rem, env(safe-area-inset-right));
+      bottom: max(0.55rem, env(safe-area-inset-bottom));
+      width: 2rem;
+      height: 2rem;
+      opacity: 0.5;
     }
 
     .foot :global(.admin svg) {
-      width: 0.72rem;
-      height: 0.72rem;
+      width: 0.8rem;
+      height: 0.8rem;
     }
 
     .foot :global(.admin:hover),
@@ -473,9 +493,14 @@
 
   @media (max-width: 520px) {
     .socials {
-      gap: 0.25rem 0.85rem;
-      letter-spacing: 0.06em;
-      font-size: 0.72rem;
+      gap: 0.25rem 0.8rem;
+      letter-spacing: 0.02em;
+      font-size: 0.74rem;
+    }
+
+    .social-link svg {
+      width: 1rem;
+      height: 1rem;
     }
   }
 
@@ -510,9 +535,9 @@
       animation-duration: 1ms;
     }
 
-    .ellipsis span {
+    .fill {
+      width: auto;
       animation: none;
-      opacity: 0.9;
     }
 
     .is-ready .reveal,
@@ -526,9 +551,9 @@
     animation-duration: 1ms;
   }
 
-  :global(html[data-motion='off']) .ellipsis span {
+  :global(html[data-motion='off']) .fill {
+    width: auto;
     animation: none;
-    opacity: 0.9;
   }
 
   :global(html[data-motion='off']) .is-ready .reveal,
