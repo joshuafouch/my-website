@@ -1,6 +1,6 @@
 <script lang="ts">
   import { onMount } from 'svelte';
-  import { onNavigate } from '$app/navigation';
+  import { afterNavigate, onNavigate } from '$app/navigation';
   import { page } from '$app/state';
   import '../app.css';
   // Same file app.css's @font-face uses, so this resolves to the identical hashed URL.
@@ -11,8 +11,9 @@
   import SiteSidebar from '#lib/components/SiteSidebar.svelte';
   import SignatureLogo from '#lib/components/SignatureLogo.svelte';
   import JafCrest from '#lib/components/JafCrest.svelte';
+  import PageWindow from '#lib/components/PageWindow.svelte';
   import VercelObservability from '#lib/components/VercelObservability.svelte';
-  import { backdrop, photoBackground, restoreBackdrop } from '#lib/backdrop.svelte.ts';
+  import { restoreBackdrop } from '#lib/backdrop.svelte.ts';
   import { reducedMotion, restoreMotion } from '#lib/motion.svelte.ts';
   import { restoreSidebar, sidebar } from '#lib/sidebar.svelte.ts';
   import { restoreTheme } from '#lib/theme.svelte.ts';
@@ -21,21 +22,24 @@
 
   const isLanding = $derived(page.url.pathname === '/');
 
-  /**
-   * /projects and /projects/<slug> are one page: the slug only opens the project dialog, which
-   * animates itself. Same key → the page (grid + dialog) isn't torn down and rebuilt on open/close,
-   * which made the dialog fade in twice.
-   */
-  const pageKey = (pathname: string) =>
-    pathname === '/projects' || pathname.startsWith('/projects/') ? '/projects' : pathname;
-  const transitionKey = $derived(pageKey(page.url.pathname));
+  const transitionKey = $derived(page.url.pathname);
   let scrollY = $state(0);
   let signatureRun = $state(0);
-  let ridgePx = $state(176);
+  /** Bottom of the header window, from the top of the page: on phones the signature sits on the
+      seam just under it. */
+  let seamPx = $state(240);
   /** In-flight landing↔inner fade direction; used to detect quick reverses. */
   let activeLandingFade: 'inner' | 'landing' | null = null;
   const showTop = $derived(scrollY > 280);
-  const sigReveal = $derived(Math.min(1, Math.max(0, scrollY / (ridgePx || 1))));
+
+  function measure() {
+    const frame = document.querySelector('.page-window .window');
+    const shell = document.querySelector('.inner-shell');
+    if (!frame || !shell) return;
+    seamPx = frame.getBoundingClientRect().bottom - shell.getBoundingClientRect().top;
+  }
+
+  afterNavigate(() => requestAnimationFrame(measure));
 
   function scrollUp() {
     window.scrollTo({ top: 0, behavior: reducedMotion() ? 'auto' : 'smooth' });
@@ -45,10 +49,6 @@
     restoreTheme();
     restoreSidebar();
     restoreMotion();
-    const measure = () => {
-      const ridge = document.querySelector('.ridge');
-      if (ridge) ridgePx = ridge.getBoundingClientRect().height;
-    };
     measure();
     window.addEventListener('resize', measure);
     const stopBackdrop = restoreBackdrop();
@@ -100,8 +100,6 @@
     const from = navigation.from?.url.pathname;
     const to = navigation.to?.url.pathname;
     if (!from || !to || from === to) return;
-    // Opening/closing a project dialog: no page transition (the dialog has its own fade).
-    if (pageKey(from) === pageKey(to)) return;
 
     const root = document.documentElement;
 
@@ -129,6 +127,15 @@
           // so the ridge/sidebar geometry does not flash at a stale offset.
           if (entering === 'landing') window.scrollTo(0, 0);
           root.dataset.fade = 'in';
+          // The longer, staged entrance into the inner pages (app.css, html[data-entrance]).
+          if (entering === 'inner') {
+            root.dataset.entrance = token;
+            window.setTimeout(() => {
+              if (root.dataset.entrance === token) delete root.dataset.entrance;
+            }, 1900);
+          } else {
+            delete root.dataset.entrance;
+          }
           resolve();
           const clearMs = entering === 'inner' ? 280 : 220;
           navigation.complete.finally(() => {
@@ -183,14 +190,35 @@
       });
     }
 
-    if (!document.startViewTransition) return;
-
+    // Page → page: the new page's blocks rise in one after another (app.css, html[data-swap]).
     const token = String(Date.now());
+    const swap = () => {
+      root.dataset.swap = token;
+      window.setTimeout(() => {
+        if (root.dataset.swap === token) delete root.dataset.swap;
+      }, 1100);
+    };
+
+    if (!document.startViewTransition) {
+      // No view transitions (some phone browsers): fade the old page out by hand first.
+      root.dataset.leaving = token;
+      return new Promise((resolve) => {
+        window.setTimeout(() => {
+          swap();
+          resolve();
+          navigation.complete.finally(() => {
+            if (root.dataset.leaving === token) delete root.dataset.leaving;
+          });
+        }, 140);
+      });
+    }
+
     root.dataset.vt = 'swap';
     root.dataset.vtId = token;
 
     return new Promise((resolve) => {
       const transition = document.startViewTransition(async () => {
+        swap();
         resolve();
         await navigation.complete;
       });
@@ -230,15 +258,13 @@
        (a full repaint every frame). A sibling, not a pseudo-element: isolating .inner-shell would
        trap the sidebar (z-index 40) under the back-to-top button (z-index 30). -->
   <div class="shell-surface" aria-hidden="true"></div>
-  <div class="inner-shell" class:sidebar-open={sidebar.open}>
+  <div class="inner-shell" class:sidebar-open={sidebar.open} style:--seam-y={`${seamPx}px`}>
     <SiteSidebar />
     <div class="seam" aria-hidden="true"></div>
     <button
       type="button"
       class="watermark"
-      class:resting={sigReveal === 0}
       aria-label="Replay signature"
-      style:--sig-reveal={sigReveal}
       onclick={() => signatureRun++}
     >
       <div class="turn">
@@ -252,16 +278,7 @@
     </div>
     <div class="page-stack">
       <main>
-        <div class="ridge" aria-hidden="true">
-          <div class="photo" style:background-image={photoBackground(backdrop.previous)}></div>
-          {#key backdrop.index}
-            <div
-              class="photo"
-              class:fade={backdrop.previous !== backdrop.index}
-              style:background-image={photoBackground(backdrop.index)}
-            ></div>
-          {/key}
-        </div>
+        <PageWindow />
         <Transition url={transitionKey}>
           {@render children()}
         </Transition>
@@ -272,7 +289,7 @@
 {/if}
 
 <button
-  class="to-top"
+  class="to-top ticked"
   class:shown={showTop}
   type="button"
   aria-label="Back to top"
@@ -294,8 +311,7 @@
 
 <style>
   .inner-shell {
-    --ridge-height: 11rem;
-    --sig-length: 100svh;
+    --sig-length: 90svh;
     --sig-thickness: calc(var(--sig-length) * 850.3 / 2857.14);
     --bar-height: 0px;
     position: relative;
@@ -328,40 +344,6 @@
     translate: var(--sidebar-width) 0;
   }
 
-  .ridge {
-    position: relative;
-    height: var(--ridge-height);
-    margin-right: calc(var(--sidebar-width) * -1);
-    overflow: hidden;
-    background-color: var(--surface-raised);
-  }
-
-  .ridge .photo {
-    position: absolute;
-    inset: 0;
-    background-position: center 42%;
-    background-size: cover;
-  }
-
-  .ridge .photo.fade {
-    opacity: 0;
-    animation: ridge-in 700ms ease forwards;
-  }
-
-  .ridge::after {
-    content: '';
-    position: absolute;
-    z-index: 1;
-    inset: 0;
-    background: linear-gradient(transparent 35%, var(--surface));
-  }
-
-  @keyframes ridge-in {
-    to {
-      opacity: 1;
-    }
-  }
-
   .floor-crest,
   .seam {
     display: none;
@@ -383,7 +365,6 @@
     font: inherit;
     cursor: pointer;
     pointer-events: none;
-    opacity: var(--sig-reveal, 0);
     transition:
       opacity 240ms ease,
       visibility 0s;
@@ -412,9 +393,8 @@
         visibility 0s linear 200ms;
     }
 
-    /* Invisible (scrolled to the top, or hidden behind the open sidebar): hold the drift
-       instead of running a filter animation nobody sees. It resumes where it stopped. */
-    .watermark.resting .turn,
+    /* Hidden behind the open sidebar: hold the drift instead of running a filter animation
+       nobody sees. It resumes where it stopped. */
     .sidebar-open .watermark .turn {
       animation-play-state: paused;
     }
@@ -460,7 +440,6 @@
 
   @media (max-width: 767px) {
     .inner-shell {
-      --ridge-height: 7rem;
       --bar-height: 3.5rem;
     }
 
@@ -471,13 +450,9 @@
       padding-top: var(--bar-height);
     }
 
-    .ridge {
-      margin-right: 0;
-    }
-
     .watermark {
       position: absolute;
-      top: calc(var(--bar-height) + var(--ridge-height));
+      top: calc(var(--seam-y) + 1.9rem);
       right: auto;
       bottom: auto;
       left: 50%;
@@ -492,7 +467,7 @@
     .seam {
       position: absolute;
       z-index: 2;
-      top: calc(var(--bar-height) + var(--ridge-height));
+      top: calc(var(--seam-y) + 1.9rem);
       right: 0;
       left: 0;
       display: block;
@@ -538,11 +513,6 @@
       transition: none;
     }
 
-    .ridge .photo.fade {
-      opacity: 1;
-      animation: none;
-    }
-
     .turn {
       animation: none;
       color: var(--signature-rest, var(--nord4));
@@ -559,11 +529,6 @@
   :global(html[data-motion='off']) .inner-shell .page-stack,
   :global(html[data-motion='off']) .watermark {
     transition: none;
-  }
-
-  :global(html[data-motion='off']) .ridge .photo.fade {
-    opacity: 1;
-    animation: none;
   }
 
   :global(html[data-motion='off']) .turn {
