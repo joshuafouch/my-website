@@ -7,7 +7,7 @@
   import garamondRegular from '@fontsource/eb-garamond/files/eb-garamond-latin-400-normal.woff2?url';
   import Footer from '#lib/components/Footer.svelte';
   import Transition from '#lib/components/Transition.svelte';
-  import SiteBackdrop from '#lib/components/SiteBackdrop.svelte';
+  import NightSky from '#lib/components/NightSky.svelte';
   import SiteSidebar from '#lib/components/SiteSidebar.svelte';
   import SignatureLogo from '#lib/components/SignatureLogo.svelte';
   import JafCrest from '#lib/components/JafCrest.svelte';
@@ -21,6 +21,16 @@
   let { children } = $props();
 
   const isLanding = $derived(page.url.pathname === '/');
+
+  /** The theme the Safari edge strips were last created in; follows theme.current once its fade
+      (theme.svelte.ts, 400ms) is over, so the strips never show the next theme early. */
+  let edgeTheme = $state(theme.current);
+  $effect(() => {
+    const next = theme.current;
+    if (next === edgeTheme) return;
+    const timer = window.setTimeout(() => (edgeTheme = next), 420);
+    return () => window.clearTimeout(timer);
+  });
 
   const transitionKey = $derived(page.url.pathname);
   let scrollY = $state(0);
@@ -245,14 +255,12 @@
 
 <svelte:window bind:scrollY />
 
-<!-- One photo layer for landing and the enter crossfade; dormant on settled inner pages. -->
 <VercelObservability />
-<SiteBackdrop />
 
 {#if isLanding}
-  <!-- Solid edge strips for iOS Safari's bar colour (app.css .safari-edge). Keyed on the theme:
-       Safari only re-reads the colour when the element at the edge is replaced. -->
-  {#key theme.current}
+  <!-- Solid edge strips for iOS Safari's bar colour (app.css .safari-edge). Re-created once a
+       theme change has finished fading: Safari only re-reads the colour of a new element. -->
+  {#key edgeTheme}
     <div class="safari-edge top" aria-hidden="true"></div>
     <div class="safari-edge bottom" aria-hidden="true"></div>
   {/key}
@@ -288,6 +296,8 @@
       <JafCrest />
     </div>
     <div class="page-stack">
+      <!-- A faint aurora over the header window and stars in the margins (never behind text). -->
+      <NightSky variant="inner" />
       <main>
         <PageWindow />
         <Transition url={transitionKey}>
