@@ -309,9 +309,6 @@
 html[data-theme='nord-dark'] {
   color-scheme: dark;
 
-  /* --ground as a plain (unregistered) value: it switches in one step, never fades. */
-  --edge: #13161c;
-
   --ground: #13161c;
   --surface: #2e3440; /* nord0 */
   --surface-raised: #3b4252; /* nord1 */
@@ -349,9 +346,6 @@ html[data-theme='nord-dark'] {
 /* Snow Storm: Nord light, muted so the landing photo isn’t washed out */
 html[data-theme='nord'] {
   color-scheme: light;
-
-  /* --ground as a plain (unregistered) value: it switches in one step, never fades. */
-  --edge: #e5e9f0;
 
   --ground: #e5e9f0; /* nord5 */
   --surface: #eceff4; /* nord6 */
@@ -411,9 +405,6 @@ html[data-theme='nord'] .landing svg {
 /* Frost: dusk built from nord7–nord10, between Polar Night and Snow Storm */
 html[data-theme='frost'] {
   color-scheme: dark;
-
-  /* --ground as a plain (unregistered) value: it switches in one step, never fades. */
-  --edge: #3d5166;
 
   --ground: #3d5166;
   --surface: #466078;
@@ -732,44 +723,6 @@ html[data-theme='nord'] .initial {
   background: radial-gradient(ellipse at center, var(--veil-inner) 0%, var(--veil-outer) 70%);
 }
 
-/* iOS Safari 26 paints the status-bar strip and the strip under its bottom toolbar in the root
-   background colour (--ground), where no page content can reach. Fade the landing photo's top
-   and bottom edges into that colour so those strips read as part of the page. */
-/* iOS Safari 26 colours its status-bar and toolbar strips from what sits at the screen edges, and
-   on the landing (a full-screen photo that never scrolls) it read the photo once and kept that
-   colour after a theme change: dark bars over Snow Storm. These solid strips, and a solid root,
-   give it a plain colour that changes in one step with the theme. */
-.safari-edge {
-  display: none;
-}
-
-@media (max-width: 767px) {
-  html:has(.landing),
-  html:has(.landing) body {
-    background-color: var(--edge);
-  }
-
-  .safari-edge {
-    position: fixed;
-    z-index: 60;
-    right: 0;
-    left: 0;
-    display: block;
-    background-color: var(--edge);
-    pointer-events: none;
-  }
-
-  .safari-edge.top {
-    top: 0;
-    height: max(1px, env(safe-area-inset-top));
-  }
-
-  .safari-edge.bottom {
-    bottom: 0;
-    height: 1px;
-  }
-}
-
 @media (max-width: 767px) {
   /* The mobile landing is exactly one screen (.landing clips its own overflow), but with
      viewport-fit=cover Safari still let the document scroll by about the safe-area height. */
@@ -779,16 +732,24 @@ html[data-theme='nord'] .initial {
     overscroll-behavior: none;
   }
 
+  /* iOS Safari 26 takes its status-bar and toolbar colour from the screen edges once, on load,
+     and doesn't look again when the theme changes. So the photo runs edge to edge, and the
+     theme's veil stops short of the outermost strip: what Safari read stays right in every theme. */
   html:has(.landing) .site-backdrop .veil {
-    background:
-      linear-gradient(
-        to bottom,
-        var(--ground) 0,
-        transparent 3.5rem,
-        transparent calc(100% - 6rem),
-        var(--ground) 100%
-      ),
-      radial-gradient(ellipse at center, var(--veil-inner) 0%, var(--veil-outer) 70%);
+    -webkit-mask-image: linear-gradient(
+      to bottom,
+      transparent 0,
+      #000 max(1.5rem, env(safe-area-inset-top)),
+      #000 calc(100% - 1.5rem),
+      transparent 100%
+    );
+    mask-image: linear-gradient(
+      to bottom,
+      transparent 0,
+      #000 max(1.5rem, env(safe-area-inset-top)),
+      #000 calc(100% - 1.5rem),
+      transparent 100%
+    );
   }
 }
 
