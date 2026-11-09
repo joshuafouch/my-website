@@ -6,8 +6,8 @@
 </script>
 
 <Metadata
-  title="Personal - Joshua Fouch"
-  description={data.description || 'A few personal notes from Joshua Fouch.'}
+  title="About - Joshua Fouch"
+  description={data.description || 'A bit about me.'}
   url="/about/personal"
   image={data.portraits[0]?.src || '/assets/backgrounds/hero-bg.webp'}
   imageAlt="Joshua Fouch"

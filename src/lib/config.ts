@@ -1,5 +1,5 @@
 export const title = 'Joshua Fouch';
-export const description = "Josh's Corner of the Web";
+export const description = 'My little corner of the web.';
 /** The canonical origin. The apex (joshuafouch.com) 308-redirects here, so links use www. */
 export const url = 'https://www.joshuafouch.com';
 

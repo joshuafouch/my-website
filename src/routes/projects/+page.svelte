@@ -9,8 +9,8 @@
 </script>
 
 <Metadata
-  title="My Projects"
-  description="Personal, research, and collaborative projects."
+  title="Projects - Joshua Fouch"
+  description="Things I've built."
   url="/projects"
   image="/assets/backgrounds/IMG_1797.webp"
   imageAlt="Dog on a dock"

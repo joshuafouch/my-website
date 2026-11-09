@@ -11,8 +11,8 @@
 </script>
 
 <Metadata
-  title={data.meta.title}
-  description={data.meta.description}
+  title={`${data.meta.title} - Joshua Fouch`}
+  description={data.meta.description || `${data.meta.title}, a post by Joshua Fouch.`}
   url={`/${data.meta.slug}`}
   image={data.meta.image || '/assets/backgrounds/IMG_1797.webp'}
   imageAlt={data.meta.title}

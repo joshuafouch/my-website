@@ -9,7 +9,7 @@
 
 <Metadata
   title="Resume - Joshua Fouch"
-  description="Joshua Fouch's resume."
+  description="My resume."
   url="/resume"
   image={heroImage}
   imageAlt="Joshua Fouch"

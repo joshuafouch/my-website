@@ -13,8 +13,8 @@
 </script>
 
 <Metadata
-  title={project.title}
-  description={project.description}
+  title={`${project.title} - Joshua Fouch`}
+  description={project.description || `${project.title}, a project by Joshua Fouch.`}
   url={`/projects/${project.slug}`}
   image={cover}
   imageAlt={project.title}
