@@ -301,16 +301,27 @@
 
   /* Inner pages: stars only in the margins beside the reading column, and a fainter, shorter
      aurora that fades out before the page heading. */
+  /* The inner pages' column (.page-stack) is a sidebar's width narrower than the screen and,
+     with the sidebar closed, only slid over by the rail: the sky runs on past its right edge to
+     the screen's (the shell clips the overflow when the sidebar is open). */
+  .inner {
+    --reach: calc(var(--sidebar-width) - var(--rail-mini));
+    right: calc(-1 * var(--reach));
+  }
+
+  /* Stars only in the margins: --column is the centre of the reading column, in this box. */
   .inner .star-field {
     opacity: 0.55;
-    --gutter-in: calc(50% - var(--page-width) / 2);
+    --column: calc((100% - var(--reach)) / 2);
+    --gutter-left: calc(var(--column) - var(--page-width) / 2);
+    --gutter-right: calc(var(--column) + var(--page-width) / 2);
     mask-image: linear-gradient(
       90deg,
       #000 0,
-      #000 calc(var(--gutter-in) - 3rem),
-      transparent var(--gutter-in),
-      transparent calc(100% - var(--gutter-in)),
-      #000 calc(100% - var(--gutter-in) + 3rem)
+      #000 calc(var(--gutter-left) - 3rem),
+      transparent var(--gutter-left),
+      transparent var(--gutter-right),
+      #000 calc(var(--gutter-right) + 3rem)
     );
   }
 
@@ -371,6 +382,10 @@
   }
 
   @media (max-width: 767px) {
+    .inner {
+      --reach: 0px;
+    }
+
     .inner .star-field {
       display: none;
     }
