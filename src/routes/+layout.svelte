@@ -482,10 +482,26 @@
       display: block;
       height: 1px;
       pointer-events: none;
-      background:
-        linear-gradient(currentColor, currentColor) left center / calc(50% - 3.6rem) 1px no-repeat,
-        linear-gradient(currentColor, currentColor) right center / calc(50% - 3.6rem) 1px no-repeat;
-      color: var(--border-strong);
+    }
+
+    /* Two plain bars rather than currentColor gradients: Safari kept a stale (near-transparent)
+       gradient colour after a theme change, so the line all but vanished. */
+    .seam::before,
+    .seam::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      width: calc(50% - 3.6rem);
+      height: 1px;
+      background-color: var(--border-strong);
+    }
+
+    .seam::before {
+      left: 0;
+    }
+
+    .seam::after {
+      right: 0;
     }
 
     .turn {
