@@ -7,7 +7,7 @@
   import garamondRegular from '@fontsource/eb-garamond/files/eb-garamond-latin-400-normal.woff2?url';
   import Footer from '#lib/components/Footer.svelte';
   import Transition from '#lib/components/Transition.svelte';
-  import SiteBackdrop from '#lib/components/SiteBackdrop.svelte';
+  import NightSky from '#lib/components/NightSky.svelte';
   import SiteSidebar from '#lib/components/SiteSidebar.svelte';
   import SignatureLogo from '#lib/components/SignatureLogo.svelte';
   import JafCrest from '#lib/components/JafCrest.svelte';
@@ -245,9 +245,7 @@
 
 <svelte:window bind:scrollY />
 
-<!-- One photo layer for landing and the enter crossfade; dormant on settled inner pages. -->
 <VercelObservability />
-<SiteBackdrop />
 
 {#if isLanding}
   <!-- Solid edge strips for iOS Safari's bar colour (app.css .safari-edge). Keyed on the theme:
@@ -288,6 +286,8 @@
       <JafCrest />
     </div>
     <div class="page-stack">
+      <!-- A faint aurora over the header window and stars in the margins (never behind text). -->
+      <NightSky variant="inner" />
       <main>
         <PageWindow />
         <Transition url={transitionKey}>

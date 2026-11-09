@@ -10,7 +10,8 @@
   import BackgroundSwitch from '#lib/components/BackgroundSwitch.svelte';
   import ThemeSwitch from '#lib/components/ThemeSwitch.svelte';
   import MotionToggle from '#lib/components/MotionToggle.svelte';
-  import { backdrop, photos } from '#lib/backdrop.svelte.ts';
+  import NightSky from '#lib/components/NightSky.svelte';
+  import { backdrop, photoBackground, photos } from '#lib/backdrop.svelte.ts';
   import { resolve } from '$app/paths';
   import { preloadCode } from '$app/navigation';
   // The italic for the name in the greeting (the regular face is preloaded by the root layout).
@@ -51,10 +52,10 @@
     ready = true;
   }
 
-  /** The JAF loader stays up at least this long after mount, so it reads as a beat, not a flash. */
-  const LOADER_MIN_MS = 350;
+  /** The terminal loader stays up long enough to type its command and fill its bar (CSS, below). */
+  const LOADER_MIN_MS = 950;
   /** Never hold the page longer than this for the photo; the text doesn't need it. */
-  const LOADER_MAX_MS = 900;
+  const LOADER_MAX_MS = 1400;
   let loaderShown = $state(false);
 
   // Wait for the backdrop photo (the root layout decodes the visitor's saved one, preloaded by
@@ -63,6 +64,14 @@
   $effect(() => {
     if (backdrop.revealed && loaderShown) finishLoading();
   });
+
+  // The window's photo: a switch made here fades from the old photo to the new one.
+  const startPhoto = backdrop.index;
+  let switched = $state(false);
+  $effect(() => {
+    if (backdrop.index !== startPhoto) switched = true;
+  });
+  const under = $derived(switched ? backdrop.previous : backdrop.index);
 
   // Fetch the three pages' code once the landing has settled, so a tap only waits on their data
   // (which the hover/touchstart preload starts). Saves a round trip on a phone's first visit.
@@ -98,7 +107,8 @@
   <link rel="preload" href={garamondItalic} as="font" type="font/woff2" crossorigin="anonymous" />
   <noscript>
     <style>
-      .landing .reveal {
+      .landing .reveal,
+      .landing .window {
         opacity: 1 !important;
       }
       .landing .loader {
@@ -115,47 +125,70 @@
   class:faded-in={fadedIn}
 >
   {#if !returning}
-    <div class="loader absolute inset-0 flex items-center justify-center" aria-hidden="true">
-      <div class="flex flex-col items-center gap-6">
-        <img src="/favicon.png" alt="" class="w-16" />
-        <!-- A package-manager progress bar filling up. Plain CSS, so it runs in the first
-             paint, before hydration. -->
-        <span class="bar font-mono"
-          >[<span class="track"
+    <!-- A fake download in a full-screen terminal: the command types out, then a progress bar
+         fills. Plain CSS, so it runs in the first paint, before hydration. -->
+    <div class="loader" aria-hidden="true">
+      <div class="term font-mono">
+        <div>
+          <span class="prompt">~ $ </span><span class="cmd">curl -sL https://joshuafouch.com</span>
+        </div>
+        <div class="progress">
+          <span class="dim">[</span><span class="track"
             >--------------------<span class="fill">####################</span></span
-          >]</span
-        >
+          ><span class="dim">]</span> <span class="pct"></span><span class="caret"></span>
+        </div>
       </div>
     </div>
   {/if}
 
-  <div class="landing-chrome flex flex-1 flex-col">
-    <div class="corner reveal" style="--step: 0">
-      <BackgroundSwitch />
-      <ThemeSwitch />
-      <MotionToggle />
-    </div>
+  <NightSky variant="landing" />
 
-    <div class="relative flex flex-1 flex-col items-center justify-center px-6 text-center">
-      <div class="logo w-full max-w-md" class:quick={returning && replay === 0}>
-        <button
-          type="button"
-          class="signature-btn"
-          aria-label="Replay signature"
-          onclick={() => replay++}
-        >
-          {#key replay}
-            <SignatureLogo play={ready} instant={returning && replay === 0} drift />
+  <div class="landing-chrome">
+    <header class="top">
+      <a class="home" href={resolve('/')} aria-label="Home">
+        <img src="/favicon.png" alt="" width="30" height="30" />
+      </a>
+      <div class="corner reveal" style="--step: 0">
+        <BackgroundSwitch />
+        <ThemeSwitch />
+        <MotionToggle />
+      </div>
+    </header>
+
+    <div class="middle">
+      <div class="window" class:quick={returning && replay === 0}>
+        <div class="view" aria-hidden="true">
+          <div class="photo" style:background-image={photoBackground(under)}></div>
+          {#key backdrop.index}
+            <div
+              class="photo"
+              class:fade={under !== backdrop.index}
+              style:background-image={photoBackground(backdrop.index)}
+            ></div>
           {/key}
-        </button>
+          <div class="tint"></div>
+          <div class="veil"></div>
+        </div>
+        <div class="sign">
+          <button
+            type="button"
+            class="signature-btn"
+            aria-label="Replay signature"
+            onclick={() => replay++}
+          >
+            {#key replay}
+              <SignatureLogo play={ready} instant={returning && replay === 0} drift />
+            {/key}
+          </button>
+        </div>
       </div>
 
-      <p class="hello reveal mt-4 max-w-md text-xl leading-relaxed sm:text-2xl" style="--step: 0">
+      <p class="hello reveal" style="--step: 1">
         Hello! My name is <em class="name">Joshua Fouch</em>. Welcome to my corner of the web.
       </p>
 
-      <nav aria-label="Pages" class="reveal mt-10" style="--step: 1">
-        <ul class="pages flex flex-wrap items-center justify-center gap-y-1 text-base sm:text-xl">
+      <nav aria-label="Pages" class="reveal" style="--step: 2">
+        <ul class="pages">
           {#each pages as page, index (page.text)}
             {#if index > 0}
               <li aria-hidden="true" class="dot">·</li>
@@ -166,8 +199,8 @@
       </nav>
     </div>
 
-    <footer class="foot reveal text-center" style="--step: 2">
-      <ul class="socials flex flex-wrap justify-center">
+    <footer class="foot reveal" style="--step: 3">
+      <ul class="socials">
         <li>
           <a class="social-link link-line" href={resolve('/resume')}>
             <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -230,30 +263,45 @@
 </section>
 
 <style>
+  @property --pct {
+    syntax: '<integer>';
+    inherits: false;
+    initial-value: 0;
+  }
+
   .landing {
-    color: var(--ink);
-    min-height: 100svh;
-    min-height: 100dvh;
+    isolation: isolate;
+    height: 100svh;
+    height: 100dvh;
     overflow: hidden;
+    background: var(--surface);
+    color: var(--ink);
   }
 
   .landing-chrome {
+    position: relative;
+    z-index: 1;
+    display: flex;
+    flex: 1;
+    flex-direction: column;
     min-height: 0;
+    padding: max(0.75rem, env(safe-area-inset-top)) max(1rem, env(safe-area-inset-right))
+      max(0.5rem, env(safe-area-inset-bottom)) max(1rem, env(safe-area-inset-left));
   }
 
-  .corner {
-    position: absolute;
-    z-index: 2;
-    top: max(0.75rem, env(safe-area-inset-top));
-    right: max(0.75rem, env(safe-area-inset-right));
-    display: flex;
-    gap: 0.2rem;
-  }
+  /* ---- Loader: a full-screen terminal ---------------------------------------------------- */
 
   /* Visible in the first paint (a fade-in animation can't start until hydration frees the main
      thread, which held it invisible for ~0.5s), then fades out as the content rises in. */
   .loader {
+    position: absolute;
+    inset: 0;
     z-index: 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    background: var(--ground);
   }
 
   .is-ready .loader {
@@ -270,15 +318,56 @@
     }
   }
 
-  .bar {
-    color: color-mix(in oklab, var(--nord4) 45%, transparent);
-    font-size: 0.8rem;
+  .term {
+    color: var(--ink);
+    font-size: 0.85rem;
+    line-height: 1.9;
+  }
+
+  .prompt,
+  .cmd,
+  .track {
     white-space: pre;
+  }
+
+  .prompt {
+    color: var(--ink-accent);
+  }
+
+  /* The command types out, a character a step. */
+  .cmd {
+    display: inline-block;
+    width: 0;
+    overflow: hidden;
+    vertical-align: bottom;
+    animation: type-cmd 330ms steps(32) 60ms forwards;
+  }
+
+  @keyframes type-cmd {
+    to {
+      width: 32ch;
+    }
+  }
+
+  .progress {
+    opacity: 0;
+    animation: appear 0s 430ms forwards;
+  }
+
+  @keyframes appear {
+    to {
+      opacity: 1;
+    }
+  }
+
+  .dim {
+    color: var(--ink-faint);
   }
 
   .track {
     position: relative;
     display: inline-block;
+    color: color-mix(in oklab, var(--ink-faint) 45%, transparent);
   }
 
   .fill {
@@ -286,8 +375,8 @@
     inset: 0 auto 0 0;
     width: 0;
     overflow: hidden;
-    color: var(--nord4);
-    animation: term-fill 800ms steps(20) 80ms forwards;
+    color: var(--ink-accent);
+    animation: term-fill 440ms steps(20) 450ms forwards;
   }
 
   @keyframes term-fill {
@@ -296,9 +385,166 @@
     }
   }
 
+  .pct {
+    counter-reset: pct var(--pct);
+    animation: count 440ms steps(20) 450ms forwards;
+  }
+
+  .pct::after {
+    content: counter(pct) '%';
+  }
+
+  @keyframes count {
+    to {
+      --pct: 100;
+    }
+  }
+
+  .caret {
+    display: inline-block;
+    width: 0.55em;
+    height: 1.05em;
+    margin-left: 0.4em;
+    vertical-align: -0.18em;
+    background: var(--ink-accent);
+    animation: blink 1.05s steps(1) infinite;
+  }
+
+  @keyframes blink {
+    50% {
+      opacity: 0;
+    }
+  }
+
+  /* ---- Chrome ------------------------------------------------------------------------------ */
+
+  .top {
+    display: flex;
+    flex: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .home {
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    margin-left: -0.4rem;
+    transition: transform 250ms var(--ease-out);
+  }
+
+  .home img {
+    width: 1.85rem;
+    height: 1.85rem;
+  }
+
+  .home:hover,
+  .home:focus-visible {
+    transform: scale(1.06);
+    outline: none;
+  }
+
+  .corner {
+    display: flex;
+    gap: 0.2rem;
+  }
+
+  .middle {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    justify-content: center;
+    width: 100%;
+    max-width: var(--page-width);
+    min-height: 0;
+    margin-inline: auto;
+    padding-block: 0.75rem;
+  }
+
+  /* The photo, framed like the inner pages' header window, with the signature over it. */
+  .window {
+    position: relative;
+    flex: 0 1 28rem;
+    min-height: 10rem;
+    border: 1px solid var(--border-strong);
+    background: var(--ground);
+    opacity: 0;
+  }
+
+  .window::before,
+  .window::after {
+    content: '';
+    position: absolute;
+    z-index: 2;
+    width: 0.7rem;
+    height: 0.7rem;
+    border: 0 solid var(--border-strong);
+  }
+
+  .window::before {
+    top: -0.45rem;
+    left: -0.45rem;
+    border-width: 1px 0 0 1px;
+  }
+
+  .window::after {
+    right: -0.45rem;
+    bottom: -0.45rem;
+    border-width: 0 1px 1px 0;
+  }
+
+  .view {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+  }
+
+  .photo {
+    position: absolute;
+    inset: 0;
+    background-position: center 62%;
+    background-size: cover;
+  }
+
+  .photo.fade {
+    opacity: 0;
+    animation: window-photo-in 700ms ease forwards;
+  }
+
+  @keyframes window-photo-in {
+    to {
+      opacity: 1;
+    }
+  }
+
+  .tint {
+    position: absolute;
+    inset: 0;
+    background: var(--tint);
+    mix-blend-mode: color;
+    opacity: 0.35;
+  }
+
+  .veil {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at center, var(--veil-inner) 0%, var(--veil-outer) 75%);
+  }
+
+  .sign {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-inline: 8%;
+  }
+
   .signature-btn {
     display: block;
-    width: 100%;
+    width: min(36rem, 100%);
     padding: 0;
     border: 0;
     background: none;
@@ -311,12 +557,23 @@
     outline-offset: 6px;
   }
 
-  .logo.quick {
-    opacity: 0;
+  .is-ready .window {
+    animation: window-in 700ms var(--ease-out) both;
   }
 
-  .is-ready .logo.quick {
+  .is-ready .window.quick {
     animation: rise 200ms ease both;
+  }
+
+  @keyframes window-in {
+    from {
+      opacity: 0;
+      transform: scale(0.985);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
   }
 
   .reveal {
@@ -325,7 +582,7 @@
 
   .is-ready .reveal {
     animation: rise 600ms ease both;
-    animation-delay: calc(120ms + var(--step) * 160ms);
+    animation-delay: calc(160ms + var(--step) * 140ms);
   }
 
   .is-return .reveal {
@@ -345,16 +602,22 @@
   }
 
   .hello {
+    flex: none;
+    max-width: 30ch;
+    margin: 2.25rem auto 0;
     color: var(--ink-muted);
+    font-size: 1.75rem;
+    line-height: 1.35;
+    text-align: center;
   }
 
   .name {
     color: var(--ink);
   }
 
-  /* Back from an inner page (see fadedIn): that page has dissolved into the photo, and the
-     signature, then each row under it, rise back in one after another. */
-  .faded-in.is-ready .logo.quick {
+  /* Back from an inner page (see fadedIn): that page has dissolved, and the window, then each
+     row under it, rise back in one after another. */
+  .faded-in.is-ready .window.quick {
     animation: return-rise 620ms var(--ease-out) 40ms both;
   }
 
@@ -374,9 +637,22 @@
     }
   }
 
+  nav {
+    flex: none;
+    margin-top: 1.4rem;
+  }
+
   .pages {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: 1.35rem;
     font-variant: small-caps;
-    letter-spacing: 0.08em;
+    letter-spacing: 0.12em;
   }
 
   .pages a {
@@ -386,23 +662,21 @@
   }
 
   .dot {
-    padding-inline: 0.45rem;
+    padding-inline: 1.1rem;
     color: color-mix(in oklab, var(--ink-muted) 55%, transparent);
   }
 
   .foot {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
-    align-items: center;
-    padding-inline: max(0.75rem, env(safe-area-inset-right));
-    padding-bottom: max(1rem, env(safe-area-inset-bottom));
+    flex: none;
   }
 
   /* IBM Plex Mono, lowercase: the same voice as the sidebar's links and the inner pages' trail. */
   .socials {
-    grid-column: 2;
+    display: flex;
+    flex-wrap: wrap;
     align-items: center;
-    gap: 1.25rem 1.9rem;
+    justify-content: center;
+    gap: 0 1.9rem;
     margin: 0;
     padding: 0;
     list-style: none;
@@ -480,31 +754,24 @@
   }
 
   @media (max-width: 767px) {
-    .landing {
-      height: 100svh;
-      height: 100dvh;
+    .window {
+      flex-basis: 19rem;
     }
 
-    /* Pinned to the bottom edge, so the signature group centers in the full screen. */
-    .foot {
-      position: absolute;
-      right: 0;
-      bottom: 0;
-      left: 0;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding-inline: max(1rem, env(safe-area-inset-left)) max(0.85rem, env(safe-area-inset-right));
-      padding-bottom: max(0.55rem, env(safe-area-inset-bottom));
+    .hello {
+      font-size: 1.35rem;
     }
 
-    .socials {
-      width: auto;
-      flex-wrap: nowrap;
-      justify-content: center;
-      gap: 0.35rem 1.1rem;
-      margin: 0;
-      padding-inline: 0;
+    .pages {
+      font-size: 1.15rem;
+    }
+
+    .dot {
+      padding-inline: 0.6rem;
+    }
+
+    .term {
+      font-size: 0.72rem;
     }
   }
 
@@ -521,48 +788,33 @@
     }
   }
 
-  @media (max-width: 399px) {
-    .dot {
-      display: none;
-    }
-
-    .pages {
-      column-gap: 1.1rem;
-      row-gap: 0.15rem;
-    }
-  }
-
-  @media (min-width: 640px) {
-    .corner {
-      top: max(1.5rem, env(safe-area-inset-top));
-      right: max(1.5rem, env(safe-area-inset-right));
-    }
-
-    .pages {
-      letter-spacing: 0.12em;
-    }
-
-    .dot {
-      padding-inline: 1.1rem;
-    }
-  }
-
   @media (prefers-reduced-motion: reduce) {
     .is-ready .loader {
       animation-duration: 1ms;
     }
 
-    .fill {
-      width: auto;
+    .cmd,
+    .fill,
+    .progress,
+    .pct {
+      animation-duration: 1ms;
+      animation-delay: 0ms;
+    }
+
+    .caret {
       animation: none;
     }
 
     .is-ready .reveal,
-    .is-ready .logo.quick,
+    .is-ready .window,
     .faded-in.is-ready .reveal,
-    .faded-in.is-ready .logo.quick {
+    .faded-in.is-ready .window.quick {
       animation: none;
       opacity: 1;
+    }
+
+    .photo.fade {
+      animation-duration: 1ms;
     }
   }
 
@@ -570,13 +822,20 @@
     animation-duration: 1ms;
   }
 
-  :global(html[data-motion='off']) .fill {
-    width: auto;
+  :global(html[data-motion='off']) .cmd,
+  :global(html[data-motion='off']) .fill,
+  :global(html[data-motion='off']) .progress,
+  :global(html[data-motion='off']) .pct {
+    animation-duration: 1ms;
+    animation-delay: 0ms;
+  }
+
+  :global(html[data-motion='off']) .caret {
     animation: none;
   }
 
   :global(html[data-motion='off']) .is-ready .reveal,
-  :global(html[data-motion='off']) .is-ready .logo.quick {
+  :global(html[data-motion='off']) .is-ready .window {
     animation: none;
     opacity: 1;
   }
