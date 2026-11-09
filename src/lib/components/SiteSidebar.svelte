@@ -42,6 +42,24 @@
 
 <aside class="rail font-serif" class:closed={!sidebar.open} class:expanded={menu}>
   <div class="bar">
+    <!-- Phones: the menu button leads, left of the mark (hidden on wider screens). -->
+    <button
+      type="button"
+      class="menu-btn"
+      aria-expanded={menu}
+      aria-controls="site-links"
+      aria-label={menu ? 'Close' : 'Menu'}
+      onclick={() => (menu = !menu)}
+    >
+      <!-- One icon: the outer bars turn into the cross and the middle one fades (.expanded). -->
+      <svg class="burger" viewBox="0 0 24 24" aria-hidden="true">
+        <g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
+          <path class="bar-top" d="M4 7h16" />
+          <path class="bar-mid" d="M4 12h16" />
+          <path class="bar-low" d="M4 17h16" />
+        </g>
+      </svg>
+    </button>
     <a class="mark" href={resolve('/')} aria-label="Home" inert={folded}>
       <JafMark />
     </a>
@@ -62,23 +80,6 @@
           stroke-linecap="round"
           stroke-linejoin="round"
         />
-      </svg>
-    </button>
-    <button
-      type="button"
-      class="menu-btn"
-      aria-expanded={menu}
-      aria-controls="site-links"
-      aria-label={menu ? 'Close' : 'Menu'}
-      onclick={() => (menu = !menu)}
-    >
-      <!-- One icon: the outer bars turn into the cross and the middle one fades (.expanded). -->
-      <svg class="burger" viewBox="0 0 24 24" aria-hidden="true">
-        <g fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round">
-          <path class="bar-top" d="M4 7h16" />
-          <path class="bar-mid" d="M4 12h16" />
-          <path class="bar-low" d="M4 17h16" />
-        </g>
       </svg>
     </button>
   </div>
@@ -474,7 +475,7 @@
       right: 0;
       bottom: auto;
       display: grid;
-      grid-template-columns: auto 1fr auto auto;
+      grid-template-columns: auto auto 1fr;
       grid-template-rows: 3.5rem auto;
       align-items: center;
       width: 100%;
@@ -497,11 +498,11 @@
     }
 
     .mark {
-      grid-column: 1;
+      grid-column: 2;
       grid-row: 1;
       width: 2.5rem;
       height: 2.5rem;
-      margin: 0 0.85rem;
+      margin: 0 0.35rem;
     }
 
     .mark :global(.jaf-mark) {
@@ -516,10 +517,11 @@
 
     .menu-btn {
       display: grid;
-      grid-column: 4;
+      grid-column: 1;
       grid-row: 1;
       width: 2.75rem;
       height: 2.75rem;
+      margin-left: 0.4rem;
       padding: 0;
     }
 
@@ -531,7 +533,7 @@
       justify-content: flex-end;
       height: auto;
       margin: 0;
-      padding-right: 0.15rem;
+      padding-right: 0.5rem;
     }
 
     nav {

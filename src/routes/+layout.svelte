@@ -250,6 +250,10 @@
 <SiteBackdrop />
 
 {#if isLanding}
+  <!-- Solid strips at the screen edges for iOS Safari to take its status-bar and toolbar
+       colour from (app.css .safari-edge). -->
+  <div class="safari-edge top" aria-hidden="true"></div>
+  <div class="safari-edge bottom" aria-hidden="true"></div>
   <div class="page-stack">
     <main>
       <Transition url={transitionKey}>
@@ -481,7 +485,7 @@
       background:
         linear-gradient(currentColor, currentColor) left center / calc(50% - 3.6rem) 1px no-repeat,
         linear-gradient(currentColor, currentColor) right center / calc(50% - 3.6rem) 1px no-repeat;
-      color: var(--border-subtle);
+      color: var(--border-strong);
     }
 
     .turn {
