@@ -46,34 +46,25 @@
   const STARS_A = starTile(11, 34);
   const STARS_B = starTile(23, 26);
 
-  /** Revelation 12:1: a crescent moon under a crown of twelve stars. */
-  const MOON = [
-    '         *   *',
-    '      *         *',
-    '',
-    '    *             *',
-    '    *             *',
-    '',
-    '      *         *',
-    '         *   *',
-    '',
-    '  :                 :',
-    '  -:               :-',
-    '  -=:             :=-',
-    '  :=+-:         :-+=:',
-    '   -+#+=--:::--=+#+-',
-    '    -+###*****###+-',
-    '     :=+*#####*+=:',
-    '       :--===--:'
-  ];
-  /** The crown is the first rows: its stars are gold; the crescent's own '*' are not. */
-  const CROWN_ROWS = 8;
-  const MOON_BODY = MOON.map((line, row) =>
-    row < CROWN_ROWS ? line.replace(/\*/g, ' ') : line
-  ).join('\n');
-  const MOON_CROWN = MOON.map((line, row) =>
-    row < CROWN_ROWS ? line.replace(/[^*]/g, ' ') : ''
-  ).join('\n');
+  /* Revelation 12:1: a crescent moon with a crown of twelve stars resting in it, drawn as a dot
+     matrix (like braille cells, but as SVG dots so no font can change it). */
+  const MOON_W = 30;
+  const MOON_H = 32;
+  const MOON_DOTS: [number, number][] = [];
+  const CROWN_DOTS: [number, number][] = [];
+  for (let y = 0; y < MOON_H; y++) {
+    for (let x = 0; x < MOON_W; x++) {
+      const outer = Math.hypot(x - 14.5, y - 21.5);
+      const inner = Math.hypot(x - 14.5, y - 17);
+      if (outer <= 10.2 && inner >= 9.4) MOON_DOTS.push([x, y]);
+    }
+  }
+  for (let k = 0; k < 12; k++) {
+    const angle = ((k * 30 + 15) * Math.PI) / 180;
+    const x = Math.round(14.5 + 10 * Math.cos(angle) - 0.5);
+    const y = Math.round(9.5 - 8.4 * Math.sin(angle) - 0.5);
+    CROWN_DOTS.push([x + 0.5, y + 0.5]);
+  }
 
   // The Big Dipper with Polaris above it: the stars of the Alaska flag.
   const DIPPER = [
@@ -249,10 +240,14 @@
     </svg>
 
     <div class="moon">
-      <div class="moon-art">
-        <div class="moon-body">{MOON_BODY}</div>
-        <div class="moon-crown">{MOON_CROWN}</div>
-      </div>
+      <svg class="moon-art" viewBox="-1 -1 {MOON_W + 1} {MOON_H + 1}">
+        {#each MOON_DOTS as [x, y] (`${x},${y}`)}
+          <circle cx={x} cy={y} r="0.36" class="dot" />
+        {/each}
+        {#each CROWN_DOTS as [x, y] (`${x},${y}`)}
+          <circle cx={x} cy={y} r="0.8" class="crown" />
+        {/each}
+      </svg>
       <span class="moon-ref">rev 12:1</span>
     </div>
   {/if}
@@ -377,30 +372,39 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 6px;
+    gap: 5px;
     color: var(--moon-ink);
   }
 
   .moon-art {
-    display: grid;
-    font-size: 8px;
-    line-height: 8.5px;
-    white-space: pre;
-    opacity: 0.85;
+    width: 64px;
+    height: auto;
+    overflow: visible;
   }
 
-  .moon-body,
-  .moon-crown {
-    grid-area: 1 / 1;
+  .moon-art .dot {
+    fill: var(--moon-ink);
+    opacity: 0.7;
   }
 
-  .moon-crown {
-    color: var(--star-gold);
+  .moon-art .crown {
+    fill: var(--star-gold);
+    filter: drop-shadow(0 0 1.5px var(--star-gold));
+    animation: crown 7s ease-in-out infinite alternate;
+  }
+
+  @keyframes crown {
+    from {
+      opacity: 0.7;
+    }
+    to {
+      opacity: 1;
+    }
   }
 
   .moon-ref {
-    font-size: 8px;
-    letter-spacing: 0.1em;
+    font-size: 7px;
+    letter-spacing: 0.12em;
     color: var(--ink-faint);
   }
 
@@ -425,22 +429,23 @@
     }
 
     .moon-art {
-      font-size: 6.5px;
-      line-height: 7px;
+      width: 50px;
     }
 
     .moon-ref {
-      font-size: 7px;
+      font-size: 6px;
     }
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .stars {
+    .stars,
+    .moon-art .crown {
       animation: none;
     }
   }
 
-  :global(html[data-motion='off']) .stars {
+  :global(html[data-motion='off']) .stars,
+  :global(html[data-motion='off']) .moon-art .crown {
     animation: none;
   }
 </style>
