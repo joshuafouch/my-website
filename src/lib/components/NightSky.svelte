@@ -46,38 +46,38 @@
   const STARS_A = starTile(11, 34);
   const STARS_B = starTile(23, 26);
 
-  /* Revelation 12:1: a crescent moon with a crown of twelve stars resting in it, drawn as a dot
-     matrix (like braille cells, but as SVG dots so no font can change it). */
-  const MOON_W = 30;
-  const MOON_H = 32;
+  /* A small waning crescent (lit on the left), drawn as a dot matrix so no font can change it.
+     Revelation 12:1's moon, kept quiet. */
+  const MOON_SIZE = 22;
   const MOON_DOTS: [number, number][] = [];
-  const CROWN_DOTS: [number, number][] = [];
-  for (let y = 0; y < MOON_H; y++) {
-    for (let x = 0; x < MOON_W; x++) {
-      const outer = Math.hypot(x - 14.5, y - 21.5);
-      const inner = Math.hypot(x - 14.5, y - 17);
-      if (outer <= 10.2 && inner >= 9.4) MOON_DOTS.push([x, y]);
+  for (let y = 0; y < MOON_SIZE; y++) {
+    for (let x = 0; x < MOON_SIZE; x++) {
+      const lit = Math.hypot(x - 10.5, y - 10.5) <= 10.2;
+      const shadow = Math.hypot(x - 15.5, y - 9.5) <= 9.6;
+      if (lit && !shadow) MOON_DOTS.push([x, y]);
     }
   }
-  for (let k = 0; k < 12; k++) {
-    const angle = ((k * 30 + 15) * Math.PI) / 180;
-    const x = Math.round(14.5 + 10 * Math.cos(angle) - 0.5);
-    const y = Math.round(9.5 - 8.4 * Math.sin(angle) - 0.5);
-    CROWN_DOTS.push([x + 0.5, y + 0.5]);
+
+  /** A five-pointed star centred on (x, y), outer radius r, as on the flag. */
+  function starPoints(x: number, y: number, r: number) {
+    return Array.from({ length: 10 }, (_, i) => {
+      const angle = -Math.PI / 2 + (i * Math.PI) / 5;
+      const radius = i % 2 ? r * 0.4 : r;
+      return `${(x + radius * Math.cos(angle)).toFixed(2)},${(y + radius * Math.sin(angle)).toFixed(2)}`;
+    }).join(' ');
   }
 
-  // The Big Dipper with Polaris above it: the stars of the Alaska flag.
+  // The Alaska flag: the Big Dipper's seven stars and Polaris, placed as on the flag.
   const DIPPER = [
-    [14, 214],
-    [60, 232],
-    [98, 214],
-    [134, 196],
-    [142, 148],
-    [94, 124],
-    [76, 176]
-  ];
-  const DIPPER_PATH = [0, 1, 2, 3, 6, 5, 4, 3].map((i) => DIPPER[i].join(',')).join(' ');
-  const POLARIS = [134, 22];
+    [35, 67],
+    [67, 78],
+    [83, 95],
+    [100, 113],
+    [97, 138],
+    [134, 148],
+    [147, 128]
+  ].map(([x, y]) => starPoints(x, y, 6.5));
+  const POLARIS = starPoints(210, 26, 12);
 </script>
 
 <script lang="ts">
@@ -221,31 +221,19 @@
   </div>
 
   {#if variant === 'landing'}
-    <svg class="dipper" viewBox="-4 0 168 264">
-      <polyline points={DIPPER_PATH} class="line" stroke-dasharray="2 5" />
-      <line
-        x1="142"
-        y1="140"
-        x2={POLARIS[0]}
-        y2={POLARIS[1] + 12}
-        class="line"
-        stroke-dasharray="1 6"
-      />
-      {#each DIPPER as [x, y] (`${x},${y}`)}
-        <text {x} {y} class="star">✦</text>
+    <svg class="dipper" viewBox="20 8 210 158">
+      {#each DIPPER as points (points)}
+        <polygon {points} class="star" />
       {/each}
-      <text x={POLARIS[0]} y={POLARIS[1]} class="star polaris">✦</text>
-      <text x={POLARIS[0] - 14} y={POLARIS[1] + 4} class="label" text-anchor="end">polaris</text>
-      <text x="0" y="252" class="label">ursa major</text>
+      <polygon points={POLARIS} class="star polaris" />
+      <text x="208" y="50" class="label" text-anchor="middle">polaris</text>
+      <text x="22" y="160" class="label">ursa major</text>
     </svg>
 
     <div class="moon">
-      <svg class="moon-art" viewBox="-1 -1 {MOON_W + 1} {MOON_H + 1}">
+      <svg class="moon-art" viewBox="-1 -1 {MOON_SIZE + 1} {MOON_SIZE + 1}">
         {#each MOON_DOTS as [x, y] (`${x},${y}`)}
-          <circle cx={x} cy={y} r="0.36" class="dot" />
-        {/each}
-        {#each CROWN_DOTS as [x, y] (`${x},${y}`)}
-          <circle cx={x} cy={y} r="0.8" class="crown" />
+          <circle cx={x} cy={y} r="0.38" />
         {/each}
       </svg>
       <span class="moon-ref">rev 12:1</span>
@@ -342,26 +330,17 @@
     overflow: visible;
   }
 
-  .dipper .line {
-    fill: none;
-    stroke: var(--sky-line);
-    stroke-width: 1;
-  }
-
   .dipper .star {
     fill: var(--star-gold);
-    font-size: 15px;
-    text-anchor: middle;
-    dominant-baseline: central;
   }
 
   .dipper .polaris {
-    font-size: 24px;
+    filter: drop-shadow(0 0 3px color-mix(in oklab, var(--star-gold) 60%, transparent));
   }
 
   .dipper .label {
     fill: var(--ink-faint);
-    font-size: 7px;
+    font-size: 9px;
     letter-spacing: 0.06em;
   }
 
@@ -377,29 +356,12 @@
   }
 
   .moon-art {
-    width: 64px;
+    width: 34px;
     height: auto;
     overflow: visible;
-  }
-
-  .moon-art .dot {
     fill: var(--moon-ink);
-    opacity: 0.7;
-  }
-
-  .moon-art .crown {
-    fill: var(--star-gold);
-    filter: drop-shadow(0 0 1.5px var(--star-gold));
-    animation: crown 7s ease-in-out infinite alternate;
-  }
-
-  @keyframes crown {
-    from {
-      opacity: 0.7;
-    }
-    to {
-      opacity: 1;
-    }
+    opacity: 0.8;
+    filter: drop-shadow(0 0 4px color-mix(in oklab, var(--moon-ink) 35%, transparent));
   }
 
   .moon-ref {
@@ -429,7 +391,7 @@
     }
 
     .moon-art {
-      width: 50px;
+      width: 28px;
     }
 
     .moon-ref {
@@ -438,14 +400,12 @@
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .stars,
-    .moon-art .crown {
+    .stars {
       animation: none;
     }
   }
 
-  :global(html[data-motion='off']) .stars,
-  :global(html[data-motion='off']) .moon-art .crown {
+  :global(html[data-motion='off']) .stars {
     animation: none;
   }
 </style>
