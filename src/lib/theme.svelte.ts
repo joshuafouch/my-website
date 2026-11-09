@@ -77,14 +77,24 @@ export function toggleTheme() {
   }
 
   const root = document.documentElement;
-  root.dataset.themeFade = '';
 
-  // One crossfade. Interpolating color and the signature filter repaints thousands of paths.
-  if (typeof document.startViewTransition !== 'function') {
+  // Phones (and browsers without View Transitions) swap in one frame. On iOS Safari a snapshot
+  // crossfade shows the status-bar and toolbar strips in the new colour while the old screenshot
+  // fades, and the drifting signature and crest flash their snapshot hue before snapping back.
+  const narrow = window.matchMedia('(max-width: 767px)').matches;
+  if (narrow || typeof document.startViewTransition !== 'function') {
+    // Suppress colour transitions just for this style change: flush with the attribute set,
+    // then drop it so nothing tweens from the old theme.
+    root.dataset.themeFade = 'instant';
     apply();
-    requestAnimationFrame(() => delete root.dataset.themeFade);
+    void getComputedStyle(root).color;
+    delete root.dataset.themeFade;
     return;
   }
+
+  // Wider screens: one crossfade. Interpolating color and the signature filter repaints a lot.
+  root.dataset.themeFade = 'vt';
+  const clear = () => delete root.dataset.themeFade;
 
   let transition: ViewTransition;
   try {
@@ -94,11 +104,10 @@ export function toggleTheme() {
     });
   } catch {
     apply();
-    delete root.dataset.themeFade;
+    clear();
     return;
   }
 
-  const clear = () => delete root.dataset.themeFade;
   transition.finished.then(clear, clear);
 }
 
