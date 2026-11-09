@@ -6,8 +6,8 @@
 </script>
 
 <Metadata
-  title="Professional - Joshua Fouch"
-  description="Work experience and the technologies Joshua Fouch uses, from the Alaska Railroad to Franciscan University."
+  title="About - Joshua Fouch"
+  description="Where I've worked and what I work with."
   url="/about/professional"
   image={data.portraits[0]?.src || '/assets/backgrounds/hero-bg.webp'}
   imageAlt="Joshua Fouch"

@@ -53,9 +53,9 @@
   }
 
   /** The terminal loader stays up long enough to type its command and fill its bar (CSS, below). */
-  const LOADER_MIN_MS = 950;
+  const LOADER_MIN_MS = 700;
   /** Never hold the page longer than this for the photo; the text doesn't need it. */
-  const LOADER_MAX_MS = 1400;
+  const LOADER_MAX_MS = 1100;
   let loaderShown = $state(false);
 
   // Wait for the backdrop photo (the root layout decodes the visitor's saved one, preloaded by
@@ -96,11 +96,11 @@
 </script>
 
 <Metadata
-  title="Joshua Fouch - Computer Science Student & Developer"
-  description="Fourth-year Computer Science undergraduate at Franciscan University, focusing on networking, scripting, and web development. Explore my portfolio, projects, and blog."
+  title="Joshua Fouch"
+  description="My little corner of the web."
   url="/"
   image={heroImage}
-  imageAlt="Joshua Fouch's Portfolio"
+  imageAlt="Joshua Fouch"
 />
 
 <svelte:head>
@@ -306,7 +306,7 @@
   }
 
   .is-ready .loader {
-    animation: loader-out 400ms ease both;
+    animation: loader-out 320ms ease both;
   }
 
   @keyframes loader-out {
@@ -320,8 +320,8 @@
   }
 
   .term {
-    color: var(--ink);
-    font-size: 0.85rem;
+    color: var(--ink-muted);
+    font-size: 0.78rem;
     line-height: 1.9;
   }
 
@@ -332,7 +332,7 @@
   }
 
   .prompt {
-    color: var(--ink-accent);
+    color: color-mix(in oklab, var(--ink-accent) 75%, transparent);
   }
 
   /* The command types out, a character a step. */
@@ -341,7 +341,7 @@
     width: 0;
     overflow: hidden;
     vertical-align: bottom;
-    animation: type-cmd 330ms steps(32) 60ms forwards;
+    animation: type-cmd 260ms steps(32) 40ms forwards;
   }
 
   @keyframes type-cmd {
@@ -352,7 +352,7 @@
 
   .progress {
     opacity: 0;
-    animation: appear 0s 430ms forwards;
+    animation: appear 0s 320ms forwards;
   }
 
   @keyframes appear {
@@ -376,8 +376,8 @@
     inset: 0 auto 0 0;
     width: 0;
     overflow: hidden;
-    color: var(--ink-accent);
-    animation: term-fill 440ms steps(20) 450ms forwards;
+    color: color-mix(in oklab, var(--ink-accent) 75%, transparent);
+    animation: term-fill 330ms steps(20) 330ms forwards;
   }
 
   @keyframes term-fill {
@@ -388,7 +388,7 @@
 
   .pct {
     counter-reset: pct var(--pct);
-    animation: count 440ms steps(20) 450ms forwards;
+    animation: count 330ms steps(20) 330ms forwards;
   }
 
   .pct::after {
@@ -403,17 +403,18 @@
 
   .caret {
     display: inline-block;
-    width: 0.55em;
-    height: 1.05em;
+    width: 0.5em;
+    height: 1em;
     margin-left: 0.4em;
-    vertical-align: -0.18em;
+    vertical-align: -0.16em;
     background: var(--ink-accent);
+    opacity: 0.55;
     animation: blink 1.05s steps(1) infinite;
   }
 
   @keyframes blink {
     50% {
-      opacity: 0;
+      visibility: hidden;
     }
   }
 

@@ -47,8 +47,8 @@
 />
 
 <Metadata
-  title="My Blog"
-  description="Welcome to my devblog where I post about my projects and ideas."
+  title="Blog - Joshua Fouch"
+  description="Notes on what I'm working on."
   url="/blog"
   image="/assets/backgrounds/IMG_1797.webp"
   imageAlt="Dog on a dock"
