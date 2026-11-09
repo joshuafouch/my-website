@@ -22,6 +22,16 @@
 
   const isLanding = $derived(page.url.pathname === '/');
 
+  /** The theme the Safari edge strips were last created in; follows theme.current once its fade
+      (theme.svelte.ts, 400ms) is over, so the strips never show the next theme early. */
+  let edgeTheme = $state(theme.current);
+  $effect(() => {
+    const next = theme.current;
+    if (next === edgeTheme) return;
+    const timer = window.setTimeout(() => (edgeTheme = next), 420);
+    return () => window.clearTimeout(timer);
+  });
+
   const transitionKey = $derived(page.url.pathname);
   let scrollY = $state(0);
   let signatureRun = $state(0);
@@ -248,9 +258,9 @@
 <VercelObservability />
 
 {#if isLanding}
-  <!-- Solid edge strips for iOS Safari's bar colour (app.css .safari-edge). Keyed on the theme:
-       Safari only re-reads the colour when the element at the edge is replaced. -->
-  {#key theme.current}
+  <!-- Solid edge strips for iOS Safari's bar colour (app.css .safari-edge). Re-created once a
+       theme change has finished fading: Safari only re-reads the colour of a new element. -->
+  {#key edgeTheme}
     <div class="safari-edge top" aria-hidden="true"></div>
     <div class="safari-edge bottom" aria-hidden="true"></div>
   {/key}

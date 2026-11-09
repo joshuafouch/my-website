@@ -773,23 +773,11 @@ html[data-theme='nord'] .initial {
 }
 
 /* iOS Safari 26 paints its status-bar and toolbar strips a solid colour, read from the topmost
-   fixed element at the screen edge. On the landing that was the photo layer: an image, sampled
-   once and kept, so after a theme change the strips stayed in the old theme until a reload.
-   These solid strips sit on top at the edges instead; the layout re-creates them on every theme
-   change, which makes Safari read them again. --edge is unregistered, so it switches in one
-   step rather than fading. Safari only counts strips more than 10px thick. */
-html[data-theme='nord-dark'] {
-  --edge: #2e3440;
-}
-
-html[data-theme='nord'] {
-  --edge: #eceff4;
-}
-
-html[data-theme='frost'] {
-  --edge: #466078;
-}
-
+   fixed element at the screen edge, and only re-reads it when that element is replaced. These
+   solid strips sit on top at the edges in the page colour (--surface, which fades with a theme
+   change, so no bar of the next theme shows during the fade); the layout re-creates them once
+   the fade has finished, so Safari picks up the settled colour. Safari only counts strips more
+   than 10px thick. */
 .safari-edge {
   display: none;
 }
@@ -802,7 +790,7 @@ html[data-theme='frost'] {
     left: 0;
     display: block;
     height: 12px;
-    background-color: var(--edge);
+    background-color: var(--surface);
   }
 
   .safari-edge.top {

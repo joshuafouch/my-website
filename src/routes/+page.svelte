@@ -274,7 +274,8 @@
     height: 100svh;
     height: 100dvh;
     overflow: hidden;
-    background: var(--surface);
+    /* No background of its own: the page's (--surface on html/body, app.css) shows through, so
+       it fades in step with the Safari edge strips on a theme change. */
     color: var(--ink);
   }
 
