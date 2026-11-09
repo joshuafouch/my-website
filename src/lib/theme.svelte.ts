@@ -78,17 +78,23 @@ export function toggleTheme() {
 
   const root = document.documentElement;
 
-  // Phones (and browsers without View Transitions) swap in one frame. On iOS Safari a snapshot
-  // crossfade shows the status-bar and toolbar strips in the new colour while the old screenshot
-  // fades, and the drifting signature and crest flash their snapshot hue before snapping back.
+  // Phones fade the theme's colour tokens in place (app.css, data-theme-fade='soft'). A snapshot
+  // crossfade looks wrong in iOS Safari: its status-bar and toolbar strips take the new colour
+  // while the old screenshot is still fading, and the drifting signature and crest flash their
+  // snapshot hue before snapping back.
   const narrow = window.matchMedia('(max-width: 767px)').matches;
   if (narrow || typeof document.startViewTransition !== 'function') {
-    // Suppress colour transitions just for this style change: flush with the attribute set,
-    // then drop it so nothing tweens from the old theme.
-    root.dataset.themeFade = 'instant';
-    apply();
+    const token = String(Date.now());
+    root.dataset.themeFade = 'soft';
+    root.dataset.themeFadeId = token;
+    // Flush so the transitions are in place before the colours change.
     void getComputedStyle(root).color;
-    delete root.dataset.themeFade;
+    apply();
+    window.setTimeout(() => {
+      if (root.dataset.themeFadeId !== token) return;
+      delete root.dataset.themeFade;
+      delete root.dataset.themeFadeId;
+    }, 400);
     return;
   }
 
