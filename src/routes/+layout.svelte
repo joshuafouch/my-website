@@ -16,7 +16,7 @@
   import { restoreBackdrop } from '#lib/backdrop.svelte.ts';
   import { reducedMotion, restoreMotion } from '#lib/motion.svelte.ts';
   import { restoreSidebar, sidebar } from '#lib/sidebar.svelte.ts';
-  import { restoreTheme } from '#lib/theme.svelte.ts';
+  import { restoreTheme, theme } from '#lib/theme.svelte.ts';
 
   let { children } = $props();
 
@@ -250,6 +250,12 @@
 <SiteBackdrop />
 
 {#if isLanding}
+  <!-- Solid edge strips for iOS Safari's bar colour (app.css .safari-edge). Keyed on the theme:
+       Safari only re-reads the colour when the element at the edge is replaced. -->
+  {#key theme.current}
+    <div class="safari-edge top" aria-hidden="true"></div>
+    <div class="safari-edge bottom" aria-hidden="true"></div>
+  {/key}
   <div class="page-stack">
     <main>
       <Transition url={transitionKey}>

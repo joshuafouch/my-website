@@ -731,25 +731,48 @@ html[data-theme='nord'] .initial {
     overflow: hidden;
     overscroll-behavior: none;
   }
+}
 
-  /* iOS Safari 26 takes its status-bar and toolbar colour from the screen edges once, on load,
-     and doesn't look again when the theme changes. So the photo runs edge to edge, and the
-     theme's veil stops short of the outermost strip: what Safari read stays right in every theme. */
-  html:has(.landing) .site-backdrop .veil {
-    -webkit-mask-image: linear-gradient(
-      to bottom,
-      transparent 0,
-      #000 max(1.5rem, env(safe-area-inset-top)),
-      #000 calc(100% - 1.5rem),
-      transparent 100%
-    );
-    mask-image: linear-gradient(
-      to bottom,
-      transparent 0,
-      #000 max(1.5rem, env(safe-area-inset-top)),
-      #000 calc(100% - 1.5rem),
-      transparent 100%
-    );
+/* iOS Safari 26 paints its status-bar and toolbar strips a solid colour, read from the topmost
+   fixed element at the screen edge. On the landing that was the photo layer: an image, sampled
+   once and kept, so after a theme change the strips stayed in the old theme until a reload.
+   These solid strips sit on top at the edges instead; the layout re-creates them on every theme
+   change, which makes Safari read them again. --edge is unregistered, so it switches in one
+   step rather than fading. Safari only counts strips more than 10px thick. */
+html[data-theme='nord-dark'] {
+  --edge: #13161c;
+}
+
+html[data-theme='nord'] {
+  --edge: #e5e9f0;
+}
+
+html[data-theme='frost'] {
+  --edge: #3d5166;
+}
+
+.safari-edge {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .safari-edge {
+    position: fixed;
+    z-index: 60;
+    right: 0;
+    left: 0;
+    display: block;
+    height: 12px;
+    background-color: var(--edge);
+  }
+
+  .safari-edge.top {
+    top: 0;
+    height: max(12px, env(safe-area-inset-top));
+  }
+
+  .safari-edge.bottom {
+    bottom: 0;
   }
 }
 
