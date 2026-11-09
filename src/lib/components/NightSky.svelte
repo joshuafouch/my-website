@@ -386,8 +386,26 @@
       --reach: 0px;
     }
 
+    /* Phones have no margins beside the text: stars only in the thin edges outside its padding,
+       and across the foot of the page (part of the page, so they scroll with it). */
     .inner .star-field {
-      display: none;
+      opacity: 0.85;
+      mask-image:
+        linear-gradient(
+          90deg,
+          #000 0,
+          #000 0.9rem,
+          transparent 1.35rem,
+          transparent calc(100% - 1.35rem),
+          #000 calc(100% - 0.9rem)
+        ),
+        linear-gradient(to bottom, transparent calc(100% - 18rem), #000 calc(100% - 8rem));
+      mask-composite: add;
+    }
+
+    /* A denser tile on phones, so the thin edges still catch a few stars. */
+    .inner .stars {
+      mask-size: 460px 460px;
     }
 
     .inner .aurora {
