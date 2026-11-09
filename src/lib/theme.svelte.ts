@@ -77,14 +77,30 @@ export function toggleTheme() {
   }
 
   const root = document.documentElement;
-  root.dataset.themeFade = '';
 
-  // One crossfade. Interpolating color and the signature filter repaints thousands of paths.
-  if (typeof document.startViewTransition !== 'function') {
+  // Phones fade the theme's colour tokens in place (app.css, data-theme-fade='soft'). A snapshot
+  // crossfade looks wrong in iOS Safari: its status-bar and toolbar strips take the new colour
+  // while the old screenshot is still fading, and the drifting signature and crest flash their
+  // snapshot hue before snapping back.
+  const narrow = window.matchMedia('(max-width: 767px)').matches;
+  if (narrow || typeof document.startViewTransition !== 'function') {
+    const token = String(Date.now());
+    root.dataset.themeFade = 'soft';
+    root.dataset.themeFadeId = token;
+    // Flush so the transitions are in place before the colours change.
+    void getComputedStyle(root).color;
     apply();
-    requestAnimationFrame(() => delete root.dataset.themeFade);
+    window.setTimeout(() => {
+      if (root.dataset.themeFadeId !== token) return;
+      delete root.dataset.themeFade;
+      delete root.dataset.themeFadeId;
+    }, 400);
     return;
   }
+
+  // Wider screens: one crossfade. Interpolating color and the signature filter repaints a lot.
+  root.dataset.themeFade = 'vt';
+  const clear = () => delete root.dataset.themeFade;
 
   let transition: ViewTransition;
   try {
@@ -94,11 +110,10 @@ export function toggleTheme() {
     });
   } catch {
     apply();
-    delete root.dataset.themeFade;
+    clear();
     return;
   }
 
-  const clear = () => delete root.dataset.themeFade;
   transition.finished.then(clear, clear);
 }
 
