@@ -89,15 +89,23 @@
   let time = 0;
   let timer = 0;
 
+  // Cached between frames so a redraw never forces a style or layout pass: the canvas's size
+  // (kept by the ResizeObserver) and the aurora colours (re-read only around a theme change).
+  let context: CanvasRenderingContext2D | null = null;
+  let width = 0;
+  let height = 0;
+  let colors: string[] | null = null;
+  let colorsUntil = 0;
+  /** Off screen (an inner page scrolled past its header): the timer keeps time but skips drawing. */
+  let visible = true;
+
   /** The motion button (html[data-motion='off']) or the OS setting holds the sky still. */
   const still = $derived(reducedMotion());
 
   function draw() {
-    const context = canvas?.getContext('2d');
-    if (!canvas || !context) return;
-    const width = canvas.clientWidth;
-    const height = canvas.clientHeight;
-    if (!width || !height) return;
+    if (!canvas) return;
+    context ??= canvas.getContext('2d');
+    if (!context || !width || !height) return;
 
     const ratio = window.devicePixelRatio || 1;
     if (
@@ -110,8 +118,13 @@
 
     const phone = width < 640;
     const scale = phone ? 0.75 : 1;
-    const style = getComputedStyle(canvas);
-    const colors = [1, 2, 3, 4].map((n) => style.getPropertyValue(`--aurora-${n}`).trim());
+    if (!colors || performance.now() < colorsUntil) {
+      const style = getComputedStyle(canvas);
+      colors = [1, 2, 3, 4].map((n) => style.getPropertyValue(`--aurora-${n}`).trim());
+    }
+    // Canvas state changes cost more than the glyphs: set them only when they change.
+    let lastColor = -1;
+    let lastAlpha = -1;
 
     context.setTransform(ratio * scale, 0, 0, ratio * scale, 0, 0);
     context.clearRect(0, 0, width / scale, height / scale);
@@ -157,8 +170,16 @@
         if (level === 0) continue;
 
         const above = (hem - y) / 160;
-        context.fillStyle = colors[above < 0.35 ? 0 : above < 0.8 ? 1 : above < 1.3 ? 2 : 3];
-        context.globalAlpha = Math.min(0.22 + 0.45 * strength, 0.7);
+        const color = above < 0.35 ? 0 : above < 0.8 ? 1 : above < 1.3 ? 2 : 3;
+        if (color !== lastColor) {
+          context.fillStyle = colors[color];
+          lastColor = color;
+        }
+        const alpha = Math.min(0.22 + 0.45 * strength, 0.7);
+        if (alpha !== lastAlpha) {
+          context.globalAlpha = alpha;
+          lastAlpha = alpha;
+        }
         context.fillText(RAMP[level], c * CW, r * CH);
       }
     }
@@ -173,20 +194,33 @@
   function start() {
     if (timer) return;
     timer = window.setInterval(() => {
-      if (document.hidden) return;
       time += STEP;
+      if (document.hidden || !visible) return;
       draw();
     }, FRAME_MS);
   }
 
   onMount(() => {
     mounted = true;
-    const resize = new ResizeObserver(() => draw());
-    if (canvas) resize.observe(canvas);
+    const resize = new ResizeObserver(([entry]) => {
+      width = entry.contentRect.width;
+      height = entry.contentRect.height;
+      draw();
+    });
+    const seen = new IntersectionObserver(([entry]) => {
+      const wasHidden = !visible;
+      visible = entry.isIntersecting;
+      if (visible && wasHidden) draw();
+    });
+    if (canvas) {
+      resize.observe(canvas);
+      seen.observe(canvas);
+    }
     // The aurora's face may still be loading; redraw once it is in.
     void document.fonts?.load(`${CH}px 'IBM Plex Mono'`).then(() => draw());
     return () => {
       resize.disconnect();
+      seen.disconnect();
       stop();
     };
   });
@@ -203,6 +237,7 @@
   $effect(() => {
     void theme.current;
     if (!mounted) return;
+    colorsUntil = performance.now() + 400;
     draw();
     const settle = window.setTimeout(draw, 360);
     return () => window.clearTimeout(settle);
@@ -249,6 +284,9 @@
     overflow: hidden;
     pointer-events: none;
     font-family: 'IBM Plex Mono', ui-monospace, monospace;
+    /* Its size comes from inset, never its content: nothing inside can cause layout or paint
+       work outside it. */
+    contain: strict;
   }
 
   /* Stars: two tiles of white glyphs used as masks over the star colour, so they follow the
@@ -266,6 +304,8 @@
     mask-repeat: repeat;
     mask-size: 640px 640px;
     animation: twinkle 9s ease-in-out infinite alternate;
+    /* Own layers, so the twinkle only fades them on the GPU and never re-rasterises the masks. */
+    will-change: opacity;
   }
 
   .stars.b {
