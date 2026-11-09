@@ -119,10 +119,17 @@
     context.textBaseline = 'top';
 
     const cols = Math.ceil(width / (CW * scale)) + 2;
-    const rows = Math.min(ROWS, Math.ceil(height / (CH * scale)));
+    // The landing's aurora fills the whole screen: the screen's height maps onto the top 340px of
+    // the curtain's sky, so its hem sits about three quarters of the way down and its rays reach
+    // the top. Inner pages keep it as a short band at the top.
+    const fill = variant === 'landing';
+    const rows = fill
+      ? Math.ceil(height / (CH * scale))
+      : Math.min(ROWS, Math.ceil(height / (CH * scale)));
+    const stretch = fill ? 340 / Math.max(rows * CH, 1) : 1;
     const offset = (DESIGN_WIDTH - cols * CW) / 2;
     const shift = Math.floor(time * FLOW) * CW; // whole-column steps, like a terminal redraw
-    const centreFade = phone ? 0.15 : 0.45;
+    const centreFade = phone || fill ? 0.2 : 0.45;
     const S = Math.sin;
 
     for (let c = 0; c < cols; c++) {
@@ -139,7 +146,7 @@
         (0.4 + 0.6 * (0.5 + 0.5 * S(wx * 0.006 - 1.2)));
 
       for (let r = 0; r < rows; r++) {
-        const y = r * CH + 14;
+        const y = r * CH * stretch + 14;
         let strength =
           y <= hem ? 1.7 * Math.exp(-(hem - y) / 150) * ray : 1.7 * Math.exp(-(y - hem) / 16) * ray;
         strength *= across;
@@ -281,9 +288,9 @@
     top: 0;
     right: 0;
     left: 0;
-    height: 28rem;
+    height: 100%;
     opacity: var(--aurora-opacity);
-    mask-image: linear-gradient(to bottom, #000 60%, transparent);
+    mask-image: linear-gradient(to bottom, #000 85%, transparent);
   }
 
   .aurora canvas {
