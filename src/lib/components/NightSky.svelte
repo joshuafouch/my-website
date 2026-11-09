@@ -46,28 +46,20 @@
   const STARS_A = starTile(11, 34);
   const STARS_B = starTile(23, 26);
 
-  /* A small waning crescent (lit on the left), drawn as a dot matrix so no font can change it.
-     Revelation 12:1's moon, kept quiet. */
-  const MOON_SIZE = 22;
+  /* A small waning crescent (lit on the left) made of the same '·' dots as the star field, so it
+     reads as part of the sky. Revelation 12:1's moon, kept quiet. */
+  const MOON_SIZE = 12;
   const MOON_DOTS: [number, number][] = [];
   for (let y = 0; y < MOON_SIZE; y++) {
     for (let x = 0; x < MOON_SIZE; x++) {
-      const lit = Math.hypot(x - 10.5, y - 10.5) <= 10.2;
-      const shadow = Math.hypot(x - 15.5, y - 9.5) <= 9.6;
+      const lit = Math.hypot(x - 5.5, y - 5.5) <= 5.7;
+      const shadow = Math.hypot(x - 8.4, y - 5) <= 5.2;
       if (lit && !shadow) MOON_DOTS.push([x, y]);
     }
   }
 
-  /** A five-pointed star centred on (x, y), outer radius r, as on the flag. */
-  function starPoints(x: number, y: number, r: number) {
-    return Array.from({ length: 10 }, (_, i) => {
-      const angle = -Math.PI / 2 + (i * Math.PI) / 5;
-      const radius = i % 2 ? r * 0.4 : r;
-      return `${(x + radius * Math.cos(angle)).toFixed(2)},${(y + radius * Math.sin(angle)).toFixed(2)}`;
-    }).join(' ');
-  }
-
-  // The Alaska flag: the Big Dipper's seven stars and Polaris, placed as on the flag.
+  // The Alaska flag: the Big Dipper's seven stars and Polaris, placed as on the flag, drawn with
+  // the star field's own '+' so they belong to the same sky.
   const DIPPER = [
     [35, 67],
     [67, 78],
@@ -76,8 +68,8 @@
     [97, 138],
     [134, 148],
     [147, 128]
-  ].map(([x, y]) => starPoints(x, y, 6.5));
-  const POLARIS = starPoints(210, 26, 12);
+  ];
+  const POLARIS = [210, 26];
 </script>
 
 <script lang="ts">
@@ -222,18 +214,18 @@
 
   {#if variant === 'landing'}
     <svg class="dipper" viewBox="20 8 210 158">
-      {#each DIPPER as points (points)}
-        <polygon {points} class="star" />
+      {#each DIPPER as [x, y] (`${x},${y}`)}
+        <text {x} {y} class="star">+</text>
       {/each}
-      <polygon points={POLARIS} class="star polaris" />
-      <text x="208" y="50" class="label" text-anchor="middle">polaris</text>
+      <text x={POLARIS[0]} y={POLARIS[1]} class="star polaris">+</text>
+      <text x="210" y="48" class="label" text-anchor="middle">polaris</text>
       <text x="22" y="160" class="label">ursa major</text>
     </svg>
 
     <div class="moon">
       <svg class="moon-art" viewBox="-1 -1 {MOON_SIZE + 1} {MOON_SIZE + 1}">
         {#each MOON_DOTS as [x, y] (`${x},${y}`)}
-          <circle cx={x} cy={y} r="0.38" />
+          <circle cx={x} cy={y} r="0.32" />
         {/each}
       </svg>
       <span class="moon-ref">rev 12:1</span>
@@ -331,11 +323,14 @@
   }
 
   .dipper .star {
-    fill: var(--star-gold);
+    fill: var(--star-ink);
+    font-size: 17px;
+    text-anchor: middle;
+    dominant-baseline: central;
   }
 
   .dipper .polaris {
-    filter: drop-shadow(0 0 3px color-mix(in oklab, var(--star-gold) 60%, transparent));
+    font-size: 24px;
   }
 
   .dipper .label {
@@ -356,12 +351,10 @@
   }
 
   .moon-art {
-    width: 34px;
+    width: 30px;
     height: auto;
     overflow: visible;
     fill: var(--moon-ink);
-    opacity: 0.8;
-    filter: drop-shadow(0 0 4px color-mix(in oklab, var(--moon-ink) 35%, transparent));
   }
 
   .moon-ref {
@@ -391,7 +384,7 @@
     }
 
     .moon-art {
-      width: 28px;
+      width: 26px;
     }
 
     .moon-ref {
