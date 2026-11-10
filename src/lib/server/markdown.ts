@@ -1,7 +1,8 @@
 import { Marked } from 'marked';
+import { figureAlt } from '#lib/figure-alt.ts';
 import sanitizeHtml from 'sanitize-html';
 
-const marked = new Marked({ gfm: true, breaks: false });
+const marked = new Marked({ gfm: true, breaks: false }, figureAlt);
 
 /**
  * What markdown can produce, and nothing else. sanitize-html is a pure-JS parser (no jsdom), so
@@ -16,6 +17,8 @@ const OPTIONS: sanitizeHtml.IOptions = {
   ],
   allowedAttributes: {
     a: ['href', 'title'],
+    // An image's alt text, copied up for its caption (#lib/figure-alt.ts).
+    p: ['data-alt'],
     img: ['src', 'alt', 'title', 'width', 'height'],
     code: ['class'],
     ol: ['start'],

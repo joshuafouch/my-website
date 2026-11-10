@@ -221,10 +221,6 @@
     background: var(--mat);
   }
 
-  .details :global(a) {
-    color: var(--ink-accent);
-  }
-
   .details :global(code) {
     color: var(--nord8);
     font-family: 'IBM Plex Mono', monospace;

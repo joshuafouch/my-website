@@ -5,6 +5,7 @@
   import '../app.css';
   // Same file app.css's @font-face uses, so this resolves to the identical hashed URL.
   import garamondRegular from '@fontsource/eb-garamond/files/eb-garamond-latin-400-normal.woff2?url';
+  import grenzeInitial from '@fontsource/grenze-gotisch/files/grenze-gotisch-latin-500-normal.woff2?url';
   import Footer from '#lib/components/Footer.svelte';
   import Transition from '#lib/components/Transition.svelte';
   import NightSky from '#lib/components/NightSky.svelte';
@@ -251,6 +252,9 @@
   <!-- The serif body face on every page. Found only after app.css is parsed otherwise, so the
        text renders in the fallback first and then swaps (layout shift). -->
   <link rel="preload" href={garamondRegular} as="font" type="font/woff2" crossorigin="anonymous" />
+  <!-- The drop cap's face (.initial). It's the only thing set in Grenze, so without this the font
+       is fetched only once the letter is on screen, which then swaps in from the fallback. -->
+  <link rel="preload" href={grenzeInitial} as="font" type="font/woff2" crossorigin="anonymous" />
 </svelte:head>
 
 <svelte:window bind:scrollY />
