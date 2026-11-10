@@ -639,14 +639,85 @@ html[data-motion='off'] .ticked::after {
   margin-bottom: 0;
 }
 
-.figures .prose p:has(> img)::after {
-  display: block;
+/* Under an inline image: "fig. N" on the left, the image's alt text on the right (data-alt, from
+   #lib/figure-alt.ts). The paragraph is a two-column grid; the picture spans both columns and the
+   two captions sit side by side in the row below it. */
+.figures .prose p:has(> img) {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  column-gap: 1.5rem;
+}
+
+.figures .prose p:has(> img) > * {
+  grid-column: 1 / -1;
+}
+
+.figures .prose p:has(> img)::after,
+.figures .prose p[data-alt]:has(> img)::before {
   margin-top: 0.6rem;
   color: var(--ink-faint);
   font-family: 'IBM Plex Mono', ui-monospace, monospace;
   font-size: 0.78rem;
   line-height: 1.4;
   letter-spacing: 0.04em;
+}
+
+.figures .prose p:has(> img)::after {
+  order: 1;
+}
+
+.figures .prose p[data-alt]:has(> img)::before {
+  content: attr(data-alt);
+  order: 2;
+  text-align: right;
+}
+
+/* Links in the body of a post or project: Nord purple with a standing underline, so they read as
+   clickable at a glance; on hover they turn the accent colour like every other link on the site,
+   the underline fills in and thickens and a faint wash sits behind the words. Links that open a
+   new tab (#lib/links.ts) get a small ↗. */
+.figures .prose a {
+  color: var(--nord15);
+  font-weight: 500;
+  text-decoration-line: underline;
+  text-decoration-color: color-mix(in oklab, var(--nord15) 55%, #0000);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.22em;
+  background: none;
+  border-radius: 2px;
+  padding: 0;
+  transition:
+    color 300ms ease,
+    text-decoration-color 300ms ease,
+    text-decoration-thickness 300ms ease,
+    background-color 300ms ease;
+}
+
+.figures .prose a:hover,
+.figures .prose a:focus-visible {
+  color: var(--ink-accent);
+  text-decoration-color: var(--ink-accent);
+  text-decoration-thickness: 2px;
+  background-color: color-mix(in oklab, var(--ink-accent) 12%, #0000);
+}
+
+.figures .prose a:focus-visible {
+  outline: 1px solid var(--ink-accent);
+  outline-offset: 2px;
+}
+
+.figures .prose a[target='_blank']:not(:has(img))::after {
+  content: '↗';
+  display: inline-block;
+  margin-left: 0.12em;
+  font-size: 0.8em;
+  text-decoration: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .figures .prose a {
+    transition: none;
+  }
 }
 
 /* The first letter of a write-up, set like a versal in a chant book (#lib/initial.ts). */
@@ -974,8 +1045,7 @@ html[data-entrance] .rise {
 }
 
 html[data-entrance] .rise .mat::before,
-html[data-entrance] .rise .mat::after,
-html[data-entrance] .rise .initial {
+html[data-entrance] .rise .mat::after {
   animation: entrance-fade 500ms ease both;
   animation-delay: calc(240ms + min(var(--i, 0), 6) * 40ms);
 }
@@ -1025,8 +1095,7 @@ html[data-swap] .inner-shell .rise {
 }
 
 html[data-swap] .inner-shell .rise .mat::before,
-html[data-swap] .inner-shell .rise .mat::after,
-html[data-swap] .inner-shell .rise .initial {
+html[data-swap] .inner-shell .rise .mat::after {
   animation: entrance-fade 400ms ease both;
   animation-delay: calc(340ms + min(var(--i, 0), 6) * 55ms);
 }
@@ -1038,8 +1107,7 @@ html[data-swap^='after'] .inner-shell .rise {
 }
 
 html[data-swap^='after'] .inner-shell .rise .mat::before,
-html[data-swap^='after'] .inner-shell .rise .mat::after,
-html[data-swap^='after'] .inner-shell .rise .initial {
+html[data-swap^='after'] .inner-shell .rise .mat::after {
   animation-delay: calc(220ms + min(var(--i, 0), 6) * 50ms);
 }
 

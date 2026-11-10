@@ -11,6 +11,7 @@
   import ThemeSwitch from '#lib/components/ThemeSwitch.svelte';
   import MotionToggle from '#lib/components/MotionToggle.svelte';
   import NightSky from '#lib/components/NightSky.svelte';
+  import JafMark from '#lib/components/JafMark.svelte';
   import { backdrop, photoBackground, photos } from '#lib/backdrop.svelte.ts';
   import { resolve } from '$app/paths';
   import { preloadCode } from '$app/navigation';
@@ -128,6 +129,7 @@
     <!-- A fake download in a full-screen terminal: the command types out, then a progress bar
          fills. Plain CSS, so it runs in the first paint, before hydration. -->
     <div class="loader" aria-hidden="true">
+      <div class="loader-mark"><JafMark /></div>
       <div class="term font-mono">
         <div>
           <span class="prompt">~ $ </span><span class="cmd">curl -sL https://joshuafouch.com</span>
@@ -299,10 +301,19 @@
     inset: 0;
     z-index: 3;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
+    gap: 1.25rem;
     padding: 1.5rem;
     background: var(--ground);
+  }
+
+  /* The jaf mark, centred above the terminal lines. Its outline follows the ink colour. */
+  .loader-mark {
+    width: 5.5rem;
+    height: 5.5rem;
+    color: var(--ink);
   }
 
   .is-ready .loader {
