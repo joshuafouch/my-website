@@ -23,7 +23,13 @@
         <a class="quiet-link phone-only" href={pdf} target="_blank" rel="noopener noreferrer"
           >Open resume</a
         >
-        <a class="quiet-link" href={pdf} download={data.resume.filename}>Download</a>
+        <a
+          class="quiet-link"
+          href={pdf}
+          download={data.resume.filename}
+          target="_blank"
+          rel="noopener noreferrer">Download</a
+        >
       </p>
     </header>
 
