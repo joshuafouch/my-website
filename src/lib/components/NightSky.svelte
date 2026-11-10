@@ -3,6 +3,10 @@
   const CW = 8.4;
   const CH = 13;
   const ROWS = 34;
+  /** Inner pages: sky px per screen px, so the hem (~250px down the sky) sits ~215px down. */
+  const INNER_STRETCH = 1.18;
+  /** Inner pages: a stronger curtain, denser glyphs, though still quieter than the landing's. */
+  const INNER_GAIN = 1.45;
   const DESIGN_WIDTH = 1440;
   const RAMP = ' .·:-=+*#';
   /** Redraws per second are low on purpose: the sky changes slowly, a few frames a second. */
@@ -134,12 +138,13 @@
     const cols = Math.ceil(width / (CW * scale)) + 2;
     // The landing's aurora fills the whole screen: the screen's height maps onto the top 340px of
     // the curtain's sky, so its hem sits about three quarters of the way down and its rays reach
-    // the top. Inner pages keep it as a short band at the top.
+    // the top. Inner pages keep it as a short band at the top, squeezed a little so the bright hem
+    // lands inside the band rather than under its fade.
     const fill = variant === 'landing';
     const rows = fill
       ? Math.ceil(height / (CH * scale))
       : Math.min(ROWS, Math.ceil(height / (CH * scale)));
-    const stretch = fill ? 340 / Math.max(rows * CH, 1) : 1;
+    const stretch = fill ? 340 / Math.max(rows * CH, 1) : INNER_STRETCH;
     const offset = (DESIGN_WIDTH - cols * CW) / 2;
     const shift = Math.floor(time * FLOW) * CW; // whole-column steps, like a terminal redraw
     const centreFade = phone || fill ? 0.2 : 0.45;
@@ -162,7 +167,7 @@
         const y = r * CH * stretch + 14;
         let strength =
           y <= hem ? 1.7 * Math.exp(-(hem - y) / 150) * ray : 1.7 * Math.exp(-(y - hem) / 16) * ray;
-        strength *= across;
+        strength *= fill ? across : across * INNER_GAIN;
         let level = Math.min(RAMP.length - 1, Math.floor(strength * 8 * 1.15));
         if (level > 0 && Math.random() < 0.006) {
           level = Math.max(0, Math.min(RAMP.length - 1, level + (Math.random() < 0.5 ? -1 : 1)));
@@ -366,9 +371,9 @@
   }
 
   .inner .aurora {
-    height: 19rem;
-    opacity: calc(var(--aurora-opacity) * 0.6);
-    mask-image: linear-gradient(to bottom, #000 30%, transparent);
+    height: 22rem;
+    opacity: calc(var(--aurora-opacity) * 0.95);
+    mask-image: linear-gradient(to bottom, #000 58%, transparent);
   }
 
   .dipper {
@@ -449,7 +454,7 @@
     }
 
     .inner .aurora {
-      height: 14rem;
+      height: 16rem;
     }
 
     .dipper {
