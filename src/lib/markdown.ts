@@ -1,7 +1,8 @@
 import DOMPurify from 'dompurify';
 import { Marked } from 'marked';
+import { figureAlt } from '#lib/figure-alt.ts';
 
-const marked = new Marked({ gfm: true, breaks: false });
+const marked = new Marked({ gfm: true, breaks: false }, figureAlt);
 
 /**
  * Markdown → sanitized HTML in the browser, for the admin editors' live previews only. Public
