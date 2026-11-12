@@ -8,6 +8,7 @@ import {
   type MusicArtist,
   type MusicImage,
   type MusicLibrary,
+  type MusicProvider,
   type MusicSong,
   type Org,
   type PersonalContent,
@@ -19,6 +20,8 @@ import {
 import type { Database, Json } from '#lib/database.types.ts';
 import { safeHref } from '#lib/links.ts';
 import { requireAdmin, uploadPortraitImage } from '#lib/server/admin-posts.ts';
+import { searchDiscogs, searchDiscogsBest, discogsConfigured } from '#lib/server/discogs.ts';
+import type { MusicCatalogHit, MusicCatalogKind } from '#lib/music-catalog-types.ts';
 
 type Client = SupabaseClient<Database>;
 
@@ -34,7 +37,16 @@ type JobWire = {
   orgs: { name: string; href: string }[];
 };
 type GroupWire = { id: string; title: string; items: { text: string; href: string }[] };
-type ArtistWire = { id: string; name: string; note: string; url: string; imageId: string };
+type ArtistWire = {
+  id: string;
+  name: string;
+  note: string;
+  url: string;
+  imageId: string;
+  provider: MusicProvider;
+  providerId: string;
+  imageUrl: string;
+};
 type AlbumWire = {
   id: string;
   title: string;
@@ -42,6 +54,9 @@ type AlbumWire = {
   note: string;
   url: string;
   imageId: string;
+  provider: MusicProvider;
+  providerId: string;
+  imageUrl: string;
 };
 type SongWire = {
   id: string;
@@ -51,6 +66,9 @@ type SongWire = {
   note: string;
   url: string;
   imageId: string;
+  provider: MusicProvider;
+  providerId: string;
+  imageUrl: string;
 };
 
 const MUSIC_LIMIT = 80;
@@ -187,6 +205,21 @@ function optionalId(value: unknown): { ok: string } | { error: string } {
   return checkId(value);
 }
 
+function provider(value: unknown): MusicProvider {
+  return value === 'discogs' ? 'discogs' : '';
+}
+
+function providerId(value: unknown): string {
+  const raw = text(value);
+  if (!raw) return '';
+  // Discogs ids are numeric; ignore anything else.
+  return /^\d{1,12}$/.test(raw) ? raw : '';
+}
+
+function optionalUrl(value: unknown): string {
+  return typeof value === 'string' && /^https:\/\//i.test(value.trim()) ? value.trim() : '';
+}
+
 function parseArtists(value: unknown): { ok: ArtistWire[] } | { error: string } {
   if (!Array.isArray(value)) return { error: 'Artists could not be read.' };
   if (value.length > MUSIC_LIMIT) return { error: 'Keep artists to 80 or fewer.' };
@@ -197,11 +230,21 @@ function parseArtists(value: unknown): { ok: ArtistWire[] } | { error: string } 
     if ('error' in id) return id;
     const imageId = optionalId(item.imageId);
     if ('error' in imageId) return imageId;
+    const imageUrl = optionalUrl(item.imageUrl);
     const name = text(item.name);
     const note = text(item.note);
     const url = text(item.url);
     if (name.length > 160 || note.length > 500) return { error: 'An artist field is too long.' };
-    artists.push({ id: id.ok, name, note, url, imageId: imageId.ok });
+    artists.push({
+      id: id.ok,
+      name,
+      note,
+      url,
+      imageId: imageId.ok,
+      provider: provider(item.provider),
+      providerId: providerId(item.providerId),
+      imageUrl
+    });
   }
   if (duplicate(artists.map((artist) => artist.id)))
     return { error: 'Each artist needs its own id.' };
@@ -218,6 +261,7 @@ function parseAlbums(value: unknown): { ok: AlbumWire[] } | { error: string } {
     if ('error' in id) return id;
     const imageId = optionalId(item.imageId);
     if ('error' in imageId) return imageId;
+    const imageUrl = optionalUrl(item.imageUrl);
     const title = text(item.title);
     const artistName = text(item.artistName);
     const note = text(item.note);
@@ -231,7 +275,10 @@ function parseAlbums(value: unknown): { ok: AlbumWire[] } | { error: string } {
       artistName,
       note,
       url,
-      imageId: imageId.ok
+      imageId: imageId.ok,
+      provider: provider(item.provider),
+      providerId: providerId(item.providerId),
+      imageUrl
     });
   }
   if (duplicate(albums.map((album) => album.id))) return { error: 'Each album needs its own id.' };
@@ -248,6 +295,7 @@ function parseSongs(value: unknown): { ok: SongWire[] } | { error: string } {
     if ('error' in id) return id;
     const imageId = optionalId(item.imageId);
     if ('error' in imageId) return imageId;
+    const imageUrl = optionalUrl(item.imageUrl);
     const title = text(item.title);
     const artistName = text(item.artistName);
     const albumName = text(item.albumName);
@@ -268,7 +316,10 @@ function parseSongs(value: unknown): { ok: SongWire[] } | { error: string } {
       albumName,
       note,
       url,
-      imageId: imageId.ok
+      imageId: imageId.ok,
+      provider: provider(item.provider),
+      providerId: providerId(item.providerId),
+      imageUrl
     });
   }
   if (duplicate(songs.map((song) => song.id))) return { error: 'Each song needs its own id.' };
@@ -301,11 +352,26 @@ function emptyGroup(group: TechGroup): boolean {
 }
 
 function emptyArtist(entry: ArtistWire): boolean {
-  return !entry.name && !entry.note && !entry.url && !entry.imageId;
+  return (
+    !entry.name &&
+    !entry.note &&
+    !entry.url &&
+    !entry.imageId &&
+    !entry.providerId &&
+    !entry.imageUrl
+  );
 }
 
 function emptyAlbum(entry: AlbumWire): boolean {
-  return !entry.title && !entry.artistName && !entry.note && !entry.url && !entry.imageId;
+  return (
+    !entry.title &&
+    !entry.artistName &&
+    !entry.note &&
+    !entry.url &&
+    !entry.imageId &&
+    !entry.providerId &&
+    !entry.imageUrl
+  );
 }
 
 function emptySong(entry: SongWire): boolean {
@@ -315,7 +381,9 @@ function emptySong(entry: SongWire): boolean {
     !entry.albumName &&
     !entry.note &&
     !entry.url &&
-    !entry.imageId
+    !entry.imageId &&
+    !entry.providerId &&
+    !entry.imageUrl
   );
 }
 
@@ -637,7 +705,14 @@ export async function savePersonalFromForm(
     if ('error' in url) return { error: url.error, content: draft };
     const imageId = knownId(entry.imageId, imageIds, 'Choose an image from the library.');
     if ('error' in imageId) return { error: imageId.error, content: draft };
-    artists.push({ ...entry, url: url.ok, imageId: imageId.ok });
+    artists.push({
+      ...entry,
+      url: url.ok,
+      imageId: imageId.ok,
+      imageUrl: imageId.ok ? '' : entry.imageUrl,
+      provider: imageId.ok ? '' : entry.provider,
+      providerId: imageId.ok ? '' : entry.providerId
+    });
   }
 
   const albums: MusicAlbum[] = [];
@@ -648,7 +723,14 @@ export async function savePersonalFromForm(
     if ('error' in url) return { error: url.error, content: draft };
     const imageId = knownId(entry.imageId, imageIds, 'Choose an image from the library.');
     if ('error' in imageId) return { error: imageId.error, content: draft };
-    albums.push({ ...entry, url: url.ok, imageId: imageId.ok });
+    albums.push({
+      ...entry,
+      url: url.ok,
+      imageId: imageId.ok,
+      imageUrl: imageId.ok ? '' : entry.imageUrl,
+      provider: imageId.ok ? '' : entry.provider,
+      providerId: imageId.ok ? '' : entry.providerId
+    });
   }
 
   const songs: MusicSong[] = [];
@@ -662,7 +744,10 @@ export async function savePersonalFromForm(
     songs.push({
       ...entry,
       url: url.ok,
-      imageId: imageId.ok
+      imageId: imageId.ok,
+      imageUrl: imageId.ok ? '' : entry.imageUrl,
+      provider: imageId.ok ? '' : entry.provider,
+      providerId: imageId.ok ? '' : entry.providerId
     });
   }
 
@@ -692,6 +777,9 @@ export async function savePersonalFromForm(
             note: entry.note,
             url: entry.url || null,
             image_id: entry.imageId || null,
+            provider: entry.provider,
+            provider_id: entry.providerId,
+            image_url: entry.imageUrl || null,
             sort_order: index
           }))
         )
@@ -705,6 +793,9 @@ export async function savePersonalFromForm(
             note: entry.note,
             url: entry.url || null,
             image_id: entry.imageId || null,
+            provider: entry.provider,
+            provider_id: entry.providerId,
+            image_url: entry.imageUrl || null,
             sort_order: index
           }))
         )
@@ -719,6 +810,9 @@ export async function savePersonalFromForm(
             note: entry.note,
             url: entry.url || null,
             image_id: entry.imageId || null,
+            provider: entry.provider,
+            provider_id: entry.providerId,
+            image_url: entry.imageUrl || null,
             sort_order: index
           }))
         )
@@ -748,6 +842,230 @@ export async function savePersonalFromForm(
   if (deleteError) return { error: deleteError, content };
 
   return { ok: true };
+}
+
+export async function searchMusicCatalog(
+  supabase: Client,
+  form: FormData
+): Promise<{ results: MusicCatalogHit[] } | { error: string }> {
+  await requireAdmin(supabase);
+  if (!discogsConfigured()) {
+    return {
+      error: 'Set DISCOGS_USER_TOKEN (or DISCOGS_CONSUMER_KEY and DISCOGS_CONSUMER_SECRET) first.'
+    };
+  }
+  const kind = text(form.get('kind'));
+  const query = text(form.get('query'));
+  if (kind !== 'artist' && kind !== 'album' && kind !== 'track') {
+    return { error: 'That Discogs search type is invalid.' };
+  }
+  if (!query) return { error: 'Enter something to search for.' };
+  if (query.length > 160) return { error: 'That search is too long.' };
+  try {
+    const results = await searchDiscogs(kind as MusicCatalogKind, query);
+    return { results };
+  } catch (error) {
+    console.error('Discogs search failed', error);
+    return { error: error instanceof Error ? error.message : 'Discogs search failed.' };
+  }
+}
+
+export async function enrichMusicEntryFromDiscogs(
+  supabase: Client,
+  form: FormData
+): Promise<{ hit: MusicCatalogHit } | { error: string }> {
+  await requireAdmin(supabase);
+  if (!discogsConfigured()) {
+    return {
+      error: 'Set DISCOGS_USER_TOKEN (or DISCOGS_CONSUMER_KEY and DISCOGS_CONSUMER_SECRET) first.'
+    };
+  }
+  const kind = text(form.get('kind'));
+  const query = text(form.get('query'));
+  if (kind !== 'artist' && kind !== 'album' && kind !== 'track') {
+    return { error: 'That Discogs search type is invalid.' };
+  }
+  if (!query) return { error: 'Enter something to search for.' };
+  try {
+    const hit = await searchDiscogsBest(kind as MusicCatalogKind, query);
+    return hit ? { hit } : { error: 'No Discogs match found.' };
+  } catch (error) {
+    console.error('Discogs enrichment failed', error);
+    return { error: error instanceof Error ? error.message : 'Discogs search failed.' };
+  }
+}
+
+function applyCatalogHit<
+  T extends {
+    url: string;
+    provider: MusicProvider;
+    providerId: string;
+    imageUrl: string;
+    imageId: string;
+  }
+>(entry: T, hit: MusicCatalogHit, mapName: (entry: T, hit: MusicCatalogHit) => T): T {
+  return mapName(
+    {
+      ...entry,
+      url: hit.url,
+      provider: 'discogs',
+      providerId: hit.id,
+      imageUrl: hit.imageUrl,
+      imageId: ''
+    },
+    hit
+  );
+}
+
+/** Fill provider_id / image_url / url for curated rows that still lack a Discogs id. */
+export async function enrichMusicLibraryFromDiscogs(
+  supabase: Client
+): Promise<
+  { ok: true; updated: number; skipped: number; library: MusicLibrary } | { error: string }
+> {
+  await requireAdmin(supabase);
+  if (!discogsConfigured()) {
+    return {
+      error: 'Set DISCOGS_USER_TOKEN (or DISCOGS_CONSUMER_KEY and DISCOGS_CONSUMER_SECRET) first.'
+    };
+  }
+
+  const library = await loadMusicLibrary(supabase);
+  if (!library) return { error: 'The music library could not be read.' };
+
+  let updated = 0;
+  let skipped = 0;
+
+  const artists: MusicArtist[] = [];
+  for (const artist of library.artists) {
+    if (artist.providerId || !artist.name.trim()) {
+      artists.push(artist);
+      skipped += 1;
+      continue;
+    }
+    const hit = await searchDiscogsBest('artist', artist.name);
+    if (!hit) {
+      artists.push(artist);
+      skipped += 1;
+      continue;
+    }
+    artists.push(
+      applyCatalogHit(artist, hit, (entry, match) => ({
+        ...entry,
+        name: match.name || entry.name
+      }))
+    );
+    updated += 1;
+  }
+
+  const albums: MusicAlbum[] = [];
+  for (const album of library.albums) {
+    if (album.providerId || !album.title.trim()) {
+      albums.push(album);
+      skipped += 1;
+      continue;
+    }
+    const query = [album.title, album.artistName].filter((part) => part.trim()).join(' ');
+    const hit = await searchDiscogsBest('album', query);
+    if (!hit) {
+      albums.push(album);
+      skipped += 1;
+      continue;
+    }
+    albums.push(
+      applyCatalogHit(album, hit, (entry, match) => ({
+        ...entry,
+        title: match.name || entry.title,
+        artistName: match.artistName || entry.artistName
+      }))
+    );
+    updated += 1;
+  }
+
+  const songs: MusicSong[] = [];
+  for (const song of library.songs) {
+    if (song.providerId || !song.title.trim()) {
+      songs.push(song);
+      skipped += 1;
+      continue;
+    }
+    const query = [song.title, song.artistName].filter((part) => part.trim()).join(' ');
+    const hit = await searchDiscogsBest('track', query);
+    if (!hit) {
+      songs.push(song);
+      skipped += 1;
+      continue;
+    }
+    songs.push(
+      applyCatalogHit(song, hit, (entry, match) => ({
+        ...entry,
+        title: match.name || entry.title,
+        artistName: match.artistName || entry.artistName,
+        albumName: match.albumName || entry.albumName
+      }))
+    );
+    updated += 1;
+  }
+
+  const upserts = await Promise.all([
+    artists.length > 0
+      ? supabase.from('music_artists').upsert(
+          artists.map((entry, index) => ({
+            id: entry.id,
+            name: entry.name,
+            note: entry.note,
+            url: entry.url || null,
+            image_id: entry.imageId || null,
+            provider: entry.provider,
+            provider_id: entry.providerId,
+            image_url: entry.imageUrl || null,
+            sort_order: index
+          }))
+        )
+      : null,
+    albums.length > 0
+      ? supabase.from('music_albums').upsert(
+          albums.map((entry, index) => ({
+            id: entry.id,
+            title: entry.title,
+            artist_name: entry.artistName,
+            note: entry.note,
+            url: entry.url || null,
+            image_id: entry.imageId || null,
+            provider: entry.provider,
+            provider_id: entry.providerId,
+            image_url: entry.imageUrl || null,
+            sort_order: index
+          }))
+        )
+      : null,
+    songs.length > 0
+      ? supabase.from('music_songs').upsert(
+          songs.map((entry, index) => ({
+            id: entry.id,
+            title: entry.title,
+            artist_name: entry.artistName,
+            album_name: entry.albumName,
+            note: entry.note,
+            url: entry.url || null,
+            image_id: entry.imageId || null,
+            provider: entry.provider,
+            provider_id: entry.providerId,
+            image_url: entry.imageUrl || null,
+            sort_order: index
+          }))
+        )
+      : null
+  ]);
+  const upsertError = upserts.find((result) => result?.error)?.error;
+  if (upsertError) return { error: upsertError.message };
+
+  return {
+    ok: true,
+    updated,
+    skipped,
+    library: { images: library.images, artists, albums, songs }
+  };
 }
 
 export async function uploadMusicImage(
