@@ -55,7 +55,15 @@ export default defineConfig(({ command, mode }) => {
             'script-src': ['self', ...appHtmlScriptHashes()],
             // Svelte SSR emits style="" attributes (style: directives, app.html wrapper).
             'style-src': ['self', 'unsafe-inline'],
-            'img-src': ['self', 'data:', 'blob:', supabaseSource],
+            // Discogs CDN covers for favorite-music enrichment.
+            'img-src': [
+              'self',
+              'data:',
+              'blob:',
+              supabaseSource,
+              'https://i.discogs.com',
+              'https://img.discogs.com'
+            ],
             'font-src': ['self'],
             'connect-src': ['self'],
             'frame-src': ['https://www.youtube-nocookie.com', supabaseSource, 'blob:'],

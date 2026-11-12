@@ -1,7 +1,7 @@
 <script lang="ts">
-  import { tick } from 'svelte';
+  import { onMount, tick } from 'svelte';
+  import { musicCoverUrl, type MusicLibrary } from '#lib/about.ts';
   import { safeHref } from '#lib/links.ts';
-  import type { MusicLibrary } from '#lib/about.ts';
 
   let { library }: { library: MusicLibrary } = $props();
 
@@ -20,10 +20,34 @@
     { id: 'songs', label: 'Songs' }
   ] as const;
 
+  /** Only keep a tight window of 3D layers alive. */
+  const WINDOW = 2;
+
   let kind = $state<Kind>('artists');
   let places = $state({ artists: 0, albums: 0, songs: 0 });
   let stage = $state<HTMLElement>();
   let dragged = $state(false);
+  let animating = $state(false);
+  let settleTimer = 0;
+  /** Firefox needs a DOM mirror; set after mount to avoid SSR hydration mismatch. */
+  let useDomMirror = $state(false);
+
+  onMount(() => {
+    useDomMirror = !(
+      CSS.supports('-webkit-box-reflect', 'below 0') ||
+      CSS.supports('-webkit-box-reflect', 'below 0px')
+    );
+  });
+
+  function markAnimating() {
+    animating = true;
+    if (settleTimer) clearTimeout(settleTimer);
+    // Fallback if transitionend is skipped (reduced motion / tab switch).
+    settleTimer = window.setTimeout(() => {
+      animating = false;
+      settleTimer = 0;
+    }, 320);
+  }
 
   const items = $derived(coversFor(library, kind));
   const active = $derived(items.length === 0 ? 0 : Math.min(places[kind], items.length - 1));
@@ -31,6 +55,21 @@
   const meta = $derived(
     current ? [current.detail, `${active + 1} of ${items.length}`].filter(Boolean).join(' · ') : ''
   );
+  const visible = $derived(
+    items
+      .map((item, index) => ({ item, index, delta: index - active }))
+      .filter((entry) => Math.abs(entry.delta) <= WINDOW)
+  );
+
+  // Warm nearby covers so the next step never waits on decode.
+  $effect(() => {
+    for (const entry of visible) {
+      if (!entry.item.imageUrl) continue;
+      const img = new Image();
+      img.decoding = 'async';
+      img.src = entry.item.imageUrl;
+    }
+  });
 
   function coversFor(source: MusicLibrary, selected: Kind): Cover[] {
     const images = new Map(source.images.map((image) => [image.id, image.url]));
@@ -40,7 +79,7 @@
         id: artist.id,
         title: artist.name,
         detail: '',
-        imageUrl: images.get(artist.imageId) ?? '',
+        imageUrl: musicCoverUrl(artist.imageUrl, artist.imageId, images),
         href: safeHref(artist.url)
       }));
     }
@@ -50,7 +89,7 @@
         id: album.id,
         title: album.title,
         detail: album.artistName,
-        imageUrl: images.get(album.imageId) ?? '',
+        imageUrl: musicCoverUrl(album.imageUrl, album.imageId, images),
         href: safeHref(album.url)
       }));
     }
@@ -59,7 +98,7 @@
       id: song.id,
       title: song.title,
       detail: [song.artistName, song.albumName].filter(Boolean).join(' · '),
-      imageUrl: images.get(song.imageId) ?? '',
+      imageUrl: musicCoverUrl(song.imageUrl, song.imageId, images),
       href: safeHref(song.url)
     }));
   }
@@ -83,8 +122,20 @@
 
   function step(direction: -1 | 1) {
     const next = active + direction;
-    if (next < 0 || next >= items.length) return;
+    if (next < 0 || next >= items.length) return false;
     places[kind] = next;
+    markAnimating();
+    return true;
+  }
+
+  function onCoverTransitionEnd(event: TransitionEvent) {
+    if (event.target !== event.currentTarget) return;
+    if (event.propertyName !== 'transform') return;
+    animating = false;
+    if (settleTimer) {
+      clearTimeout(settleTimer);
+      settleTimer = 0;
+    }
   }
 
   async function onKey(event: KeyboardEvent) {
@@ -99,10 +150,12 @@
     } else if (event.key === 'Home') {
       event.preventDefault();
       places[kind] = 0;
+      markAnimating();
       await focusCurrent();
     } else if (event.key === 'End') {
       event.preventDefault();
       places[kind] = Math.max(items.length - 1, 0);
+      markAnimating();
       await focusCurrent();
     }
   }
@@ -114,6 +167,7 @@
     }
     if (index !== active) {
       places[kind] = index;
+      markAnimating();
       return;
     }
     if (href) window.open(href, '_blank', 'noopener,noreferrer');
@@ -121,27 +175,46 @@
 
   function horizontalWheel(node: HTMLElement) {
     let pending = 0;
-    const onWheel = (event: WheelEvent) => {
-      const horizontal = Math.abs(event.deltaX) > Math.abs(event.deltaY) || event.shiftKey;
-      if (!horizontal || items.length < 2) return;
-      event.preventDefault();
-      pending +=
-        event.shiftKey && Math.abs(event.deltaY) >= Math.abs(event.deltaX)
-          ? event.deltaY
-          : event.deltaX;
-      while (pending > 48) {
-        step(1);
-        pending -= 48;
+    let frame = 0;
+    const STEP = 48;
+
+    const flush = () => {
+      frame = 0;
+      // One step per frame, but keep draining so a trackpad flick can travel like key-repeat.
+      if (pending > STEP) {
+        if (!step(1)) {
+          pending = 0;
+          return;
+        }
+        pending -= STEP;
+      } else if (pending < -STEP) {
+        if (!step(-1)) {
+          pending = 0;
+          return;
+        }
+        pending += STEP;
+      } else {
+        return;
       }
-      while (pending < -48) {
-        step(-1);
-        pending += 48;
-      }
+      if (Math.abs(pending) > STEP) frame = requestAnimationFrame(flush);
     };
+
+    const onWheel = (event: WheelEvent) => {
+      if (items.length < 2) return;
+      // Trackpads send deltaX (side swipe) or deltaY (two-finger scroll); both drive the carousel.
+      const dominant =
+        Math.abs(event.deltaX) >= Math.abs(event.deltaY) ? event.deltaX : event.deltaY;
+      if (dominant === 0) return;
+      event.preventDefault();
+      pending += dominant;
+      if (!frame) frame = requestAnimationFrame(flush);
+    };
+
     node.addEventListener('wheel', onWheel, { passive: false });
     return {
       destroy() {
         node.removeEventListener('wheel', onWheel);
+        if (frame) cancelAnimationFrame(frame);
       }
     };
   }
@@ -150,6 +223,18 @@
     let startX = 0;
     let lastX = 0;
     let tracking = false;
+    let frame = 0;
+    let queued: -1 | 0 | 1 = 0;
+
+    const flush = () => {
+      frame = 0;
+      if (!queued || animating) {
+        queued = 0;
+        return;
+      }
+      step(queued);
+      queued = 0;
+    };
 
     function onDown(event: PointerEvent) {
       if (event.button !== 0) return;
@@ -164,13 +249,15 @@
       if (!tracking) return;
       const dx = event.clientX - lastX;
       if (Math.abs(event.clientX - startX) > 8) dragged = true;
-      if (Math.abs(dx) < 36) return;
-      step(dx < 0 ? 1 : -1);
+      if (Math.abs(dx) < 36 || animating) return;
+      queued = dx < 0 ? 1 : -1;
       lastX = event.clientX;
+      if (!frame) frame = requestAnimationFrame(flush);
     }
 
     function onUp() {
       tracking = false;
+      queued = 0;
     }
 
     node.addEventListener('pointerdown', onDown);
@@ -183,6 +270,7 @@
         node.removeEventListener('pointermove', onMove);
         node.removeEventListener('pointerup', onUp);
         node.removeEventListener('pointercancel', onUp);
+        if (frame) cancelAnimationFrame(frame);
       }
     };
   }
@@ -216,37 +304,52 @@
         use:horizontalWheel
         use:drag
       >
-        {#each items as item, index (item.id)}
-          {@const delta = index - active}
-          {#if Math.abs(delta) <= 6}
-            <button
-              type="button"
-              class="cover"
-              style={place(delta)}
-              aria-current={delta === 0 ? 'true' : undefined}
-              aria-label={item.detail ? `${item.title}, ${item.detail}` : item.title}
-              tabindex={delta === 0 ? 0 : -1}
-              onkeydown={onKey}
-              onclick={() => choose(index, item.href)}
-            >
-              <span
-                class="face"
-                style:background-image={item.imageUrl && Math.abs(delta) <= 3
-                  ? `url("${item.imageUrl}")`
-                  : undefined}
-              >
-                {#if !item.imageUrl}
-                  <span class="face-title">{item.title}</span>
+        {#each visible as entry (entry.item.id)}
+          <button
+            type="button"
+            class="cover"
+            class:is-active={entry.delta === 0}
+            style={place(entry.delta)}
+            aria-current={entry.delta === 0 ? 'true' : undefined}
+            aria-label={entry.item.detail
+              ? `${entry.item.title}, ${entry.item.detail}`
+              : entry.item.title}
+            tabindex={entry.delta === 0 ? 0 : -1}
+            onkeydown={onKey}
+            onclick={() => choose(entry.index, entry.item.href)}
+            ontransitionend={onCoverTransitionEnd}
+          >
+            <span class="face">
+              <span class="face-clip">
+                {#if entry.item.imageUrl}
+                  <img
+                    class="art"
+                    src={entry.item.imageUrl}
+                    alt=""
+                    width="424"
+                    height="424"
+                    decoding="async"
+                    draggable="false"
+                  />
+                {:else}
+                  <span class="face-title">{entry.item.title}</span>
                 {/if}
               </span>
-              {#if item.imageUrl && Math.abs(delta) <= 3}
-                <span class="reflect" aria-hidden="true">
-                  <span class="reflect-face" style:background-image={`url("${item.imageUrl}")`}
-                  ></span>
-                </span>
-              {/if}
-            </button>
-          {/if}
+            </span>
+            {#if useDomMirror && entry.item.imageUrl}
+              <span class="reflect" aria-hidden="true">
+                <img
+                  class="reflect-art"
+                  src={entry.item.imageUrl}
+                  alt=""
+                  width="424"
+                  height="424"
+                  decoding="async"
+                  draggable="false"
+                />
+              </span>
+            {/if}
+          </button>
         {/each}
       </div>
       <p class="caption" aria-live="polite">
@@ -307,6 +410,7 @@
     perspective: 1100px;
     touch-action: pan-y;
     user-select: none;
+    contain: layout paint;
   }
 
   .stage:focus-visible {
@@ -325,24 +429,48 @@
     color: inherit;
     font: inherit;
     cursor: pointer;
-    transform: translateX(calc(var(--x) * var(--face))) translateZ(var(--z)) rotateY(var(--rot));
+    transform: translate3d(calc(var(--x) * var(--face)), 0, var(--z)) rotateY(var(--rot));
     opacity: var(--fade, 1);
     transform-style: preserve-3d;
+    will-change: transform, opacity;
+    /* Avoid contain:paint — it clips -webkit-box-reflect. */
+    contain: layout;
     transition:
-      transform 460ms cubic-bezier(0.22, 0.7, 0.2, 1),
-      opacity 460ms ease;
+      transform 280ms cubic-bezier(0.22, 0.8, 0.2, 1),
+      opacity 280ms ease;
   }
 
   .face {
+    display: block;
+    aspect-ratio: 1;
+    background-color: var(--surface-raised);
+    border: 1px solid color-mix(in oklab, var(--nord4) 24%, transparent);
+    box-shadow: 0 12px 28px color-mix(in oklab, black 32%, transparent);
+    backface-visibility: hidden;
+    /* Native Cover Flow mirror (Chromium / WebKit / Edge). */
+    -webkit-box-reflect: below 0 linear-gradient(to bottom, transparent 35%, rgb(0 0 0 / 0.55) 100%);
+  }
+
+  .face-clip {
     display: grid;
     place-items: center;
     aspect-ratio: 1;
     overflow: hidden;
-    background-color: var(--surface-raised);
-    background-position: center;
-    background-size: cover;
-    border: 1px solid color-mix(in oklab, var(--nord4) 24%, transparent);
-    box-shadow: 0 12px 28px color-mix(in oklab, black 32%, transparent);
+  }
+
+  .cover.is-active .face {
+    box-shadow: 0 16px 34px color-mix(in oklab, black 38%, transparent);
+  }
+
+  .art,
+  .reflect-art {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    pointer-events: none;
+    user-select: none;
+    -webkit-user-drag: none;
   }
 
   .face-title {
@@ -354,6 +482,7 @@
     text-wrap: balance;
   }
 
+  /* Firefox: DOM mirror reuses the same cached image src. */
   .reflect {
     position: absolute;
     right: 0;
@@ -366,11 +495,8 @@
     mask-image: linear-gradient(to bottom, rgb(0 0 0 / 0.72), transparent 82%);
   }
 
-  .reflect-face {
-    display: block;
+  .reflect-art {
     height: var(--face);
-    background-position: center;
-    background-size: cover;
     transform: scaleY(-1);
   }
 
@@ -397,10 +523,12 @@
   @media (prefers-reduced-motion: reduce) {
     .cover {
       transition: none;
+      will-change: auto;
     }
   }
 
   :global(html[data-motion='off']) .cover {
     transition: none;
+    will-change: auto;
   }
 </style>

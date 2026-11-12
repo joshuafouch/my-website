@@ -12,4 +12,5 @@
   content={form?.content ?? data}
   error={form?.error ?? ''}
   saved={data.saved && !form}
+  discogsReady={data.discogsReady}
 />

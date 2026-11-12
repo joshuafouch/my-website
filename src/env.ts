@@ -26,6 +26,16 @@ export const variables = defineEnvVars({
   VERCEL_TOKEN: {
     schema: (value) => value ?? ''
   },
+  // Optional — Discogs catalog search for favorite-music admin enrichment
+  DISCOGS_USER_TOKEN: {
+    schema: (value) => value ?? ''
+  },
+  DISCOGS_CONSUMER_KEY: {
+    schema: (value) => value ?? ''
+  },
+  DISCOGS_CONSUMER_SECRET: {
+    schema: (value) => value ?? ''
+  },
   VERCEL_PROJECT_ID: {
     schema: (value) => value ?? ''
   },
