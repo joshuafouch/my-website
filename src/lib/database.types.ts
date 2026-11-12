@@ -241,6 +241,9 @@ export type Database = {
           note: string;
           url: string | null;
           image_id: string | null;
+          provider: string;
+          provider_id: string;
+          image_url: string | null;
           sort_order: number;
         };
         Insert: {
@@ -249,6 +252,9 @@ export type Database = {
           note?: string;
           url?: string | null;
           image_id?: string | null;
+          provider?: string;
+          provider_id?: string;
+          image_url?: string | null;
           sort_order?: number;
         };
         Update: {
@@ -257,6 +263,9 @@ export type Database = {
           note?: string;
           url?: string | null;
           image_id?: string | null;
+          provider?: string;
+          provider_id?: string;
+          image_url?: string | null;
           sort_order?: number;
         };
         Relationships: [];
@@ -269,6 +278,9 @@ export type Database = {
           note: string;
           url: string | null;
           image_id: string | null;
+          provider: string;
+          provider_id: string;
+          image_url: string | null;
           sort_order: number;
         };
         Insert: {
@@ -278,6 +290,9 @@ export type Database = {
           note?: string;
           url?: string | null;
           image_id?: string | null;
+          provider?: string;
+          provider_id?: string;
+          image_url?: string | null;
           sort_order?: number;
         };
         Update: {
@@ -287,6 +302,9 @@ export type Database = {
           note?: string;
           url?: string | null;
           image_id?: string | null;
+          provider?: string;
+          provider_id?: string;
+          image_url?: string | null;
           sort_order?: number;
         };
         Relationships: [];
@@ -300,6 +318,9 @@ export type Database = {
           note: string;
           url: string | null;
           image_id: string | null;
+          provider: string;
+          provider_id: string;
+          image_url: string | null;
           sort_order: number;
         };
         Insert: {
@@ -310,6 +331,9 @@ export type Database = {
           note?: string;
           url?: string | null;
           image_id?: string | null;
+          provider?: string;
+          provider_id?: string;
+          image_url?: string | null;
           sort_order?: number;
         };
         Update: {
@@ -320,6 +344,9 @@ export type Database = {
           note?: string;
           url?: string | null;
           image_id?: string | null;
+          provider?: string;
+          provider_id?: string;
+          image_url?: string | null;
           sort_order?: number;
         };
         Relationships: [];
