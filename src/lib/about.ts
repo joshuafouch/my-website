@@ -25,12 +25,16 @@ export type MusicImage = {
   url: string;
   alt: string;
 };
+export type MusicProvider = '' | 'discogs';
 export type MusicArtist = {
   id: string;
   name: string;
   note: string;
   url: string;
   imageId: string;
+  provider: MusicProvider;
+  providerId: string;
+  imageUrl: string;
 };
 export type MusicAlbum = {
   id: string;
@@ -39,6 +43,9 @@ export type MusicAlbum = {
   note: string;
   url: string;
   imageId: string;
+  provider: MusicProvider;
+  providerId: string;
+  imageUrl: string;
 };
 export type MusicSong = {
   id: string;
@@ -48,6 +55,9 @@ export type MusicSong = {
   note: string;
   url: string;
   imageId: string;
+  provider: MusicProvider;
+  providerId: string;
+  imageUrl: string;
 };
 export type MusicLibrary = {
   images: MusicImage[];
@@ -63,6 +73,18 @@ export function emptyLibrary(): MusicLibrary {
 export function musicImageUrl(supabase: Client, path: string): string {
   const { data } = supabase.storage.from(ALBUMS_BUCKET).getPublicUrl(path);
   return data.publicUrl;
+}
+
+export function musicCoverUrl(
+  imageUrl: string,
+  imageId: string,
+  images: Map<string, string>
+): string {
+  return imageUrl || images.get(imageId) || '';
+}
+
+export function asProvider(value: string | null | undefined): MusicProvider {
+  return value === 'discogs' ? 'discogs' : '';
 }
 
 export type ProfessionalContent = {
@@ -170,15 +192,19 @@ export async function loadMusicLibrary(supabase: Client): Promise<MusicLibrary |
     }),
     supabase
       .from('music_artists')
-      .select('id, name, note, url, image_id, sort_order')
+      .select('id, name, note, url, image_id, provider, provider_id, image_url, sort_order')
       .order('sort_order'),
     supabase
       .from('music_albums')
-      .select('id, title, artist_name, note, url, image_id, sort_order')
+      .select(
+        'id, title, artist_name, note, url, image_id, provider, provider_id, image_url, sort_order'
+      )
       .order('sort_order'),
     supabase
       .from('music_songs')
-      .select('id, title, artist_name, album_name, note, url, image_id, sort_order')
+      .select(
+        'id, title, artist_name, album_name, note, url, image_id, provider, provider_id, image_url, sort_order'
+      )
       .order('sort_order')
   ]);
 
@@ -204,7 +230,10 @@ export async function loadMusicLibrary(supabase: Client): Promise<MusicLibrary |
       name: artist.name,
       note: artist.note,
       url: artist.url ?? '',
-      imageId: artist.image_id ?? ''
+      imageId: artist.image_id ?? '',
+      provider: asProvider(artist.provider),
+      providerId: artist.provider_id ?? '',
+      imageUrl: artist.image_url ?? ''
     })),
     albums: (albums.data ?? []).map((album) => ({
       id: album.id,
@@ -212,7 +241,10 @@ export async function loadMusicLibrary(supabase: Client): Promise<MusicLibrary |
       artistName: album.artist_name,
       note: album.note,
       url: album.url ?? '',
-      imageId: album.image_id ?? ''
+      imageId: album.image_id ?? '',
+      provider: asProvider(album.provider),
+      providerId: album.provider_id ?? '',
+      imageUrl: album.image_url ?? ''
     })),
     songs: (songs.data ?? []).map((song) => ({
       id: song.id,
@@ -221,7 +253,10 @@ export async function loadMusicLibrary(supabase: Client): Promise<MusicLibrary |
       albumName: song.album_name,
       note: song.note,
       url: song.url ?? '',
-      imageId: song.image_id ?? ''
+      imageId: song.image_id ?? '',
+      provider: asProvider(song.provider),
+      providerId: song.provider_id ?? '',
+      imageUrl: song.image_url ?? ''
     }))
   };
 }

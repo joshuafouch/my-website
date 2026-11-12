@@ -2,9 +2,13 @@ import { fail, isHttpError, redirect } from '@sveltejs/kit';
 import { loadPersonal } from '#lib/about.ts';
 import {
   deleteMusicImage,
+  enrichMusicEntryFromDiscogs,
+  enrichMusicLibraryFromDiscogs,
   savePersonalFromForm,
+  searchMusicCatalog,
   uploadMusicImage
 } from '#lib/server/admin-about.ts';
+import { discogsConfigured } from '#lib/server/discogs.ts';
 import { requireAdmin } from '#lib/server/admin-posts.ts';
 import type { Actions, PageServerLoad } from './$types';
 
@@ -28,7 +32,11 @@ async function guard(supabase: Parameters<typeof requireAdmin>[0]) {
 export const load: PageServerLoad = async ({ locals, url }) => {
   await requireAdmin(locals.supabase);
   const content = await loadPersonal(locals.supabase);
-  return { ...content, saved: url.searchParams.get('saved') === '1' };
+  return {
+    ...content,
+    discogsReady: discogsConfigured(),
+    saved: url.searchParams.get('saved') === '1'
+  };
 };
 
 export const actions: Actions = {
@@ -64,6 +72,40 @@ export const actions: Actions = {
       }
       console.error('Music image delete failed', error);
       return fail(500, { error: 'Could not remove that image.' });
+    }
+  },
+  searchCatalog: async ({ request, locals }) => {
+    const denied = await guard(locals.supabase);
+    if (denied) return denied;
+    const result = await searchMusicCatalog(locals.supabase, await request.formData());
+    if ('error' in result) return fail(400, { error: result.error });
+    return { results: result.results };
+  },
+  enrichCatalog: async ({ request, locals }) => {
+    const denied = await guard(locals.supabase);
+    if (denied) return denied;
+    const result = await enrichMusicEntryFromDiscogs(locals.supabase, await request.formData());
+    if ('error' in result) return fail(400, { error: result.error });
+    return { hit: result.hit };
+  },
+  enrichLibrary: async ({ locals }) => {
+    const denied = await guard(locals.supabase);
+    if (denied) return denied;
+    try {
+      const result = await enrichMusicLibraryFromDiscogs(locals.supabase);
+      if ('error' in result) return fail(400, { error: result.error });
+      return {
+        ok: true,
+        updated: result.updated,
+        skipped: result.skipped,
+        library: result.library
+      };
+    } catch (error) {
+      if (isHttpError(error)) {
+        return fail(error.status, { error: 'Unauthorized' });
+      }
+      console.error('Discogs library enrich failed', error);
+      return fail(500, { error: 'Could not enrich from Discogs.' });
     }
   },
   // Named `save` (not `default`): SvelteKit forbids a default action alongside

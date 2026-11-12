@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { deserialize } from '$app/forms';
   import { beforeNavigate } from '$app/navigation';
   import { untrack } from 'svelte';
   import type {
@@ -8,10 +9,13 @@
     MusicSong,
     PersonalContent
   } from '#lib/about.ts';
+  import { musicCoverUrl } from '#lib/about.ts';
+  import type { MusicCatalogHit } from '#lib/music-catalog-types.ts';
   import { openLinks } from '#lib/links.ts';
   import { renderMarkdown } from '#lib/markdown.ts';
   import ConfirmDialog from '#lib/components/ConfirmDialog.svelte';
   import MarkdownField from '#lib/components/MarkdownField.svelte';
+  import MusicCatalogSearch from '#lib/components/MusicCatalogSearch.svelte';
   import MusicImagePicker from '#lib/components/MusicImagePicker.svelte';
   import PersonalAbout from '#lib/components/PersonalAbout.svelte';
 
@@ -20,11 +24,13 @@
   let {
     content,
     error = '',
-    saved = false
+    saved = false,
+    discogsReady = false
   }: {
     content: PersonalContent;
     error?: string;
     saved?: boolean;
+    discogsReady?: boolean;
   } = $props();
 
   let intro = $state(untrack(() => content.intro));
@@ -55,6 +61,9 @@
   let confirmTitle = $state('Remove?');
   let confirmMessage = $state('');
   let confirmAction = $state<(() => void) | null>(null);
+  let catalogError = $state('');
+  let enrichStatus = $state('');
+  let enrichBusy = $state(false);
 
   const kinds = [
     { id: 'artists' as const, label: 'Artists' },
@@ -67,6 +76,12 @@
   const dirty = $derived(JSON.stringify({ intro, youtubeUrl, artists, albums, songs }) !== start);
 
   const imageMap = $derived(new Map(images.map((image) => [image.id, image.url])));
+
+  $effect(() => {
+    for (const entry of [...artists, ...albums, ...songs]) {
+      if (entry.imageId) entry.imageUrl = '';
+    }
+  });
 
   const selectedArtist = $derived(artists.find((item) => item.id === selectedId) ?? null);
   const selectedAlbum = $derived(albums.find((item) => item.id === selectedId) ?? null);
@@ -127,14 +142,30 @@
 
   function addArtist() {
     const id = crypto.randomUUID();
-    artists = [...artists, { id, name: '', note: '', url: '', imageId: '' }];
+    artists = [
+      ...artists,
+      { id, name: '', note: '', url: '', imageId: '', provider: '', providerId: '', imageUrl: '' }
+    ];
     kind = 'artists';
     selectedId = id;
   }
 
   function addAlbum() {
     const id = crypto.randomUUID();
-    albums = [...albums, { id, title: '', artistName: '', note: '', url: '', imageId: '' }];
+    albums = [
+      ...albums,
+      {
+        id,
+        title: '',
+        artistName: '',
+        note: '',
+        url: '',
+        imageId: '',
+        provider: '',
+        providerId: '',
+        imageUrl: ''
+      }
+    ];
     kind = 'albums';
     selectedId = id;
   }
@@ -143,7 +174,18 @@
     const id = crypto.randomUUID();
     songs = [
       ...songs,
-      { id, title: '', artistName: '', albumName: '', note: '', url: '', imageId: '' }
+      {
+        id,
+        title: '',
+        artistName: '',
+        albumName: '',
+        note: '',
+        url: '',
+        imageId: '',
+        provider: '',
+        providerId: '',
+        imageUrl: ''
+      }
     ];
     kind = 'songs';
     selectedId = id;
@@ -163,8 +205,131 @@
       action === '?/save' ||
       action === '?/upload' ||
       action === '?/uploadImage' ||
-      action === '?/deleteImage'
+      action === '?/deleteImage' ||
+      action === '?/searchCatalog' ||
+      action === '?/enrichCatalog' ||
+      action === '?/enrichLibrary'
     );
+  }
+
+  function applyArtistHit(hit: MusicCatalogHit) {
+    if (!selectedArtist) return;
+    Object.assign(selectedArtist, {
+      name: hit.name,
+      url: hit.url,
+      provider: 'discogs',
+      providerId: hit.id,
+      imageUrl: hit.imageUrl,
+      imageId: ''
+    });
+  }
+
+  function applyAlbumHit(hit: MusicCatalogHit) {
+    if (!selectedAlbum) return;
+    Object.assign(selectedAlbum, {
+      title: hit.name,
+      artistName: hit.artistName,
+      url: hit.url,
+      provider: 'discogs',
+      providerId: hit.id,
+      imageUrl: hit.imageUrl,
+      imageId: ''
+    });
+  }
+
+  function applySongHit(hit: MusicCatalogHit) {
+    if (!selectedSong) return;
+    Object.assign(selectedSong, {
+      title: hit.name || selectedSong.title,
+      artistName: hit.artistName || selectedSong.artistName,
+      albumName: hit.albumName || selectedSong.albumName,
+      url: hit.url,
+      provider: 'discogs',
+      providerId: hit.id,
+      imageUrl: hit.imageUrl,
+      imageId: ''
+    });
+  }
+
+  async function enrich(
+    kind: 'artist' | 'album' | 'track',
+    query: string,
+    apply: (hit: MusicCatalogHit) => void
+  ) {
+    if (!query.trim()) {
+      catalogError = 'Add a title before enriching from Discogs.';
+      return;
+    }
+    catalogError = '';
+    const body = new FormData();
+    body.set('kind', kind);
+    body.set('query', query);
+    try {
+      const response = await fetch('?/enrichCatalog', {
+        method: 'POST',
+        body,
+        headers: { accept: 'application/json', 'x-sveltekit-action': 'true' }
+      });
+      const result = deserialize(await response.text());
+      if (result.type === 'success' && result.data && typeof result.data.hit === 'object') {
+        apply(result.data.hit as MusicCatalogHit);
+      } else if (
+        result.type === 'failure' &&
+        result.data &&
+        typeof result.data.error === 'string'
+      ) {
+        catalogError = result.data.error;
+      } else {
+        catalogError = 'Could not enrich from Discogs.';
+      }
+    } catch {
+      catalogError = 'Could not enrich from Discogs.';
+    }
+  }
+
+  async function enrichLibrary() {
+    if (!discogsReady || enrichBusy) return;
+    enrichBusy = true;
+    enrichStatus = 'Enriching from Discogs…';
+    catalogError = '';
+    try {
+      const response = await fetch('?/enrichLibrary', {
+        method: 'POST',
+        body: new FormData(),
+        headers: { accept: 'application/json', 'x-sveltekit-action': 'true' }
+      });
+      const result = deserialize(await response.text());
+      if (result.type === 'failure' && result.data && typeof result.data.error === 'string') {
+        enrichStatus = result.data.error;
+        return;
+      }
+      if (result.type === 'success' && result.data && result.data.library) {
+        const library = result.data.library as {
+          artists: MusicArtist[];
+          albums: MusicAlbum[];
+          songs: MusicSong[];
+          images: MusicImage[];
+        };
+        artists = library.artists.map((artist) => ({ ...artist }));
+        albums = library.albums.map((album) => ({ ...album }));
+        songs = library.songs.map((song) => ({ ...song }));
+        images = library.images.map((image) => ({ ...image }));
+        if (kind === 'artists') selectedId = artists[0]?.id ?? '';
+        else if (kind === 'albums') selectedId = albums[0]?.id ?? '';
+        else selectedId = songs[0]?.id ?? '';
+        const updated = typeof result.data.updated === 'number' ? result.data.updated : 0;
+        enrichStatus =
+          updated === 0
+            ? 'Nothing new to enrich.'
+            : `Enriched ${updated} ${updated === 1 ? 'entry' : 'entries'} from Discogs.`;
+        return;
+      }
+      enrichStatus = 'Could not enrich from Discogs.';
+    } catch {
+      enrichStatus = 'Could not enrich from Discogs.';
+    } finally {
+      enrichBusy = false;
+    }
   }
 
   function allowSave() {
@@ -251,8 +416,21 @@
 
         <h2>Favorite music</h2>
         <p class="note">
-          Pick a kind, then edit one entry at a time. Covers come from the shared library.
+          Pick a kind, then edit one entry at a time. Search Discogs to fill name, cover, and link —
+          or keep using the shared image library.
         </p>
+        {#if discogsReady}
+          <div class="bar enrich-bar">
+            <button type="button" disabled={enrichBusy} onclick={() => void enrichLibrary()}>
+              {enrichBusy ? 'Enriching…' : 'Enrich existing from Discogs'}
+            </button>
+          </div>
+          {#if enrichStatus}
+            <p class="note">{enrichStatus}</p>
+          {/if}
+        {:else}
+          <p class="note">Set DISCOGS_USER_TOKEN (or key/secret) to enable catalog search.</p>
+        {/if}
 
         <datalist id="music-artist-names">
           {#each artists as artist (artist.id)}
@@ -285,8 +463,8 @@
             {#each artists as artist, index (artist.id)}
               <li class="entry-row" class:selected={selectedId === artist.id}>
                 <button type="button" class="pick-row" onclick={() => (selectedId = artist.id)}>
-                  {#if imageMap.get(artist.imageId)}
-                    <img src={imageMap.get(artist.imageId)} alt="" />
+                  {#if musicCoverUrl(artist.imageUrl, artist.imageId, imageMap)}
+                    <img src={musicCoverUrl(artist.imageUrl, artist.imageId, imageMap)} alt="" />
                   {:else}
                     <span class="blank">No image</span>
                   {/if}
@@ -323,6 +501,20 @@
 
           {#if selectedArtist}
             <div class="entry-editor">
+              {#if discogsReady}
+                <MusicCatalogSearch
+                  kind="artist"
+                  seed={selectedArtist.name}
+                  onpick={applyArtistHit}
+                />
+                <button
+                  type="button"
+                  class="text"
+                  onclick={() => void enrich('artist', selectedArtist.name, applyArtistHit)}
+                  >Enrich from Discogs</button
+                >
+                {#if catalogError}<p class="error">{catalogError}</p>{/if}
+              {/if}
               <label class="field">
                 <span>Name</span>
                 <input bind:value={selectedArtist.name} />
@@ -350,8 +542,8 @@
             {#each albums as album, index (album.id)}
               <li class="entry-row" class:selected={selectedId === album.id}>
                 <button type="button" class="pick-row" onclick={() => (selectedId = album.id)}>
-                  {#if imageMap.get(album.imageId)}
-                    <img src={imageMap.get(album.imageId)} alt="" />
+                  {#if musicCoverUrl(album.imageUrl, album.imageId, imageMap)}
+                    <img src={musicCoverUrl(album.imageUrl, album.imageId, imageMap)} alt="" />
                   {:else}
                     <span class="blank">No image</span>
                   {/if}
@@ -391,6 +583,20 @@
 
           {#if selectedAlbum}
             <div class="entry-editor">
+              {#if discogsReady}
+                <MusicCatalogSearch
+                  kind="album"
+                  seed={selectedAlbum.title}
+                  onpick={applyAlbumHit}
+                />
+                <button
+                  type="button"
+                  class="text"
+                  onclick={() => void enrich('album', selectedAlbum.title, applyAlbumHit)}
+                  >Enrich from Discogs</button
+                >
+                {#if catalogError}<p class="error">{catalogError}</p>{/if}
+              {/if}
               <label class="field">
                 <span>Title</span>
                 <input bind:value={selectedAlbum.title} />
@@ -422,8 +628,8 @@
             {#each songs as song, index (song.id)}
               <li class="entry-row" class:selected={selectedId === song.id}>
                 <button type="button" class="pick-row" onclick={() => (selectedId = song.id)}>
-                  {#if imageMap.get(song.imageId)}
-                    <img src={imageMap.get(song.imageId)} alt="" />
+                  {#if musicCoverUrl(song.imageUrl, song.imageId, imageMap)}
+                    <img src={musicCoverUrl(song.imageUrl, song.imageId, imageMap)} alt="" />
                   {:else}
                     <span class="blank">No image</span>
                   {/if}
@@ -460,6 +666,16 @@
 
           {#if selectedSong}
             <div class="entry-editor">
+              {#if discogsReady}
+                <MusicCatalogSearch kind="track" seed={selectedSong.title} onpick={applySongHit} />
+                <button
+                  type="button"
+                  class="text"
+                  onclick={() => void enrich('track', selectedSong.title, applySongHit)}
+                  >Enrich from Discogs</button
+                >
+                {#if catalogError}<p class="error">{catalogError}</p>{/if}
+              {/if}
               <label class="field">
                 <span>Title</span>
                 <input bind:value={selectedSong.title} />
@@ -686,5 +902,9 @@
 
   .leave .bar {
     margin-top: 1.25rem;
+  }
+
+  .enrich-bar {
+    margin-top: 0.75rem;
   }
 </style>
